@@ -403,7 +403,9 @@ export default function JobDetail() {
                             </a>
                           )}
                           {fitterDetails.email && (
-                            <p className="text-sm text-slate-600">{fitterDetails.email}</p>
+                            <a href={`mailto:${fitterDetails.email}`} className="flex items-center gap-2 text-sm text-indigo-600 hover:text-indigo-700">
+                              {fitterDetails.email}
+                            </a>
                           )}
                         </div>
                       )}
