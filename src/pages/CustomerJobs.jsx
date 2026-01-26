@@ -87,27 +87,6 @@ export default function CustomerJobs() {
       return false;
     }
     
-    // Date range
-    if (dateRange !== 'all') {
-      const jobDate = new Date(job.scheduled_date);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      
-      if (dateRange === 'today' && jobDate.toDateString() !== today.toDateString()) {
-        return false;
-      }
-      if (dateRange === 'week') {
-        const weekFromNow = new Date(today);
-        weekFromNow.setDate(weekFromNow.getDate() + 7);
-        if (jobDate < today || jobDate > weekFromNow) return false;
-      }
-      if (dateRange === 'month') {
-        const monthFromNow = new Date(today);
-        monthFromNow.setMonth(monthFromNow.getMonth() + 1);
-        if (jobDate < today || jobDate > monthFromNow) return false;
-      }
-    }
-    
     return true;
   });
 
