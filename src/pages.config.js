@@ -20,7 +20,7 @@ import RoleSelection from './pages/RoleSelection';
 import OnboardingDriver from './pages/OnboardingDriver';
 import OnboardingFitter from './pages/OnboardingFitter';
 import OnboardingCustomer from './pages/OnboardingCustomer';
-import onboardingcalAdmin from './pages/OnboardingCal_admin';
+import OnboardingCal_admin from './pages/OnboardingCal_admin';
 import PendingApproval from './pages/PendingApproval';
 import CalAdminReviewQueue from './pages/CalAdminReviewQueue';
 import CustomerReviewQueue from './pages/CustomerReviewQueue';
@@ -51,7 +51,7 @@ export const PAGES = {
     "OnboardingDriver": OnboardingDriver,
     "OnboardingFitter": OnboardingFitter,
     "OnboardingCustomer": OnboardingCustomer,
-    "OnboardingCal_admin": onboardingcalAdmin,
+    "OnboardingCal_admin": OnboardingCal_admin,
     "PendingApproval": PendingApproval,
     "CalAdminReviewQueue": CalAdminReviewQueue,
     "CustomerReviewQueue": CustomerReviewQueue,
@@ -59,7 +59,7 @@ export const PAGES = {
 }
 
 export const pagesConfig = {
-    mainPage: "CustomerDashboard",
+    mainPage: "RoleSelection",
     Pages: PAGES,
     Layout: __Layout,
 };
