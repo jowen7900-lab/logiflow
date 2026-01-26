@@ -68,10 +68,23 @@ export default function CreateJob() {
     items: [{ description: '', quantity: 1, weight_kg: 0, dimensions: '' }],
   });
 
+  // Only customers can create jobs
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
     queryFn: () => base44.auth.me(),
   });
+  
+  const isCustomer = user?.app_role === 'customer' || user?.app_role === 'customer_admin';
+  
+  if (user && !isCustomer) {
+    return (
+      <div className="text-center py-12">
+        <AlertTriangle className="w-12 h-12 text-amber-500 mx-auto mb-4" />
+        <h2 className="text-lg font-semibold text-slate-900">Access Denied</h2>
+        <p className="text-slate-500 mt-1">Only customer users can create jobs</p>
+      </div>
+    );
+  }
 
   const { data: customer } = useQuery({
     queryKey: ['customer', user?.customer_id],

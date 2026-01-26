@@ -28,18 +28,13 @@ export default function CustomerDashboard() {
     queryFn: () => base44.auth.me(),
   });
 
-  // For customer roles, filter by customer_id. For ops/admin, show all jobs
-  const isOpsOrAdmin = user?.app_role === 'ops' || user?.app_role === 'admin';
+  // Strict role-based data access
+  const isCustomer = user?.app_role === 'customer' || user?.app_role === 'customer_admin';
   
   const { data: jobs = [], isLoading } = useQuery({
-    queryKey: ['customerJobs', user?.customer_id, isOpsOrAdmin],
-    queryFn: () => {
-      if (isOpsOrAdmin) {
-        return base44.entities.Job.list('-created_date', 100);
-      }
-      return base44.entities.Job.filter({ customer_id: user?.customer_id }, '-created_date', 100);
-    },
-    enabled: !!user && (isOpsOrAdmin || !!user?.customer_id),
+    queryKey: ['customerJobs', user?.customer_id],
+    queryFn: () => base44.entities.Job.filter({ customer_id: user?.customer_id }, '-created_date', 100),
+    enabled: !!user?.customer_id && isCustomer,
   });
 
   // Calculate metrics

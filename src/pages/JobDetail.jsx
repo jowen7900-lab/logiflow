@@ -89,9 +89,18 @@ export default function JobDetail() {
     enabled: !!jobId,
   });
 
-  const isOps = user?.app_role === 'ops' || user?.app_role === 'admin';
+  // Strict role checks
+  const isOps = user?.app_role === 'ops';
   const isDriver = user?.app_role === 'driver';
+  const isFitter = user?.app_role === 'fitter';
   const isCustomer = user?.app_role === 'customer' || user?.app_role === 'customer_admin';
+  const isCustomerAdmin = user?.app_role === 'customer_admin';
+  
+  // Verify access rights
+  const hasAccess = isOps || 
+    (isCustomer && job?.customer_id === user?.customer_id) ||
+    (isDriver && job?.driver_id === user?.email) ||
+    (isFitter && job?.fitter_id === user?.email);
 
   const createTaskMutation = useMutation({
     mutationFn: async ({ taskType, title, description, originalValue, requestedValue }) => {
@@ -187,12 +196,12 @@ export default function JobDetail() {
     );
   }
 
-  if (!job) {
+  if (!job || !hasAccess) {
     return (
       <div className="text-center py-12">
         <Package className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-        <h2 className="text-lg font-semibold text-slate-900">Job not found</h2>
-        <p className="text-slate-500 mt-1">This job may have been deleted or you don't have access</p>
+        <h2 className="text-lg font-semibold text-slate-900">Access Denied</h2>
+        <p className="text-slate-500 mt-1">You don't have permission to view this job</p>
         <Button onClick={() => navigate(-1)} className="mt-4">
           <ArrowLeft className="w-4 h-4 mr-2" />
           Go Back
@@ -224,6 +233,7 @@ export default function JobDetail() {
           </div>
         </div>
         
+        {/* Only customers can request changes, not drivers or fitters */}
         {isCustomer && !['completed', 'cancelled'].includes(job.customer_status) && (
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={() => handleRequestChange('date')}>

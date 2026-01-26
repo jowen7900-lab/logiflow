@@ -52,10 +52,23 @@ export default function CustomerUsers() {
   const [inviteDialog, setInviteDialog] = useState(false);
   const [inviteData, setInviteData] = useState({ email: '', role: 'customer' });
 
+  // Only customer admins can manage team
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
     queryFn: () => base44.auth.me(),
   });
+  
+  const isCustomerAdmin = user?.app_role === 'customer_admin';
+  
+  if (user && !isCustomerAdmin) {
+    return (
+      <div className="text-center py-12">
+        <Shield className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+        <h2 className="text-lg font-semibold text-slate-900">Access Denied</h2>
+        <p className="text-slate-500 mt-1">Only customer admins can manage team members</p>
+      </div>
+    );
+  }
 
   const { data: users = [], isLoading } = useQuery({
     queryKey: ['customerUsers', user?.customer_id],

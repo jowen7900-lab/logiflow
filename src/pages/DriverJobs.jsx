@@ -71,10 +71,13 @@ export default function DriverJobs() {
     queryFn: () => base44.auth.me(),
   });
 
+  // Driver-only access - can only see assigned jobs
+  const isDriver = user?.app_role === 'driver';
+  
   const { data: jobs = [], isLoading } = useQuery({
     queryKey: ['driverJobs', user?.email],
     queryFn: () => base44.entities.Job.filter({ driver_id: user?.email }, '-scheduled_date'),
-    enabled: !!user?.email,
+    enabled: !!user?.email && isDriver,
   });
 
   const activeJobs = jobs.filter(j => !['completed', 'cancelled', 'failed'].includes(j.ops_status));

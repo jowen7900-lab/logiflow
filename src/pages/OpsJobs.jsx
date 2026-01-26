@@ -98,8 +98,7 @@ export default function OpsJobs() {
       queryClient.invalidateQueries(['allJobs']);
       setAssignDialog(null);
       setSelectedDriver('');
-    },
-  });
+
 
   // Filter jobs
   const filteredJobs = jobs.filter(job => {

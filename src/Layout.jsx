@@ -33,16 +33,8 @@ export default function Layout({ children, currentPageName }) {
     queryFn: () => base44.auth.me(),
   });
 
-  // Set default app_role if not set (for demo purposes)
-  useEffect(() => {
-    if (user && !user.app_role) {
-      base44.auth.updateMe({ 
-        app_role: 'ops',
-        customer_id: '69775f6d2800a54e250880ba',
-        customer_name: 'Meridian Furniture Group'
-      });
-    }
-  }, [user]);
+  // SSO-based authentication enforced - role assigned during onboarding
+  // No role switching allowed within session
 
   const { data: notifications = [] } = useQuery({
     queryKey: ['notifications', user?.id],

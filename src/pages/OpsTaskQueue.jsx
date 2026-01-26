@@ -70,8 +70,7 @@ export default function OpsTaskQueue() {
       setActionDialog(null);
       setSelectedTask(null);
       setActionNotes('');
-    },
-  });
+
 
   const handleAction = (action, task) => {
     setSelectedTask(task);

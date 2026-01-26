@@ -14,6 +14,7 @@ import FitterManagement from './pages/FitterManagement';
 import CustomerManagement from './pages/CustomerManagement';
 import BookingRules from './pages/BookingRules';
 import UserManagement from './pages/UserManagement';
+import RoleGuard from './pages/RoleGuard';
 import __Layout from './Layout.jsx';
 
 
@@ -34,6 +35,7 @@ export const PAGES = {
     "CustomerManagement": CustomerManagement,
     "BookingRules": BookingRules,
     "UserManagement": UserManagement,
+    "RoleGuard": RoleGuard,
 }
 
 export const pagesConfig = {
