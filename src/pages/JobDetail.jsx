@@ -92,6 +92,26 @@ export default function JobDetail() {
     enabled: !!jobId,
   });
 
+  // Fetch driver details if current user is fitter
+  const { data: driverDetails } = useQuery({
+    queryKey: ['driverDetails', job?.driver_id],
+    queryFn: async () => {
+      const users = await base44.entities.User.filter({ email: job?.driver_id });
+      return users[0];
+    },
+    enabled: !!job?.driver_id && isFitter,
+  });
+
+  // Fetch fitter details if current user is driver
+  const { data: fitterDetails } = useQuery({
+    queryKey: ['fitterDetails', job?.fitter_id],
+    queryFn: async () => {
+      const users = await base44.entities.User.filter({ email: job?.fitter_id });
+      return users[0];
+    },
+    enabled: !!job?.fitter_id && isDriver,
+  });
+
   // Strict role checks
   const isOps = user?.app_role === 'ops';
   const isAppAdmin = user?.app_role === 'app_admin';
@@ -345,6 +365,45 @@ export default function JobDetail() {
                       <p className="font-medium text-slate-900">{job.driver_name}</p>
                       {job.vehicle_reg && (
                         <p className="text-slate-600">{job.vehicle_reg}</p>
+                      )}
+                      {isFitter && driverDetails && (
+                        <div className="mt-2 pt-2 border-t border-slate-200 space-y-1">
+                          {driverDetails.phone && (
+                            <a href={`tel:${driverDetails.phone}`} className="flex items-center gap-2 text-sm text-indigo-600 hover:text-indigo-700">
+                              <Phone className="w-3.5 h-3.5" />
+                              {driverDetails.phone}
+                            </a>
+                          )}
+                          {driverDetails.email && (
+                            <p className="text-sm text-slate-600">{driverDetails.email}</p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Fitter */}
+                {job.fitter_name && (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm font-medium text-slate-500">
+                      <User className="w-4 h-4" />
+                      Fitter
+                    </div>
+                    <div className="p-3 bg-slate-50 rounded-lg">
+                      <p className="font-medium text-slate-900">{job.fitter_name}</p>
+                      {isDriver && fitterDetails && (
+                        <div className="mt-2 pt-2 border-t border-slate-200 space-y-1">
+                          {fitterDetails.phone && (
+                            <a href={`tel:${fitterDetails.phone}`} className="flex items-center gap-2 text-sm text-indigo-600 hover:text-indigo-700">
+                              <Phone className="w-3.5 h-3.5" />
+                              {fitterDetails.phone}
+                            </a>
+                          )}
+                          {fitterDetails.email && (
+                            <p className="text-sm text-slate-600">{fitterDetails.email}</p>
+                          )}
+                        </div>
                       )}
                     </div>
                   </div>
