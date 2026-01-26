@@ -23,7 +23,10 @@ export default function ApprovalGuard({ children }) {
 
       // If user has role but approval_status is draft, redirect to onboarding
       if (user.approval_status === 'draft') {
-        const onboardingPage = `Onboarding${user.app_role.charAt(0).toUpperCase() + user.app_role.slice(1)}`;
+        const roleCapitalized = user.app_role === 'ops' 
+          ? 'Ops' 
+          : user.app_role.charAt(0).toUpperCase() + user.app_role.slice(1);
+        const onboardingPage = `Onboarding${roleCapitalized}`;
         navigate(createPageUrl(onboardingPage));
         return;
       }

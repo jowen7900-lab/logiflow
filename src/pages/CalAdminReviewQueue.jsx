@@ -30,7 +30,7 @@ export default function CalAdminReviewQueue() {
       });
       return users.filter(u => ['driver', 'customer'].includes(u.app_role));
     },
-    enabled: currentUser?.app_role === 'cal_admin' && currentUser?.approval_status === 'approved',
+    enabled: currentUser?.app_role === 'ops' && currentUser?.approval_status === 'approved',
   });
 
   const reviewMutation = useMutation({
@@ -65,12 +65,12 @@ export default function CalAdminReviewQueue() {
     });
   };
 
-  if (currentUser?.app_role !== 'cal_admin' || currentUser?.approval_status !== 'approved') {
+  if (currentUser?.app_role !== 'ops' || currentUser?.approval_status !== 'approved') {
     return (
       <div className="text-center py-12">
         <AlertTriangle className="w-12 h-12 text-amber-500 mx-auto mb-4" />
         <h2 className="text-lg font-semibold text-slate-900">Access Denied</h2>
-        <p className="text-slate-500 mt-1">Only approved Cal Admins can access this page</p>
+        <p className="text-slate-500 mt-1">Only approved Ops users can access this page</p>
       </div>
     );
   }

@@ -52,7 +52,7 @@ export default function PendingApproval() {
     if (user?.app_role === 'fitter') {
       return 'Customer Admin';
     }
-    if (user?.app_role === 'cal_admin') {
+    if (user?.app_role === 'ops') {
       return 'App Admin';
     }
     return 'Admin';

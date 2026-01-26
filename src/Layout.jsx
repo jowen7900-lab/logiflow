@@ -26,7 +26,7 @@ const pageTitles = {
   BookingRules: { title: 'Booking Rules', subtitle: 'Configure booking restrictions' },
   CalAdminReviewQueue: { title: 'Review Queue', subtitle: 'Review pending applications' },
   CustomerReviewQueue: { title: 'Fitter Review', subtitle: 'Review fitter applications' },
-  AppAdminReviewQueue: { title: 'Cal Admin Review', subtitle: 'Review cal admin applications' },
+  AppAdminReviewQueue: { title: 'Ops Admin Review', subtitle: 'Review ops admin applications' },
   RoleSelection: { title: 'Role Selection', subtitle: 'Choose your role' },
   PendingApproval: { title: 'Pending Approval', subtitle: 'Your application is under review' },
 };
@@ -40,7 +40,7 @@ export default function Layout({ children, currentPageName }) {
   });
 
   // Pages that don't require approval guard
-  const publicPages = ['RoleSelection', 'OnboardingDriver', 'OnboardingFitter', 'OnboardingCustomer', 'OnboardingCal_admin', 'PendingApproval'];
+  const publicPages = ['RoleSelection', 'OnboardingDriver', 'OnboardingFitter', 'OnboardingCustomer', 'OnboardingOps', 'PendingApproval'];
   const isPublicPage = publicPages.includes(currentPageName);
 
   // SSO-based authentication enforced - role assigned during onboarding

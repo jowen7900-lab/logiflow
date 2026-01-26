@@ -34,7 +34,7 @@ const roles = [
     iconColor: 'text-indigo-600',
   },
   {
-    value: 'cal_admin',
+    value: 'ops',
     label: 'Operations Admin',
     icon: ClipboardList,
     description: 'Manage operations',

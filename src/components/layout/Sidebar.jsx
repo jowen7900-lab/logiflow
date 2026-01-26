@@ -44,7 +44,7 @@ const roleNavigation = {
     { name: 'My Jobs', icon: Wrench, page: 'FitterJobs' },
     { name: 'Messages', icon: MessageSquare, page: 'Messages' },
   ],
-  cal_admin: [
+  ops: [
     { name: 'Dashboard', icon: LayoutDashboard, page: 'OpsDashboard' },
     { name: 'All Jobs', icon: Package, page: 'OpsJobs' },
     { name: 'Task Queue', icon: ClipboardList, page: 'OpsTaskQueue', badge: true },
@@ -57,7 +57,7 @@ const roleNavigation = {
     { name: 'Dashboard', icon: LayoutDashboard, page: 'OpsDashboard' },
     { name: 'All Jobs', icon: Package, page: 'OpsJobs' },
     { name: 'Task Queue', icon: ClipboardList, page: 'OpsTaskQueue', badge: true },
-    { name: 'Cal Admin Review', icon: Users, page: 'AppAdminReviewQueue' },
+    { name: 'Ops Admin Review', icon: Users, page: 'AppAdminReviewQueue' },
     { name: 'User Review', icon: Users, page: 'CalAdminReviewQueue' },
     { name: 'Drivers', icon: Truck, page: 'DriverManagement' },
     { name: 'Fitters', icon: Wrench, page: 'FitterManagement' },

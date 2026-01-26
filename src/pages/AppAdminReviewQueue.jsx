@@ -26,7 +26,7 @@ export default function AppAdminReviewQueue() {
     queryFn: async () => {
       const users = await base44.asServiceRole.entities.User.filter({
         approval_status: 'pending_review',
-        app_role: 'cal_admin',
+        app_role: 'ops',
       });
       return users;
     },
@@ -84,7 +84,7 @@ export default function AppAdminReviewQueue() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Pending Cal Admins ({pendingCalAdmins.length})</CardTitle>
+          <CardTitle>Pending Ops Admins ({pendingCalAdmins.length})</CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -150,7 +150,7 @@ export default function AppAdminReviewQueue() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {action === 'approve' ? 'Approve Cal Admin' : 'Reject Cal Admin'}
+              {action === 'approve' ? 'Approve Ops Admin' : 'Reject Ops Admin'}
             </DialogTitle>
             <DialogDescription>
               {selectedUser?.fullName}

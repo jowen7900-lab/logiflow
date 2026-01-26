@@ -20,11 +20,12 @@ import RoleSelection from './pages/RoleSelection';
 import OnboardingDriver from './pages/OnboardingDriver';
 import OnboardingFitter from './pages/OnboardingFitter';
 import OnboardingCustomer from './pages/OnboardingCustomer';
-import OnboardingCal_admin from './pages/OnboardingCal_admin';
+import onboardingcalAdmin from './pages/OnboardingCal_admin';
 import PendingApproval from './pages/PendingApproval';
 import CalAdminReviewQueue from './pages/CalAdminReviewQueue';
 import CustomerReviewQueue from './pages/CustomerReviewQueue';
 import AppAdminReviewQueue from './pages/AppAdminReviewQueue';
+import OnboardingOps from './pages/OnboardingOps';
 import __Layout from './Layout.jsx';
 
 
@@ -51,11 +52,12 @@ export const PAGES = {
     "OnboardingDriver": OnboardingDriver,
     "OnboardingFitter": OnboardingFitter,
     "OnboardingCustomer": OnboardingCustomer,
-    "OnboardingCal_admin": OnboardingCal_admin,
+    "OnboardingCal_admin": onboardingcalAdmin,
     "PendingApproval": PendingApproval,
     "CalAdminReviewQueue": CalAdminReviewQueue,
     "CustomerReviewQueue": CustomerReviewQueue,
     "AppAdminReviewQueue": AppAdminReviewQueue,
+    "OnboardingOps": OnboardingOps,
 }
 
 export const pagesConfig = {
