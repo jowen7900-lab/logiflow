@@ -92,6 +92,13 @@ export default function JobDetail() {
     enabled: !!jobId,
   });
 
+  // Strict role checks
+  const isOps = user?.app_role === 'ops';
+  const isAppAdmin = user?.app_role === 'app_admin';
+  const isDriver = user?.app_role === 'driver';
+  const isFitter = user?.app_role === 'fitter';
+  const isCustomer = user?.app_role === 'customer' || user?.app_role === 'customer_admin';
+
   // Fetch driver details if current user is fitter
   const { data: driverDetails } = useQuery({
     queryKey: ['driverDetails', job?.driver_id],
@@ -111,13 +118,6 @@ export default function JobDetail() {
     },
     enabled: !!job?.fitter_id && isDriver,
   });
-
-  // Strict role checks
-  const isOps = user?.app_role === 'ops';
-  const isAppAdmin = user?.app_role === 'app_admin';
-  const isDriver = user?.app_role === 'driver';
-  const isFitter = user?.app_role === 'fitter';
-  const isCustomer = user?.app_role === 'customer' || user?.app_role === 'customer_admin';
 
   // Verify access rights
   const hasAccess = isOps || 
