@@ -95,8 +95,6 @@ export default function CustomerUsers() {
            u.email?.toLowerCase().includes(search);
   });
 
-  const isCustomerAdmin = user?.app_role === 'customer_admin';
-
   return (
     <div className="space-y-6">
       {/* Header */}
