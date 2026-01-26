@@ -22,10 +22,7 @@ export default function PlansPage() {
 
   const { data: plans = [], isLoading } = useQuery({
     queryKey: ['plans', user?.id],
-    queryFn: async () => {
-      if (!user?.customer_id) return [];
-      return base44.entities.Plan.filter({ customer_id: user.customer_id }, '-created_date', 100);
-    },
+    queryFn: () => base44.entities.Plan.list('-created_date', 100),
     enabled: !!user?.id,
   });
 
