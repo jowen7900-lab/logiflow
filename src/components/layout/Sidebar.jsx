@@ -15,7 +15,8 @@ import {
   MessageSquare,
   ChevronRight,
   LogOut,
-  Building2
+  Building2,
+  FileText
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
