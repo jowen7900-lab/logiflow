@@ -34,14 +34,7 @@ const roleNavigation = {
     { name: 'Create Job', icon: Plus, page: 'CreateJob' },
     { name: 'Messages', icon: MessageSquare, page: 'Messages' },
     { name: 'Team', icon: Users, page: 'CustomerUsers' },
-  ],
-  ops: [
-    { name: 'Dashboard', icon: LayoutDashboard, page: 'OpsDashboard' },
-    { name: 'All Jobs', icon: Package, page: 'OpsJobs' },
-    { name: 'Task Queue', icon: ClipboardList, page: 'OpsTaskQueue', badge: true },
-    { name: 'Drivers', icon: Truck, page: 'DriverManagement' },
-    { name: 'Fitters', icon: Wrench, page: 'FitterManagement' },
-    { name: 'Messages', icon: MessageSquare, page: 'Messages' },
+    { name: 'Fitter Review', icon: ClipboardList, page: 'CustomerReviewQueue' },
   ],
   driver: [
     { name: 'My Jobs', icon: Package, page: 'DriverJobs' },
@@ -51,10 +44,21 @@ const roleNavigation = {
     { name: 'My Jobs', icon: Wrench, page: 'FitterJobs' },
     { name: 'Messages', icon: MessageSquare, page: 'Messages' },
   ],
-  admin: [
+  cal_admin: [
     { name: 'Dashboard', icon: LayoutDashboard, page: 'OpsDashboard' },
     { name: 'All Jobs', icon: Package, page: 'OpsJobs' },
     { name: 'Task Queue', icon: ClipboardList, page: 'OpsTaskQueue', badge: true },
+    { name: 'Review Queue', icon: Users, page: 'CalAdminReviewQueue' },
+    { name: 'Drivers', icon: Truck, page: 'DriverManagement' },
+    { name: 'Fitters', icon: Wrench, page: 'FitterManagement' },
+    { name: 'Messages', icon: MessageSquare, page: 'Messages' },
+  ],
+  app_admin: [
+    { name: 'Dashboard', icon: LayoutDashboard, page: 'OpsDashboard' },
+    { name: 'All Jobs', icon: Package, page: 'OpsJobs' },
+    { name: 'Task Queue', icon: ClipboardList, page: 'OpsTaskQueue', badge: true },
+    { name: 'Cal Admin Review', icon: Users, page: 'AppAdminReviewQueue' },
+    { name: 'User Review', icon: Users, page: 'CalAdminReviewQueue' },
     { name: 'Drivers', icon: Truck, page: 'DriverManagement' },
     { name: 'Fitters', icon: Wrench, page: 'FitterManagement' },
     { name: 'Users', icon: Users, page: 'UserManagement' },

@@ -24,6 +24,11 @@ const pageTitles = {
   CustomerManagement: { title: 'Customers', subtitle: 'Manage customer accounts' },
   UserManagement: { title: 'Users', subtitle: 'Manage all platform users' },
   BookingRules: { title: 'Booking Rules', subtitle: 'Configure booking restrictions' },
+  CalAdminReviewQueue: { title: 'Review Queue', subtitle: 'Review pending applications' },
+  CustomerReviewQueue: { title: 'Fitter Review', subtitle: 'Review fitter applications' },
+  AppAdminReviewQueue: { title: 'Cal Admin Review', subtitle: 'Review cal admin applications' },
+  RoleSelection: { title: 'Role Selection', subtitle: 'Choose your role' },
+  PendingApproval: { title: 'Pending Approval', subtitle: 'Your application is under review' },
 };
 
 export default function Layout({ children, currentPageName }) {
