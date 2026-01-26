@@ -1,15 +1,35 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
+import { createPageUrl } from '@/utils';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Clock, CheckCircle2, XCircle, AlertTriangle } from 'lucide-react';
 
 export default function PendingApproval() {
+  const navigate = useNavigate();
+  
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
     queryFn: () => base44.auth.me(),
   });
+
+  // Redirect approved users to their home page
+  React.useEffect(() => {
+    if (user?.approval_status === 'approved') {
+      const homePage = {
+        'customer': 'CustomerDashboard',
+        'customer_admin': 'CustomerDashboard',
+        'driver': 'DriverJobs',
+        'fitter': 'FitterJobs',
+        'ops': 'OpsDashboard',
+        'app_admin': 'OpsDashboard',
+      }[user.app_role] || 'CustomerDashboard';
+      
+      navigate(createPageUrl(homePage));
+    }
+  }, [user, navigate]);
 
   const getStatusInfo = () => {
     if (user?.approval_status === 'approved') {
