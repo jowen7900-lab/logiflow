@@ -4,6 +4,9 @@ import CreateJob from './pages/CreateJob';
 import JobDetail from './pages/JobDetail';
 import OpsDashboard from './pages/OpsDashboard';
 import OpsTaskQueue from './pages/OpsTaskQueue';
+import OpsJobs from './pages/OpsJobs';
+import DriverJobs from './pages/DriverJobs';
+import FitterJobs from './pages/FitterJobs';
 import __Layout from './Layout.jsx';
 
 
@@ -14,6 +17,9 @@ export const PAGES = {
     "JobDetail": JobDetail,
     "OpsDashboard": OpsDashboard,
     "OpsTaskQueue": OpsTaskQueue,
+    "OpsJobs": OpsJobs,
+    "DriverJobs": DriverJobs,
+    "FitterJobs": FitterJobs,
 }
 
 export const pagesConfig = {
