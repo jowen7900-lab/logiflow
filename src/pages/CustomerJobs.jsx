@@ -92,71 +92,41 @@ export default function CustomerJobs() {
 
   return (
     <div className="space-y-6">
-      {/* Actions Bar */}
+      {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-        <div className="flex items-center gap-3 flex-wrap">
-          <div className="relative">
+        <div className="flex items-center gap-3 flex-wrap flex-1">
+          <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <Input
-              placeholder="Search jobs..."
+              placeholder="Search jobs, customers, drivers..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9 w-64"
+              className="pl-9"
             />
           </div>
           
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-40">
+            <SelectTrigger className="w-48">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Statuses</SelectItem>
-              <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="requested">Requested</SelectItem>
               <SelectItem value="confirmed">Confirmed</SelectItem>
               <SelectItem value="in_progress">In Progress</SelectItem>
-              <SelectItem value="completed">Completed</SelectItem>
+              <SelectItem value="delivered">Delivered</SelectItem>
+              <SelectItem value="closed">Closed</SelectItem>
               <SelectItem value="cancelled">Cancelled</SelectItem>
-            </SelectContent>
-          </Select>
-          
-          <Select value={dateRange} onValueChange={setDateRange}>
-            <SelectTrigger className="w-40">
-              <SelectValue placeholder="Date" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Dates</SelectItem>
-              <SelectItem value="today">Today</SelectItem>
-              <SelectItem value="week">This Week</SelectItem>
-              <SelectItem value="month">This Month</SelectItem>
             </SelectContent>
           </Select>
         </div>
         
-        <div className="flex items-center gap-2">
-          <div className="flex items-center border border-slate-200 rounded-lg p-1">
-            <Button
-              variant={viewMode === 'cards' ? 'secondary' : 'ghost'}
-              size="sm"
-              onClick={() => setViewMode('cards')}
-            >
-              <Grid3X3 className="w-4 h-4" />
-            </Button>
-            <Button
-              variant={viewMode === 'table' ? 'secondary' : 'ghost'}
-              size="sm"
-              onClick={() => setViewMode('table')}
-            >
-              <List className="w-4 h-4" />
-            </Button>
-          </div>
-          
-          <Link to={createPageUrl('CreateJob')}>
-            <Button className="bg-indigo-600 hover:bg-indigo-700 gap-2">
-              <Plus className="w-4 h-4" />
-              Create Job
-            </Button>
-          </Link>
-        </div>
+        <Link to={createPageUrl('CreateJob')}>
+          <Button className="bg-indigo-600 hover:bg-indigo-700 gap-2">
+            <Plus className="w-4 h-4" />
+            Create Job
+          </Button>
+        </Link>
       </div>
 
       {/* Results count */}
@@ -164,36 +134,23 @@ export default function CustomerJobs() {
         Showing {filteredJobs.length} of {jobs.length} jobs
       </p>
 
-      {/* Jobs Display */}
-      {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {Array(6).fill(0).map((_, i) => (
-            <Skeleton key={i} className="h-40 w-full" />
-          ))}
-        </div>
-      ) : viewMode === 'cards' ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {filteredJobs.length === 0 ? (
-            <div className="col-span-full text-center py-12 text-slate-500">
-              No jobs found matching your criteria
+      {/* Jobs Table */}
+      <Card>
+        <CardContent className="p-0">
+          {isLoading ? (
+            <div className="p-6 space-y-3">
+              {Array(10).fill(0).map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}
             </div>
           ) : (
-            filteredJobs.map(job => (
-              <JobCard key={job.id} job={job} />
-            ))
-          )}
-        </div>
-      ) : (
-        <Card>
-          <CardContent className="p-0">
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Job #</TableHead>
                   <TableHead>Type</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Delivery Address</TableHead>
+                  <TableHead>Delivery</TableHead>
                   <TableHead>Scheduled</TableHead>
+                  <TableHead>Driver</TableHead>
                   <TableHead>ETA</TableHead>
                   <TableHead></TableHead>
                 </TableRow>
@@ -201,8 +158,8 @@ export default function CustomerJobs() {
               <TableBody>
                 {filteredJobs.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8 text-slate-500">
-                      No jobs found matching your criteria
+                    <TableCell colSpan={8} className="text-center py-8 text-slate-500">
+                      No jobs found
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -210,55 +167,104 @@ export default function CustomerJobs() {
                     <TableRow key={job.id} className="hover:bg-slate-50">
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          <span className="font-medium">{job.job_number}</span>
+                          <Link 
+                            to={createPageUrl(`JobDetail?id=${job.id}`)}
+                            className="font-medium text-indigo-600 hover:text-indigo-700"
+                          >
+                            {job.job_number}
+                          </Link>
                           {job.has_exception && (
                             <AlertTriangle className="w-4 h-4 text-amber-500" />
                           )}
                         </div>
                       </TableCell>
-                      <TableCell className="capitalize">{job.job_type}</TableCell>
                       <TableCell>
-                        <StatusBadge status={job.customer_status} size="sm" />
+                        <span className="text-sm capitalize">{job.job_type}</span>
                       </TableCell>
                       <TableCell>
-                        <div>
-                          <p className="text-sm truncate max-w-[200px]">{job.delivery_address}</p>
-                          <p className="text-xs text-slate-500">{job.delivery_postcode}</p>
+                        <StatusBadge status={job.customer_status} type="customer" size="sm" />
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm">
+                          <p className="truncate max-w-[150px]">{job.delivery_postcode}</p>
                         </div>
                       </TableCell>
                       <TableCell>
-                        {job.scheduled_date && (
-                          <div className="flex items-center gap-1 text-sm">
-                            <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                            {format(new Date(job.scheduled_date), 'MMM d')}
-                            {job.scheduled_time_slot && (
-                              <span className="text-slate-400">· {job.scheduled_time_slot.toUpperCase()}</span>
-                            )}
-                          </div>
-                        )}
+                        <div className="text-sm">
+                          {job.scheduled_date && (
+                            <div className="flex items-center gap-1">
+                              <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                              {format(new Date(job.scheduled_date), 'MMM d')}
+                              {job.scheduled_time_slot && (
+                                <span className="text-slate-400 uppercase text-xs">
+                                  {job.scheduled_time_slot}
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-sm">{job.driver_name || '-'}</span>
                       </TableCell>
                       <TableCell>
                         {job.eta && (
-                          <span className="text-indigo-600 font-medium">
+                          <span className="text-sm text-indigo-600 font-medium">
                             {format(new Date(job.eta), 'HH:mm')}
                           </span>
                         )}
                       </TableCell>
                       <TableCell>
-                        <Link to={createPageUrl(`JobDetail?id=${job.id}`)}>
-                          <Button variant="ghost" size="sm">
-                            <ExternalLink className="w-4 h-4" />
+                        <div className="flex gap-1">
+                          <Link to={createPageUrl(`JobDetail?id=${job.id}`)}>
+                            <Button variant="ghost" size="sm">
+                              <Edit2 className="w-4 h-4" />
+                            </Button>
+                          </Link>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => setDeleteDialog(job)}
+                            disabled={['closed', 'cancelled', 'delivered'].includes(job.customer_status)}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            <Trash2 className="w-4 h-4" />
                           </Button>
-                        </Link>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))
                 )}
               </TableBody>
             </Table>
-          </CardContent>
-        </Card>
-      )}
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Delete Dialog */}
+      <Dialog open={!!deleteDialog} onOpenChange={() => setDeleteDialog(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Job</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete job {deleteDialog?.job_number}? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteDialog(null)}>
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive"
+              onClick={() => deleteJobMutation.mutate(deleteDialog?.id)}
+              disabled={deleteJobMutation.isPending}
+            >
+              {deleteJobMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
