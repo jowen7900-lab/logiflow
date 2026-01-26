@@ -52,6 +52,22 @@ export default function RoleSelection() {
     queryFn: () => base44.auth.me(),
   });
 
+  // Redirect approved users to their home page
+  React.useEffect(() => {
+    if (user?.app_role && user?.approval_status === 'approved') {
+      const homePage = {
+        'customer': 'CustomerDashboard',
+        'customer_admin': 'CustomerDashboard',
+        'driver': 'DriverJobs',
+        'fitter': 'FitterJobs',
+        'ops': 'OpsDashboard',
+        'app_admin': 'OpsDashboard',
+      }[user.app_role] || 'CustomerDashboard';
+      
+      navigate(createPageUrl(homePage));
+    }
+  }, [user, navigate]);
+
   const selectRoleMutation = useMutation({
     mutationFn: async (role) => {
       await base44.auth.updateMe({ 
@@ -60,7 +76,8 @@ export default function RoleSelection() {
       });
     },
     onSuccess: (_, role) => {
-      navigate(createPageUrl(`Onboarding${role.charAt(0).toUpperCase() + role.slice(1)}`));
+      const roleCapitalized = role === 'ops' ? 'Ops' : role.charAt(0).toUpperCase() + role.slice(1);
+      navigate(createPageUrl(`Onboarding${roleCapitalized}`));
     },
   });
 
