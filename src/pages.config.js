@@ -10,6 +10,10 @@ import FitterJobs from './pages/FitterJobs';
 import CustomerUsers from './pages/CustomerUsers';
 import Messages from './pages/Messages';
 import DriverManagement from './pages/DriverManagement';
+import FitterManagement from './pages/FitterManagement';
+import CustomerManagement from './pages/CustomerManagement';
+import BookingRules from './pages/BookingRules';
+import UserManagement from './pages/UserManagement';
 import __Layout from './Layout.jsx';
 
 
@@ -26,6 +30,10 @@ export const PAGES = {
     "CustomerUsers": CustomerUsers,
     "Messages": Messages,
     "DriverManagement": DriverManagement,
+    "FitterManagement": FitterManagement,
+    "CustomerManagement": CustomerManagement,
+    "BookingRules": BookingRules,
+    "UserManagement": UserManagement,
 }
 
 export const pagesConfig = {
