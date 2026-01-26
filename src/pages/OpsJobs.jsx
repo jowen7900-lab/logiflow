@@ -57,9 +57,13 @@ export default function OpsJobs() {
     queryFn: () => base44.auth.me(),
   });
 
+  // Ops-only access enforcement
+  const isOps = user?.app_role === 'ops';
+  
   const { data: jobs = [], isLoading } = useQuery({
     queryKey: ['allJobs'],
     queryFn: () => base44.entities.Job.list('-created_date', 500),
+    enabled: !!user && isOps,
   });
 
   const { data: customers = [] } = useQuery({

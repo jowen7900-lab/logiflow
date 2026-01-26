@@ -47,9 +47,13 @@ export default function OpsTaskQueue() {
     queryFn: () => base44.auth.me(),
   });
 
+  // Ops-only access enforcement
+  const isOps = user?.app_role === 'ops';
+  
   const { data: allTasks = [], isLoading } = useQuery({
     queryKey: ['allOpsTasks'],
     queryFn: () => base44.entities.OpsTask.list('-created_date', 200),
+    enabled: !!user && isOps,
   });
 
   const pendingTasks = allTasks.filter(t => t.status === 'pending');
