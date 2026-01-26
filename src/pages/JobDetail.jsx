@@ -375,7 +375,9 @@ export default function JobDetail() {
                             </a>
                           )}
                           {driverDetails.email && (
-                            <p className="text-sm text-slate-600">{driverDetails.email}</p>
+                            <a href={`mailto:${driverDetails.email}`} className="flex items-center gap-2 text-sm text-indigo-600 hover:text-indigo-700">
+                              {driverDetails.email}
+                            </a>
                           )}
                         </div>
                       )}
