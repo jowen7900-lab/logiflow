@@ -28,6 +28,7 @@ import RoleSelection from './pages/RoleSelection';
 import UserManagement from './pages/UserManagement';
 import Plans from './pages/Plans';
 import PlanDetail from './pages/PlanDetail';
+import PlanDiffReview from './pages/PlanDiffReview';
 import __Layout from './Layout.jsx';
 
 
@@ -62,6 +63,7 @@ export const PAGES = {
     "UserManagement": UserManagement,
     "Plans": Plans,
     "PlanDetail": PlanDetail,
+    "PlanDiffReview": PlanDiffReview,
 }
 
 export const pagesConfig = {
