@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useEffect as useEffectAlias } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import Sidebar from '@/components/layout/Sidebar';
@@ -32,6 +33,17 @@ export default function Layout({ children, currentPageName }) {
     queryKey: ['currentUser'],
     queryFn: () => base44.auth.me(),
   });
+
+  // Set default app_role if not set (for demo purposes)
+  useEffect(() => {
+    if (user && !user.app_role) {
+      base44.auth.updateMe({ 
+        app_role: 'ops',
+        customer_id: '69775f6d2800a54e250880ba',
+        customer_name: 'Meridian Furniture Group'
+      });
+    }
+  }, [user]);
 
   const { data: notifications = [] } = useQuery({
     queryKey: ['notifications', user?.id],
