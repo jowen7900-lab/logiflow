@@ -102,7 +102,19 @@ export default function OpsJobs() {
       queryClient.invalidateQueries(['allJobs']);
       setAssignDialog(null);
       setSelectedDriver('');
-
+    },
+  });
+  
+  // Deny access for non-ops users
+  if (user && !isOps) {
+    return (
+      <div className="text-center py-12">
+        <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+        <h2 className="text-lg font-semibold text-slate-900">Access Denied</h2>
+        <p className="text-slate-500 mt-1">Only operations users can access all jobs</p>
+      </div>
+    );
+  }
 
   // Filter jobs
   const filteredJobs = jobs.filter(job => {

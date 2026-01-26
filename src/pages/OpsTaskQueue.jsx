@@ -74,7 +74,19 @@ export default function OpsTaskQueue() {
       setActionDialog(null);
       setSelectedTask(null);
       setActionNotes('');
-
+    },
+  });
+  
+  // Deny access for non-ops users
+  if (user && !isOps) {
+    return (
+      <div className="text-center py-12">
+        <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+        <h2 className="text-lg font-semibold text-slate-900">Access Denied</h2>
+        <p className="text-slate-500 mt-1">Only operations users can access task queue</p>
+      </div>
+    );
+  }
 
   const handleAction = (action, task) => {
     setSelectedTask(task);

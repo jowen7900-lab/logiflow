@@ -94,7 +94,6 @@ export default function JobDetail() {
   const isDriver = user?.app_role === 'driver';
   const isFitter = user?.app_role === 'fitter';
   const isCustomer = user?.app_role === 'customer' || user?.app_role === 'customer_admin';
-  const isCustomerAdmin = user?.app_role === 'customer_admin';
   
   // Verify access rights
   const hasAccess = isOps || 
