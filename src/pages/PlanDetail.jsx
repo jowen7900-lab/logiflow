@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Upload, FileText, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+import PlanJobsView from '@/components/plans/PlanJobsView';
 
 const urlParams = new URLSearchParams(window.location.search);
 const planId = urlParams.get('id');
@@ -164,6 +165,8 @@ export default function PlanDetailPage() {
           ))}
         </div>
       )}
+
+      {latestVersion && <PlanJobsView planId={planId} latestVersion={latestVersion} />}
 
       {latestDiff && (
         <div className="space-y-4">
