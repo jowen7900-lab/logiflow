@@ -60,13 +60,16 @@ export default function OpsJobs() {
     queryFn: () => base44.auth.me(),
   });
 
-  // Ops-only access enforcement
-  const isOps = user?.app_role === 'ops' || user?.app_role === 'app_admin';
+  // Allow ops, app_admin, customer, and customer_admin to access
+  const hasAccess = user?.app_role === 'ops' || 
+                    user?.app_role === 'app_admin' || 
+                    user?.app_role === 'customer' || 
+                    user?.app_role === 'customer_admin';
   
   const { data: jobs = [], isLoading } = useQuery({
     queryKey: ['allJobs'],
     queryFn: () => base44.entities.Job.list('-created_date', 500),
-    enabled: !!user && isOps,
+    enabled: !!user && hasAccess,
   });
 
   const { data: customers = [] } = useQuery({
@@ -138,13 +141,13 @@ export default function OpsJobs() {
     },
   });
   
-  // Deny access for non-ops users
-  if (user && !isOps) {
+  // Deny access for unauthorized users
+  if (user && !hasAccess) {
     return (
       <div className="text-center py-12">
         <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
         <h2 className="text-lg font-semibold text-slate-900">Access Denied</h2>
-        <p className="text-slate-500 mt-1">Only operations users can access all jobs</p>
+        <p className="text-slate-500 mt-1">You don't have permission to access this page</p>
       </div>
     );
   }
