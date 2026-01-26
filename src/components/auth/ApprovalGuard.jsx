@@ -17,6 +17,26 @@ export default function ApprovalGuard({ children }) {
     if (user && !isLoading) {
       const currentPath = window.location.pathname;
       
+      // If user is approved, redirect away from onboarding/role selection pages to their home
+      if (user.approval_status === 'approved') {
+        const onboardingPages = ['RoleSelection', 'OnboardingDriver', 'OnboardingFitter', 'OnboardingCustomer', 'OnboardingOps', 'PendingApproval'];
+        const isOnOnboardingPage = onboardingPages.some(page => currentPath.includes(page));
+        
+        if (isOnOnboardingPage) {
+          const homePage = {
+            'customer': 'CustomerDashboard',
+            'customer_admin': 'CustomerDashboard',
+            'driver': 'DriverJobs',
+            'fitter': 'FitterJobs',
+            'ops': 'OpsDashboard',
+            'app_admin': 'OpsDashboard',
+          }[user.app_role] || 'CustomerDashboard';
+          
+          navigate(createPageUrl(homePage));
+          return;
+        }
+      }
+      
       // If user has no role, redirect to role selection
       if (!user.app_role) {
         navigate(createPageUrl('RoleSelection'));
@@ -36,21 +56,6 @@ export default function ApprovalGuard({ children }) {
       // If user is not approved, redirect to pending approval page
       if (user.approval_status !== 'approved') {
         navigate(createPageUrl('PendingApproval'));
-        return;
-      }
-
-      // If user is approved and on PendingApproval page, redirect to their home
-      if (user.approval_status === 'approved' && currentPath.includes('PendingApproval')) {
-        const homePage = {
-          'customer': 'CustomerDashboard',
-          'customer_admin': 'CustomerDashboard',
-          'driver': 'DriverJobs',
-          'fitter': 'FitterJobs',
-          'ops': 'OpsDashboard',
-          'app_admin': 'OpsDashboard',
-        }[user.app_role] || 'CustomerDashboard';
-        
-        navigate(createPageUrl(homePage));
         return;
       }
     }
