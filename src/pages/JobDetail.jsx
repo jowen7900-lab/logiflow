@@ -8,6 +8,7 @@ import ChangeFlag from '@/components/ui/ChangeFlag';
 import JobTimeline from '@/components/jobs/JobTimeline';
 import JobChat from '@/components/chat/JobChat';
 import LiveJobTracking from '@/components/jobs/LiveJobTracking';
+import RecipientIntelligence from '@/components/recipients/RecipientIntelligence';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -302,6 +303,12 @@ export default function JobDetail() {
                         {job.delivery_phone}
                       </p>
                     )}
+                    <RecipientIntelligence
+                      recipientName={job.delivery_contact}
+                      recipientPostcode={job.delivery_postcode}
+                      userRole={user?.app_role}
+                      currentJobId={job.id}
+                    />
                   </div>
                 </div>
 

@@ -41,7 +41,6 @@ const roleNavigation = {
     { name: 'Task Queue', icon: ClipboardList, page: 'OpsTaskQueue', badge: true },
     { name: 'Drivers', icon: Truck, page: 'DriverManagement' },
     { name: 'Fitters', icon: Wrench, page: 'FitterManagement' },
-    { name: 'Customers', icon: Building2, page: 'CustomerManagement' },
     { name: 'Messages', icon: MessageSquare, page: 'Messages' },
   ],
   driver: [
@@ -58,7 +57,6 @@ const roleNavigation = {
     { name: 'Task Queue', icon: ClipboardList, page: 'OpsTaskQueue', badge: true },
     { name: 'Drivers', icon: Truck, page: 'DriverManagement' },
     { name: 'Fitters', icon: Wrench, page: 'FitterManagement' },
-    { name: 'Customers', icon: Building2, page: 'CustomerManagement' },
     { name: 'Users', icon: Users, page: 'UserManagement' },
     { name: 'Booking Rules', icon: Settings, page: 'BookingRules' },
   ],

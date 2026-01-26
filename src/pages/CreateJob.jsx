@@ -34,6 +34,7 @@ import {
 } from 'lucide-react';
 import { format, addDays, isWeekend } from 'date-fns';
 import { cn } from '@/lib/utils';
+import RecipientIntelligence from '@/components/recipients/RecipientIntelligence';
 
 const steps = [
   { id: 'type', title: 'Job Type', icon: Package },
@@ -407,42 +408,49 @@ export default function CreateJob() {
 
           {/* Step 3: Delivery */}
           {currentStep === 2 && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="md:col-span-2">
-                <Label>Address *</Label>
-                <Input
-                  value={formData.delivery_address}
-                  onChange={(e) => updateFormData({ delivery_address: e.target.value })}
-                  placeholder="Enter full delivery address"
-                  className="mt-1.5"
-                />
-              </div>
-              <div>
-                <Label>Postcode *</Label>
-                <Input
-                  value={formData.delivery_postcode}
-                  onChange={(e) => updateFormData({ delivery_postcode: e.target.value })}
-                  placeholder="e.g. SW1A 1AA"
-                  className="mt-1.5"
-                />
-              </div>
-              <div>
-                <Label>Contact Name</Label>
-                <Input
-                  value={formData.delivery_contact}
-                  onChange={(e) => updateFormData({ delivery_contact: e.target.value })}
-                  placeholder="Recipient name"
-                  className="mt-1.5"
-                />
-              </div>
-              <div>
-                <Label>Phone</Label>
-                <Input
-                  value={formData.delivery_phone}
-                  onChange={(e) => updateFormData({ delivery_phone: e.target.value })}
-                  placeholder="Recipient phone"
-                  className="mt-1.5"
-                />
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="md:col-span-2">
+                  <Label>Address *</Label>
+                  <Input
+                    value={formData.delivery_address}
+                    onChange={(e) => updateFormData({ delivery_address: e.target.value })}
+                    placeholder="Enter full delivery address"
+                    className="mt-1.5"
+                  />
+                </div>
+                <div>
+                  <Label>Postcode *</Label>
+                  <Input
+                    value={formData.delivery_postcode}
+                    onChange={(e) => updateFormData({ delivery_postcode: e.target.value })}
+                    placeholder="e.g. SW1A 1AA"
+                    className="mt-1.5"
+                  />
+                </div>
+                <div>
+                  <Label>Contact Name</Label>
+                  <Input
+                    value={formData.delivery_contact}
+                    onChange={(e) => updateFormData({ delivery_contact: e.target.value })}
+                    placeholder="Recipient name"
+                    className="mt-1.5"
+                  />
+                  <RecipientIntelligence
+                    recipientName={formData.delivery_contact}
+                    recipientPostcode={formData.delivery_postcode}
+                    userRole={user?.app_role}
+                  />
+                </div>
+                <div>
+                  <Label>Phone</Label>
+                  <Input
+                    value={formData.delivery_phone}
+                    onChange={(e) => updateFormData({ delivery_phone: e.target.value })}
+                    placeholder="Recipient phone"
+                    className="mt-1.5"
+                  />
+                </div>
               </div>
             </div>
           )}
