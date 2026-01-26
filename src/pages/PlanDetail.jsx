@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Upload, FileText, AlertCircle } from 'lucide-react';
+import { Upload, FileText, AlertCircle, Download } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import PlanJobsView from '@/components/plans/PlanJobsView';
@@ -93,6 +93,19 @@ export default function PlanDetailPage() {
     }
   };
 
+  const handleDownloadTemplate = async () => {
+    const response = await base44.functions.invoke('generatePlanTemplate', {});
+    const blob = new Blob([response.data], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'plan_import_template.csv';
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    a.remove();
+  };
+
   if (planLoading || !plan) return <div>Loading...</div>;
 
   const latestVersion = versions[0];
@@ -117,6 +130,9 @@ export default function PlanDetailPage() {
               <p className="text-sm text-slate-600">
                 Upload a CSV or XLSX file with job data. Required columns: delivery_recipient_name, delivery_address1, delivery_postcode, delivery_date_time
               </p>
+              <Button onClick={handleDownloadTemplate} variant="outline" className="gap-2 w-full sm:w-auto">
+                <Download className="w-4 h-4" /> Download Template
+              </Button>
               <input
                 type="file"
                 accept=".csv,.xlsx"
