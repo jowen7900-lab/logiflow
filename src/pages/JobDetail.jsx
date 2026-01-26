@@ -94,12 +94,14 @@ export default function JobDetail() {
 
   // Strict role checks
   const isOps = user?.app_role === 'ops';
+  const isAppAdmin = user?.app_role === 'app_admin';
   const isDriver = user?.app_role === 'driver';
   const isFitter = user?.app_role === 'fitter';
   const isCustomer = user?.app_role === 'customer' || user?.app_role === 'customer_admin';
-  
+
   // Verify access rights
   const hasAccess = isOps || 
+    isAppAdmin ||
     (isCustomer && job?.customer_id === user?.customer_id) ||
     (isDriver && job?.driver_id === user?.email) ||
     (isFitter && job?.fitter_id === user?.email);

@@ -58,7 +58,7 @@ export default function OpsJobs() {
   });
 
   // Ops-only access enforcement
-  const isOps = user?.app_role === 'ops';
+  const isOps = user?.app_role === 'ops' || user?.app_role === 'app_admin';
   
   const { data: jobs = [], isLoading } = useQuery({
     queryKey: ['allJobs'],

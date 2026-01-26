@@ -48,7 +48,7 @@ export default function OpsTaskQueue() {
   });
 
   // Ops-only access enforcement
-  const isOps = user?.app_role === 'ops';
+  const isOps = user?.app_role === 'ops' || user?.app_role === 'app_admin';
   
   const { data: allTasks = [], isLoading } = useQuery({
     queryKey: ['allOpsTasks'],
