@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { History, Loader2 } from 'lucide-react';
-import { findRecipientHistory } from '@/utils/recipientMatcher';
+import { findRecipientHistory } from './recipientMatcher';
 import { formatDistanceToNow } from 'date-fns';
 import RecipientHistoryDrawer from './RecipientHistoryDrawer';
 
