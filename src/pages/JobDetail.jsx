@@ -4,8 +4,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import StatusBadge from '@/components/ui/StatusBadge';
+import ChangeFlag from '@/components/ui/ChangeFlag';
 import JobTimeline from '@/components/jobs/JobTimeline';
 import JobChat from '@/components/chat/JobChat';
+import LiveJobTracking from '@/components/jobs/LiveJobTracking';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -219,13 +221,15 @@ export default function JobDetail() {
               <ArrowLeft className="w-5 h-5" />
             </Button>
             <div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 flex-wrap">
                 <h1 className="text-2xl font-bold text-slate-900">{job.job_number}</h1>
                 <StatusBadge status={job.customer_status} type="customer" />
                 {isOps && <StatusBadge status={job.ops_status} type="ops" />}
                 {job.priority !== 'standard' && (
                   <StatusBadge status={job.priority} type="priority" />
                 )}
+                {job.has_pending_change && <ChangeFlag type="change" />}
+                {job.has_rule_breach && !job.has_pending_change && <ChangeFlag type="rule_breach" />}
               </div>
               <p className="text-slate-500 mt-1">{job.customer_name}</p>
             </div>
@@ -439,6 +443,11 @@ export default function JobDetail() {
 
         {/* Sidebar */}
         <div className="space-y-6">
+          {/* Live Tracking - Customer View */}
+          {isCustomer && !['closed', 'cancelled'].includes(job.customer_status) && (
+            <LiveJobTracking job={job} />
+          )}
+
           {/* Timeline */}
           <Card>
             <CardHeader>

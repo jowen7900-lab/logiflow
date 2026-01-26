@@ -15,6 +15,7 @@ import CustomerManagement from './pages/CustomerManagement';
 import BookingRules from './pages/BookingRules';
 import UserManagement from './pages/UserManagement';
 import RoleGuard from './pages/RoleGuard';
+import DriverPerformance from './pages/DriverPerformance';
 import __Layout from './Layout.jsx';
 
 
@@ -36,6 +37,7 @@ export const PAGES = {
     "BookingRules": BookingRules,
     "UserManagement": UserManagement,
     "RoleGuard": RoleGuard,
+    "DriverPerformance": DriverPerformance,
 }
 
 export const pagesConfig = {

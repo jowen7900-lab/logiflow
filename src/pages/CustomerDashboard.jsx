@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import MetricCard from '@/components/ui/MetricCard';
 import JobCard from '@/components/jobs/JobCard';
+import RecentActivity from '@/components/jobs/RecentActivity';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -35,6 +36,16 @@ export default function CustomerDashboard() {
     queryKey: ['customerJobs', user?.customer_id],
     queryFn: () => base44.entities.Job.filter({ customer_id: user?.customer_id }, '-created_date', 100),
     enabled: !!user?.customer_id && isCustomer,
+  });
+
+  const { data: history = [] } = useQuery({
+    queryKey: ['recentHistory', user?.customer_id],
+    queryFn: async () => {
+      const allHistory = await base44.entities.JobStatusHistory.filter({}, '-created_date', 20);
+      const customerJobs = jobs.map(j => j.id);
+      return allHistory.filter(h => customerJobs.includes(h.job_id));
+    },
+    enabled: !!user?.customer_id && isCustomer && jobs.length > 0,
   });
 
   // Calculate metrics
@@ -295,6 +306,16 @@ export default function CustomerDashboard() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Recent Activity */}
+          <RecentActivity 
+            activities={history.slice(0, 5).map(h => ({
+              type: 'status_change',
+              title: `Status updated to ${h.new_customer_status}`,
+              job_number: h.job_number,
+              timestamp: h.created_date
+            }))}
+          />
         </div>
       </div>
     </div>
