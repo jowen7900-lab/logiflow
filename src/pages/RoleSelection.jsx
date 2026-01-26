@@ -1,0 +1,121 @@
+import React, { useState } from 'react';
+import { base44 } from '@/api/base44Client';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Truck, Wrench, Building2, ClipboardList, Loader2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+const roles = [
+  {
+    value: 'driver',
+    label: 'Driver',
+    icon: Truck,
+    description: 'Deliver and collect items',
+    color: 'bg-blue-50 border-blue-200 hover:bg-blue-100',
+    iconColor: 'text-blue-600',
+  },
+  {
+    value: 'fitter',
+    label: 'Fitter',
+    icon: Wrench,
+    description: 'Install and fit products',
+    color: 'bg-amber-50 border-amber-200 hover:bg-amber-100',
+    iconColor: 'text-amber-600',
+  },
+  {
+    value: 'customer',
+    label: 'Customer',
+    icon: Building2,
+    description: 'Book and manage deliveries',
+    color: 'bg-indigo-50 border-indigo-200 hover:bg-indigo-100',
+    iconColor: 'text-indigo-600',
+  },
+  {
+    value: 'cal_admin',
+    label: 'Operations Admin',
+    icon: ClipboardList,
+    description: 'Manage operations',
+    color: 'bg-emerald-50 border-emerald-200 hover:bg-emerald-100',
+    iconColor: 'text-emerald-600',
+  },
+];
+
+export default function RoleSelection() {
+  const navigate = useNavigate();
+  const [selectedRole, setSelectedRole] = useState(null);
+
+  const { data: user } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: () => base44.auth.me(),
+  });
+
+  const selectRoleMutation = useMutation({
+    mutationFn: async (role) => {
+      await base44.auth.updateMe({ 
+        app_role: role,
+        approval_status: 'draft'
+      });
+    },
+    onSuccess: (_, role) => {
+      navigate(createPageUrl(`Onboarding${role.charAt(0).toUpperCase() + role.slice(1)}`));
+    },
+  });
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
+      <div className="max-w-4xl w-full space-y-8">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <Truck className="w-8 h-8 text-white" />
+          </div>
+          <h1 className="text-3xl font-bold text-slate-900">Welcome to LogiFlow</h1>
+          <p className="text-slate-600 mt-2">Choose your role to get started</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {roles.map((role) => {
+            const Icon = role.icon;
+            const isSelected = selectedRole === role.value;
+
+            return (
+              <button
+                key={role.value}
+                onClick={() => setSelectedRole(role.value)}
+                className={cn(
+                  'text-left p-6 rounded-xl border-2 transition-all',
+                  role.color,
+                  isSelected && 'ring-4 ring-offset-2 ring-indigo-500'
+                )}
+              >
+                <div className="flex items-start gap-4">
+                  <div className={cn('w-12 h-12 rounded-xl bg-white flex items-center justify-center', role.iconColor)}>
+                    <Icon className="w-6 h-6" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-lg text-slate-900">{role.label}</h3>
+                    <p className="text-sm text-slate-600 mt-1">{role.description}</p>
+                  </div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="flex justify-center">
+          <Button
+            size="lg"
+            onClick={() => selectRoleMutation.mutate(selectedRole)}
+            disabled={!selectedRole || selectRoleMutation.isPending}
+            className="bg-indigo-600 hover:bg-indigo-700 px-8"
+          >
+            {selectRoleMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+            Continue
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}

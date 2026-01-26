@@ -16,6 +16,12 @@ import BookingRules from './pages/BookingRules';
 import UserManagement from './pages/UserManagement';
 import RoleGuard from './pages/RoleGuard';
 import DriverPerformance from './pages/DriverPerformance';
+import RoleSelection from './pages/RoleSelection';
+import OnboardingDriver from './pages/OnboardingDriver';
+import OnboardingFitter from './pages/OnboardingFitter';
+import OnboardingCustomer from './pages/OnboardingCustomer';
+import onboardingcalAdmin from './pages/OnboardingCal_admin';
+import PendingApproval from './pages/PendingApproval';
 import __Layout from './Layout.jsx';
 
 
@@ -38,6 +44,12 @@ export const PAGES = {
     "UserManagement": UserManagement,
     "RoleGuard": RoleGuard,
     "DriverPerformance": DriverPerformance,
+    "RoleSelection": RoleSelection,
+    "OnboardingDriver": OnboardingDriver,
+    "OnboardingFitter": OnboardingFitter,
+    "OnboardingCustomer": OnboardingCustomer,
+    "OnboardingCal_admin": onboardingcalAdmin,
+    "PendingApproval": PendingApproval,
 }
 
 export const pagesConfig = {
