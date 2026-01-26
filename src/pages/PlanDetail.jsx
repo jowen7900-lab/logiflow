@@ -17,7 +17,7 @@ export default function PlanDetailPage() {
 
   const { data: plan, isLoading: planLoading } = useQuery({
     queryKey: ['plan', planId],
-    queryFn: () => base44.entities.Plan.read(planId),
+    queryFn: () => base44.entities.Plan.get(planId),
     enabled: !!planId,
   });
 
