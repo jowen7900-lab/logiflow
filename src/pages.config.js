@@ -26,6 +26,7 @@ import PendingApproval from './pages/PendingApproval';
 import RoleGuard from './pages/RoleGuard';
 import RoleSelection from './pages/RoleSelection';
 import UserManagement from './pages/UserManagement';
+import Plans from './pages/Plans';
 import __Layout from './Layout.jsx';
 
 
@@ -58,6 +59,7 @@ export const PAGES = {
     "RoleGuard": RoleGuard,
     "RoleSelection": RoleSelection,
     "UserManagement": UserManagement,
+    "Plans": Plans,
 }
 
 export const pagesConfig = {
