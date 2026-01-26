@@ -122,7 +122,7 @@ export default function JobDetail() {
   // Verify access rights
   const hasAccess = isOps || 
     isAppAdmin ||
-    (isCustomer && job?.customer_id === user?.customer_id) ||
+    isCustomer ||
     (isDriver && job?.driver_id === user?.email) ||
     (isFitter && job?.fitter_id === user?.email);
 
