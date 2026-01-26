@@ -301,10 +301,25 @@ export default function OpsJobs() {
                       <TableCell>
                         {job.driver_name ? (
                           <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 bg-emerald-100 rounded-full flex items-center justify-center">
-                              <User className="w-3.5 h-3.5 text-emerald-600" />
+                            <div className="flex items-center gap-2">
+                              <div className="w-6 h-6 bg-emerald-100 rounded-full flex items-center justify-center">
+                                <User className="w-3.5 h-3.5 text-emerald-600" />
+                              </div>
+                              <span className="text-sm">{job.driver_name}</span>
                             </div>
-                            <span className="text-sm">{job.driver_name}</span>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setAssignType('driver');
+                                setSelectedDriver('');
+                                setAssignDialog(job);
+                              }}
+                              disabled={['completed', 'cancelled'].includes(job.ops_status)}
+                              className="h-7 px-2 text-xs"
+                            >
+                              Change
+                            </Button>
                           </div>
                         ) : (
                           <Button
@@ -322,28 +337,41 @@ export default function OpsJobs() {
                         )}
                       </TableCell>
                       <TableCell>
-                        {job.requires_fitter && (
-                          job.fitter_name ? (
+                        {job.fitter_name ? (
+                          <div className="flex items-center gap-2">
                             <div className="flex items-center gap-2">
                               <div className="w-6 h-6 bg-amber-100 rounded-full flex items-center justify-center">
                                 <Wrench className="w-3.5 h-3.5 text-amber-600" />
                               </div>
                               <span className="text-sm">{job.fitter_name}</span>
                             </div>
-                          ) : (
                             <Button
-                              variant="outline"
+                              variant="ghost"
                               size="sm"
                               onClick={() => {
                                 setAssignType('fitter');
+                                setSelectedFitter('');
                                 setAssignDialog(job);
                               }}
                               disabled={['completed', 'cancelled'].includes(job.ops_status)}
+                              className="h-7 px-2 text-xs"
                             >
-                              <Wrench className="w-3.5 h-3.5 mr-1" />
-                              Assign
+                              Change
                             </Button>
-                          )
+                          </div>
+                        ) : (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setAssignType('fitter');
+                              setAssignDialog(job);
+                            }}
+                            disabled={['completed', 'cancelled'].includes(job.ops_status)}
+                          >
+                            <Wrench className="w-3.5 h-3.5 mr-1" />
+                            Assign
+                          </Button>
                         )}
                       </TableCell>
                       <TableCell>
