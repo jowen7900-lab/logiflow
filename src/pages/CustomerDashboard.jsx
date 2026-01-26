@@ -61,17 +61,44 @@ export default function CustomerDashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Quick Actions */}
+      {/* Alert Banner - Exceptions */}
+      {exceptionsJobs.length > 0 && (
+        <Card className="border-amber-200 bg-gradient-to-r from-amber-50 to-amber-50/50 shadow-sm">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
+                  <AlertTriangle className="w-5 h-5 text-amber-600" />
+                </div>
+                <div>
+                  <p className="font-semibold text-amber-900">{exceptionsJobs.length} Job{exceptionsJobs.length !== 1 ? 's' : ''} Require{exceptionsJobs.length === 1 ? 's' : ''} Attention</p>
+                  <p className="text-sm text-amber-700">Review exceptions and pending changes</p>
+                </div>
+              </div>
+              <Link to={createPageUrl('CustomerJobs')}>
+                <Button variant="outline" className="border-amber-300 text-amber-700 hover:bg-amber-100">
+                  View Jobs
+                </Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Quick Actions Header */}
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-slate-500">Welcome back, <span className="font-medium text-slate-900">{user?.full_name}</span></p>
+          <h2 className="text-2xl font-bold text-slate-900">Welcome back, {user?.full_name?.split(' ')[0]}</h2>
+          <p className="text-slate-500 mt-1">Here's what's happening with your logistics today</p>
         </div>
-        <Link to={createPageUrl('CreateJob')}>
-          <Button className="bg-indigo-600 hover:bg-indigo-700 gap-2">
-            <Plus className="w-4 h-4" />
-            Create New Job
-          </Button>
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link to={createPageUrl('CreateJob')}>
+            <Button className="bg-indigo-600 hover:bg-indigo-700 gap-2 shadow-sm">
+              <Plus className="w-4 h-4" />
+              Create Job
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Metrics */}

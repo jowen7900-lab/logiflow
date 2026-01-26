@@ -2,6 +2,7 @@ import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import StatusBadge from '@/components/ui/StatusBadge';
+import ChangeFlag from '@/components/ui/ChangeFlag';
 import { 
   MapPin, 
   Clock, 
@@ -17,6 +18,8 @@ import { createPageUrl } from '@/utils';
 
 export default function JobCard({ job, showOpsStatus = false, compact = false }) {
   const hasException = job.has_exception;
+  const hasPendingChange = job.has_pending_change;
+  const hasRuleBreach = job.has_rule_breach;
   
   return (
     <Card className={`overflow-hidden transition-all duration-200 hover:shadow-md ${hasException ? 'border-l-4 border-l-amber-400' : ''}`}>
@@ -37,8 +40,14 @@ export default function JobCard({ job, showOpsStatus = false, compact = false })
               {job.priority !== 'standard' && (
                 <StatusBadge status={job.priority} type="priority" size="sm" />
               )}
+              {hasPendingChange && (
+                <ChangeFlag type="change" />
+              )}
+              {hasRuleBreach && !hasPendingChange && (
+                <ChangeFlag type="rule_breach" />
+              )}
               {hasException && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-amber-50 text-amber-700 rounded-full border border-amber-200">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-red-50 text-red-700 rounded-full border border-red-200">
                   <AlertTriangle className="w-3 h-3" />
                   Exception
                 </span>

@@ -63,9 +63,30 @@ export default function OpsDashboard() {
 
   return (
     <div className="space-y-6">
+      {/* Header with Time */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-slate-900">Operations Control Center</h2>
+          <p className="text-slate-500 mt-1">{format(new Date(), 'EEEE, MMMM d, yyyy · HH:mm')}</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Link to={createPageUrl('OpsTaskQueue')}>
+            <Button variant="outline" className="gap-2">
+              <ClipboardList className="w-4 h-4" />
+              Task Queue
+              {tasks.length > 0 && (
+                <span className="ml-1 px-2 py-0.5 bg-amber-100 text-amber-700 text-xs font-semibold rounded-full">
+                  {tasks.length}
+                </span>
+              )}
+            </Button>
+          </Link>
+        </div>
+      </div>
+
       {/* Critical Alerts */}
       {criticalTasks.length > 0 && (
-        <Card className="border-red-200 bg-red-50">
+        <Card className="border-red-200 bg-gradient-to-r from-red-50 to-red-50/50 shadow-sm">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -79,7 +100,31 @@ export default function OpsDashboard() {
               </div>
               <Link to={createPageUrl('OpsTaskQueue')}>
                 <Button variant="outline" className="border-red-300 text-red-700 hover:bg-red-100">
-                  View Tasks
+                  Review Now
+                </Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Capacity Alert */}
+      {unallocatedJobs.length > 10 && (
+        <Card className="border-amber-200 bg-gradient-to-r from-amber-50 to-amber-50/50 shadow-sm">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
+                  <Clock className="w-5 h-5 text-amber-600" />
+                </div>
+                <div>
+                  <p className="font-semibold text-amber-900">High Unallocated Volume</p>
+                  <p className="text-sm text-amber-700">{unallocatedJobs.length} jobs awaiting driver assignment</p>
+                </div>
+              </div>
+              <Link to={createPageUrl('OpsJobs')}>
+                <Button variant="outline" className="border-amber-300 text-amber-700 hover:bg-amber-100">
+                  Allocate
                 </Button>
               </Link>
             </div>

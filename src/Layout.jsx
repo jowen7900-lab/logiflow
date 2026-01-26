@@ -66,7 +66,7 @@ export default function Layout({ children, currentPageName }) {
   const pageInfo = pageTitles[currentPageName] || { title: currentPageName, subtitle: '' };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       {/* Desktop Sidebar */}
       <div className="hidden lg:block">
         <Sidebar 
@@ -103,7 +103,7 @@ export default function Layout({ children, currentPageName }) {
           onToggleMobile={() => setMobileOpen(!mobileOpen)}
         />
         
-        <main className="p-6">
+        <main className="p-4 md:p-6 lg:p-8 max-w-[1800px] mx-auto">
           {children}
         </main>
       </div>
