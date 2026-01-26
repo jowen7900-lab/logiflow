@@ -49,9 +49,9 @@ export default function CustomerJobs() {
   });
 
   const { data: jobs = [], isLoading } = useQuery({
-    queryKey: ['customerJobs', user?.customer_id],
-    queryFn: () => base44.entities.Job.filter({ customer_id: user?.customer_id }, '-created_date', 200),
-    enabled: !!user?.customer_id,
+    queryKey: ['allJobs'],
+    queryFn: () => base44.entities.Job.list('-created_date'),
+    enabled: !!user,
   });
 
   // Filter jobs
