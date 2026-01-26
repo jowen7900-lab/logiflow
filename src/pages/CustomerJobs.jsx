@@ -44,10 +44,10 @@ import { format } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function CustomerJobs() {
-  const [viewMode, setViewMode] = useState('cards');
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [dateRange, setDateRange] = useState('all');
+  const [deleteDialog, setDeleteDialog] = useState(null);
 
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
@@ -55,9 +55,19 @@ export default function CustomerJobs() {
   });
 
   const { data: jobs = [], isLoading } = useQuery({
-    queryKey: ['allJobs'],
-    queryFn: () => base44.entities.Job.list('-created_date'),
-    enabled: !!user,
+    queryKey: ['customerJobs', user?.customer_id],
+    queryFn: () => base44.entities.Job.filter({ customer_id: user?.customer_id }, '-created_date', 200),
+    enabled: !!user?.customer_id,
+  });
+
+  const deleteJobMutation = useMutation({
+    mutationFn: async (jobId) => {
+      await base44.entities.Job.delete(jobId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['customerJobs', user?.customer_id]);
+      setDeleteDialog(null);
+    },
   });
 
   // Filter jobs
