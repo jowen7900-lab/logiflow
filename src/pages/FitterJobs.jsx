@@ -35,16 +35,16 @@ export default function FitterJobs() {
     enabled: !!user?.email,
   });
 
-  // Also get all jobs requiring fitter that aren't assigned
-  const { data: unassignedJobs = [] } = useQuery({
-    queryKey: ['unassignedFitterJobs'],
-    queryFn: () => base44.entities.Job.filter({ requires_fitter: true }),
+  // Get all jobs that aren't assigned to a fitter yet
+  const { data: allJobs = [] } = useQuery({
+    queryKey: ['allJobs'],
+    queryFn: () => base44.entities.Job.list('-scheduled_date'),
     enabled: !!user,
   });
 
   const myActiveJobs = jobs.filter(j => !['completed', 'cancelled', 'failed'].includes(j.ops_status));
   const myCompletedJobs = jobs.filter(j => ['completed'].includes(j.ops_status));
-  const pendingJobs = unassignedJobs.filter(j => 
+  const pendingJobs = allJobs.filter(j => 
     !j.fitter_id && 
     !['completed', 'cancelled', 'failed'].includes(j.ops_status)
   );
