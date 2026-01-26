@@ -13,10 +13,14 @@ export default function PlanJobsView({ planId, latestVersion }) {
   const [selectedJob, setSelectedJob] = useState(null);
   const queryClient = useQueryClient();
 
-  const { data: jobs = [] } = useQuery({
-    queryKey: ['planJobs', latestVersion?.id],
-    queryFn: () => base44.entities.PlanLine.filter({ plan_version_id: latestVersion?.id }, 'external_row_id', 100),
-    enabled: !!latestVersion?.id,
+  const versionId = latestVersion?.id;
+  const { data: jobs = [], isLoading: jobsLoading } = useQuery({
+    queryKey: ['planJobs', versionId],
+    queryFn: () => {
+      if (!versionId) return [];
+      return base44.entities.PlanLine.filter({ plan_version_id: versionId }, 'external_row_id', 100);
+    },
+    enabled: !!versionId,
   });
 
   const deleteJobMutation = useMutation({
