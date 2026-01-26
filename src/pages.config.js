@@ -7,6 +7,9 @@ import OpsTaskQueue from './pages/OpsTaskQueue';
 import OpsJobs from './pages/OpsJobs';
 import DriverJobs from './pages/DriverJobs';
 import FitterJobs from './pages/FitterJobs';
+import CustomerUsers from './pages/CustomerUsers';
+import Messages from './pages/Messages';
+import DriverManagement from './pages/DriverManagement';
 import __Layout from './Layout.jsx';
 
 
@@ -20,6 +23,9 @@ export const PAGES = {
     "OpsJobs": OpsJobs,
     "DriverJobs": DriverJobs,
     "FitterJobs": FitterJobs,
+    "CustomerUsers": CustomerUsers,
+    "Messages": Messages,
+    "DriverManagement": DriverManagement,
 }
 
 export const pagesConfig = {
