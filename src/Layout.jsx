@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import Sidebar from '@/components/layout/Sidebar';
 import Header from '@/components/layout/Header';
+import ApprovalGuard from '@/components/auth/ApprovalGuard';
 import { Loader2 } from 'lucide-react';
 
 const pageTitles = {
@@ -32,6 +33,10 @@ export default function Layout({ children, currentPageName }) {
     queryKey: ['currentUser'],
     queryFn: () => base44.auth.me(),
   });
+
+  // Pages that don't require approval guard
+  const publicPages = ['RoleSelection', 'OnboardingDriver', 'OnboardingFitter', 'OnboardingCustomer', 'OnboardingCal_admin', 'PendingApproval'];
+  const isPublicPage = publicPages.includes(currentPageName);
 
   // SSO-based authentication enforced - role assigned during onboarding
   // No role switching allowed within session
@@ -65,16 +70,22 @@ export default function Layout({ children, currentPageName }) {
 
   const pageInfo = pageTitles[currentPageName] || { title: currentPageName, subtitle: '' };
 
+  // For public pages, render without guard
+  if (isPublicPage) {
+    return <>{children}</>;
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      {/* Desktop Sidebar */}
-      <div className="hidden lg:block">
-        <Sidebar 
-          user={user} 
-          currentPage={currentPageName} 
-          pendingTasks={pendingTasks.length}
-        />
-      </div>
+    <ApprovalGuard>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+        {/* Desktop Sidebar */}
+        <div className="hidden lg:block">
+          <Sidebar 
+            user={user} 
+            currentPage={currentPageName} 
+            pendingTasks={pendingTasks.length}
+          />
+        </div>
 
       {/* Mobile Sidebar Overlay */}
       {mobileOpen && (
@@ -108,5 +119,6 @@ export default function Layout({ children, currentPageName }) {
         </main>
       </div>
     </div>
+    </ApprovalGuard>
   );
 }

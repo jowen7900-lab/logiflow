@@ -22,6 +22,9 @@ import OnboardingFitter from './pages/OnboardingFitter';
 import OnboardingCustomer from './pages/OnboardingCustomer';
 import onboardingcalAdmin from './pages/OnboardingCal_admin';
 import PendingApproval from './pages/PendingApproval';
+import CalAdminReviewQueue from './pages/CalAdminReviewQueue';
+import CustomerReviewQueue from './pages/CustomerReviewQueue';
+import AppAdminReviewQueue from './pages/AppAdminReviewQueue';
 import __Layout from './Layout.jsx';
 
 
@@ -50,6 +53,9 @@ export const PAGES = {
     "OnboardingCustomer": OnboardingCustomer,
     "OnboardingCal_admin": onboardingcalAdmin,
     "PendingApproval": PendingApproval,
+    "CalAdminReviewQueue": CalAdminReviewQueue,
+    "CustomerReviewQueue": CustomerReviewQueue,
+    "AppAdminReviewQueue": AppAdminReviewQueue,
 }
 
 export const pagesConfig = {
