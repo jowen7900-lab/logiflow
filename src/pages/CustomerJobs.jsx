@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import JobCard from '@/components/jobs/JobCard';
 import StatusBadge from '@/components/ui/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,16 +22,23 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { 
   Plus, 
   Search, 
-  Filter, 
-  Grid3X3, 
-  List, 
-  Download,
   Calendar,
   AlertTriangle,
-  ExternalLink
+  ExternalLink,
+  Edit2,
+  Trash2,
+  Loader2
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
