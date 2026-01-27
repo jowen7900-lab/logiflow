@@ -43,7 +43,7 @@ export default function DriverManagement() {
 
   const { data: drivers = [], isLoading } = useQuery({
     queryKey: ['drivers'],
-    queryFn: () => base44.entities.User.filter({ app_role: 'driver' }),
+    queryFn: () => base44.entities.Driver.list('-created_date', 100),
   });
 
   const { data: jobs = [] } = useQuery({
@@ -76,7 +76,7 @@ export default function DriverManagement() {
   const filteredDrivers = drivers.filter(d => {
     if (!searchTerm) return true;
     const search = searchTerm.toLowerCase();
-    return d.full_name?.toLowerCase().includes(search) ||
+    return d.name?.toLowerCase().includes(search) ||
            d.email?.toLowerCase().includes(search) ||
            d.vehicle_reg?.toLowerCase().includes(search);
   });
@@ -127,11 +127,11 @@ export default function DriverManagement() {
                         <User className={`w-5 h-5 ${isBusy ? 'text-amber-600' : 'text-emerald-600'}`} />
                       </div>
                       <div>
-                        <p className="font-semibold">{driver.full_name}</p>
+                        <p className="font-semibold">{driver.name}</p>
                         <div className="flex items-center gap-2 mt-0.5">
                           <div className="flex items-center gap-1">
                             <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-                            <span className="text-sm font-medium text-slate-700">{rating.toFixed(1)}</span>
+                            <span className="text-sm font-medium text-slate-700">{(driver.rating || 0).toFixed(1)}</span>
                           </div>
                           {hasComplaints && (
                             <Badge variant="destructive" className="h-5 px-1.5 text-xs">
@@ -151,8 +151,8 @@ export default function DriverManagement() {
                       <div className="flex items-center gap-2 text-sm text-slate-600">
                         <Truck className="w-3.5 h-3.5 text-slate-400" />
                         <span className="font-medium">{driver.vehicle_reg}</span>
-                        {driver.vehicleSize && (
-                          <span className="text-slate-400">({driver.vehicleSize})</span>
+                        {driver.vehicle_type && (
+                          <span className="text-slate-400">({driver.vehicle_type})</span>
                         )}
                       </div>
                     )}
@@ -215,14 +215,14 @@ export default function DriverManagement() {
                   <User className="w-6 h-6 text-emerald-600" />
                 </div>
                 <div>
-                  <p>{selectedDriver.full_name}</p>
+                  <p>{selectedDriver.name}</p>
                   <div className="flex items-center gap-2 mt-1">
                     <div className="flex items-center gap-1">
                       <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
-                      <span className="text-sm font-medium">{(selectedDriver.driver_rating || 0).toFixed(1)} / 5.0</span>
+                      <span className="text-sm font-medium">{(selectedDriver.rating || 0).toFixed(1)} / 5.0</span>
                     </div>
-                    <Badge variant="outline" className="text-emerald-600">
-                      {selectedDriver.available ? 'Available' : 'Unavailable'}
+                    <Badge variant="outline" className={selectedDriver.status === 'active' ? 'text-emerald-600' : 'text-slate-600'}>
+                      {selectedDriver.status}
                     </Badge>
                   </div>
                 </div>
@@ -244,10 +244,10 @@ export default function DriverManagement() {
                       <span className="text-sm text-slate-700">{selectedDriver.phone}</span>
                     </div>
                   )}
-                  {selectedDriver.homePostcode && (
-                    <div className="flex items-center gap-3">
-                      <Home className="w-4 h-4 text-slate-400" />
-                      <span className="text-sm text-slate-700">{selectedDriver.homePostcode}</span>
+                  {selectedDriver.notes && (
+                    <div className="flex items-start gap-3">
+                      <Home className="w-4 h-4 text-slate-400 mt-0.5" />
+                      <span className="text-sm text-slate-700">{selectedDriver.notes}</span>
                     </div>
                   )}
                 </div>
@@ -262,16 +262,16 @@ export default function DriverManagement() {
                       <Truck className="w-5 h-5 text-slate-400" />
                       <div>
                         <p className="font-medium text-slate-900">{selectedDriver.vehicle_reg}</p>
-                        {selectedDriver.vehicleSize && (
-                          <p className="text-sm text-slate-500">{selectedDriver.vehicleSize}</p>
+                        {selectedDriver.vehicle_type && (
+                          <p className="text-sm text-slate-500">{selectedDriver.vehicle_type}</p>
                         )}
                       </div>
                     </div>
-                    {selectedDriver.insuranceExpiry && (
+                    {selectedDriver.license_expiry && (
                       <div className="mt-3 pt-3 border-t border-slate-200">
-                        <p className="text-xs text-slate-500">Insurance Expires</p>
+                        <p className="text-xs text-slate-500">License Expires</p>
                         <p className="text-sm font-medium text-slate-700">
-                          {format(new Date(selectedDriver.insuranceExpiry), 'PPP')}
+                          {format(new Date(selectedDriver.license_expiry), 'PPP')}
                         </p>
                       </div>
                     )}

@@ -20,7 +20,7 @@ export default function FitterManagement() {
 
   const { data: fitters = [], isLoading } = useQuery({
     queryKey: ['fitters'],
-    queryFn: () => base44.entities.User.filter({ app_role: 'fitter' }),
+    queryFn: () => base44.entities.Fitter.list('-created_date', 100),
   });
 
   const { data: jobs = [] } = useQuery({
@@ -39,7 +39,7 @@ export default function FitterManagement() {
   const filteredFitters = fitters.filter(f => {
     if (!searchTerm) return true;
     const search = searchTerm.toLowerCase();
-    return f.full_name?.toLowerCase().includes(search) ||
+    return f.name?.toLowerCase().includes(search) ||
            f.email?.toLowerCase().includes(search);
   });
 
@@ -83,8 +83,8 @@ export default function FitterManagement() {
                         <Wrench className={`w-5 h-5 ${isBusy ? 'text-purple-600' : 'text-emerald-600'}`} />
                       </div>
                       <div>
-                        <p className="font-semibold">{fitter.full_name}</p>
-                        <p className="text-sm text-slate-500">{fitter.email}</p>
+                        <p className="font-semibold">{fitter.name}</p>
+                        <p className="text-sm text-slate-500">{fitter.specialization}</p>
                       </div>
                     </div>
                     <Badge variant={isBusy ? 'secondary' : 'outline'} className={isBusy ? 'bg-purple-100 text-purple-700' : 'text-emerald-600'}>
