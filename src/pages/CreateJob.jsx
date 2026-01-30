@@ -75,7 +75,7 @@ export default function CreateJob() {
     queryFn: () => base44.auth.me(),
   });
   
-  // Strict role checks (must be before useQuery that references them)
+  // Strict role checks (locked roles only)
   const isCustomer = user?.app_role === 'customer' || user?.app_role === 'customer_admin';
   
   if (user && !isCustomer) {
