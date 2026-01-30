@@ -33,14 +33,6 @@ const roles = [
     color: 'bg-indigo-50 border-indigo-200 hover:bg-indigo-100',
     iconColor: 'text-indigo-600',
   },
-  {
-    value: 'ops',
-    label: 'Operations Admin',
-    icon: ClipboardList,
-    description: 'Manage operations',
-    color: 'bg-emerald-50 border-emerald-200 hover:bg-emerald-100',
-    iconColor: 'text-emerald-600',
-  },
 ];
 
 export default function RoleSelection() {
@@ -56,12 +48,10 @@ export default function RoleSelection() {
   React.useEffect(() => {
     if (user?.app_role && user?.approval_status === 'approved') {
       const homePage = {
+        'admin': 'OpsDashboard',
         'customer': 'CustomerDashboard',
-        'customer_admin': 'CustomerDashboard',
         'driver': 'DriverJobs',
         'fitter': 'FitterJobs',
-        'ops': 'OpsDashboard',
-        'app_admin': 'OpsDashboard',
       }[user.app_role] || 'CustomerDashboard';
       
       navigate(createPageUrl(homePage));
@@ -76,7 +66,7 @@ export default function RoleSelection() {
       });
     },
     onSuccess: (_, role) => {
-      const roleCapitalized = role === 'ops' ? 'Ops' : role.charAt(0).toUpperCase() + role.slice(1);
+      const roleCapitalized = role.charAt(0).toUpperCase() + role.slice(1);
       navigate(createPageUrl(`Onboarding${roleCapitalized}`));
     },
   });
