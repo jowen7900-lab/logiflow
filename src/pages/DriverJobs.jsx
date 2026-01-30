@@ -412,6 +412,20 @@ export default function DriverJobs() {
                 {job.scheduled_time_slot?.toUpperCase()}
               </div>
             </div>
+
+            {job.ops_status === 'on_route_to_collection' && (job.collection_eta ?? job.eta) && (
+              <div className="flex items-center gap-1 text-xs text-indigo-600 mt-1">
+                <Clock className="w-3.5 h-3.5" />
+                Collection ETA: {format(new Date(job.collection_eta ?? job.eta), 'HH:mm')}
+              </div>
+            )}
+
+            {job.ops_status === 'on_route_to_delivery' && (job.delivery_eta ?? job.eta) && (
+              <div className="flex items-center gap-1 text-xs text-indigo-600 mt-1">
+                <Clock className="w-3.5 h-3.5" />
+                Delivery ETA: {format(new Date(job.delivery_eta ?? job.eta), 'HH:mm')}
+              </div>
+            )}
           </div>
 
           {job.special_instructions && (
