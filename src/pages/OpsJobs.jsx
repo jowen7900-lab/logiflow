@@ -39,8 +39,7 @@ import {
   ExternalLink,
   User,
   Truck,
-  Loader2,
-  Wrench
+  Loader2
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -51,9 +50,7 @@ export default function OpsJobs() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [customerFilter, setCustomerFilter] = useState('all');
   const [assignDialog, setAssignDialog] = useState(null);
-  const [assignType, setAssignType] = useState('driver');
   const [selectedDriver, setSelectedDriver] = useState('');
-  const [selectedFitter, setSelectedFitter] = useState('');
 
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
@@ -77,11 +74,6 @@ export default function OpsJobs() {
   const { data: drivers = [] } = useQuery({
     queryKey: ['drivers'],
     queryFn: () => base44.entities.User.filter({ app_role: 'driver' }),
-  });
-
-  const { data: fitters = [] } = useQuery({
-    queryKey: ['fitters'],
-    queryFn: () => base44.entities.User.filter({ app_role: 'fitter' }),
   });
 
   const assignDriverMutation = useMutation({
@@ -110,31 +102,6 @@ export default function OpsJobs() {
       queryClient.invalidateQueries(['allJobs']);
       setAssignDialog(null);
       setSelectedDriver('');
-    },
-  });
-
-  const assignFitterMutation = useMutation({
-    mutationFn: async ({ jobId, fitterId }) => {
-      const fitter = fitters.find(f => f.id === fitterId);
-      await base44.entities.Job.update(jobId, {
-        fitter_id: fitter?.email,
-        fitter_name: fitter?.full_name,
-      });
-
-      await base44.entities.JobStatusHistory.create({
-        job_id: jobId,
-        job_number: assignDialog?.job_number,
-        new_ops_status: assignDialog?.ops_status,
-        changed_by: user?.email,
-        changed_by_name: user?.full_name,
-        changed_by_role: 'admin',
-        notes: `Assigned fitter: ${fitter?.full_name}`,
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries(['allJobs']);
-      setAssignDialog(null);
-      setSelectedFitter('');
     },
   });
   
@@ -230,14 +197,13 @@ export default function OpsJobs() {
                   <TableHead>Delivery</TableHead>
                   <TableHead>Scheduled</TableHead>
                   <TableHead>Driver</TableHead>
-                  <TableHead>Fitter</TableHead>
                   <TableHead></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredJobs.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={9} className="text-center py-8 text-slate-500">
+                    <TableCell colSpan={8} className="text-center py-8 text-slate-500">
                       No jobs found
                     </TableCell>
                   </TableRow>
@@ -381,75 +347,43 @@ export default function OpsJobs() {
         </CardContent>
       </Card>
 
-      {/* Assign Dialog */}
+      {/* Assign Driver Dialog */}
       <Dialog open={!!assignDialog} onOpenChange={() => {
         setAssignDialog(null);
         setSelectedDriver('');
-        setSelectedFitter('');
       }}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Assign {assignType === 'driver' ? 'Driver' : 'Fitter'}</DialogTitle>
+            <DialogTitle>Assign Driver</DialogTitle>
             <DialogDescription>
-              Select a {assignType} for job {assignDialog?.job_number}
+              Select a driver for job {assignDialog?.job_number}
             </DialogDescription>
           </DialogHeader>
           
           <div className="py-4">
-            {assignType === 'driver' ? (
-              <>
-                <Label>Select Driver</Label>
-                <Select value={selectedDriver} onValueChange={setSelectedDriver}>
-                  <SelectTrigger className="mt-1.5">
-                    <SelectValue placeholder="Choose a driver" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {drivers.map(driver => (
-                      <SelectItem key={driver.id} value={driver.id}>
-                        <div className="flex items-center gap-2">
-                          <span>{driver.full_name}</span>
-                          {driver.vehicle_reg && (
-                            <span className="text-xs text-slate-400">({driver.vehicle_reg})</span>
-                          )}
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                
-                {drivers.length === 0 && (
-                  <p className="text-sm text-amber-600 mt-2">
-                    No drivers available. Add drivers in Driver Management.
-                  </p>
-                )}
-              </>
-            ) : (
-              <>
-                <Label>Select Fitter</Label>
-                <Select value={selectedFitter} onValueChange={setSelectedFitter}>
-                  <SelectTrigger className="mt-1.5">
-                    <SelectValue placeholder="Choose a fitter" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {fitters.map(fitter => (
-                      <SelectItem key={fitter.id} value={fitter.id}>
-                        <div className="flex items-center gap-2">
-                          <span>{fitter.full_name}</span>
-                          {fitter.fitterCompany && (
-                            <span className="text-xs text-slate-400">({fitter.fitterCompany})</span>
-                          )}
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                
-                {fitters.length === 0 && (
-                  <p className="text-sm text-amber-600 mt-2">
-                    No fitters available. Add fitters in Fitter Management.
-                  </p>
-                )}
-              </>
+            <Label>Select Driver</Label>
+            <Select value={selectedDriver} onValueChange={setSelectedDriver}>
+              <SelectTrigger className="mt-1.5">
+                <SelectValue placeholder="Choose a driver" />
+              </SelectTrigger>
+              <SelectContent>
+                {drivers.map(driver => (
+                  <SelectItem key={driver.id} value={driver.id}>
+                    <div className="flex items-center gap-2">
+                      <span>{driver.full_name}</span>
+                      {driver.vehicle_reg && (
+                        <span className="text-xs text-slate-400">({driver.vehicle_reg})</span>
+                      )}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            
+            {drivers.length === 0 && (
+              <p className="text-sm text-amber-600 mt-2">
+                No drivers available. Add drivers in Driver Management.
+              </p>
             )}
           </div>
           
@@ -457,34 +391,23 @@ export default function OpsJobs() {
             <Button variant="outline" onClick={() => {
               setAssignDialog(null);
               setSelectedDriver('');
-              setSelectedFitter('');
             }}>
               Cancel
             </Button>
             <Button
               onClick={() => {
-                if (assignType === 'driver') {
-                  assignDriverMutation.mutate({ 
-                    jobId: assignDialog?.id, 
-                    driverId: selectedDriver 
-                  });
-                } else {
-                  assignFitterMutation.mutate({ 
-                    jobId: assignDialog?.id, 
-                    fitterId: selectedFitter 
-                  });
-                }
+                assignDriverMutation.mutate({ 
+                  jobId: assignDialog?.id, 
+                  driverId: selectedDriver 
+                });
               }}
-              disabled={
-                (assignType === 'driver' && (!selectedDriver || assignDriverMutation.isPending)) ||
-                (assignType === 'fitter' && (!selectedFitter || assignFitterMutation.isPending))
-              }
+              disabled={!selectedDriver || assignDriverMutation.isPending}
               className="bg-indigo-600 hover:bg-indigo-700"
             >
-              {(assignDriverMutation.isPending || assignFitterMutation.isPending) && (
+              {assignDriverMutation.isPending && (
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
               )}
-              Assign {assignType === 'driver' ? 'Driver' : 'Fitter'}
+              Assign Driver
             </Button>
           </DialogFooter>
         </DialogContent>
