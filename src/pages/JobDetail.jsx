@@ -166,7 +166,7 @@ export default function JobDetail() {
         job_number: job.job_number,
         sender_id: user?.email,
         sender_name: user?.full_name,
-        sender_role: user?.app_role,
+        sender_role: user?.app_role === 'ops' ? 'admin' : user?.app_role,
         message,
         message_type: 'text',
       });
