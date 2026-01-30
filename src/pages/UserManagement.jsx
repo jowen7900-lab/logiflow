@@ -98,7 +98,18 @@ export default function UserManagement() {
     mutationFn: async (data) => {
       // First invite the user
       await base44.users.inviteUser(data.email, 'user');
-      // Note: Additional user data would need to be set after they accept the invite
+      
+      // For customer and fitter roles: pre-approve at invite time
+      if (data.app_role === 'customer' || data.app_role === 'fitter') {
+        const users = await base44.entities.User.filter({ email: data.email });
+        if (users.length > 0) {
+          await base44.asServiceRole.entities.User.update(users[0].id, {
+            app_role: data.app_role,
+            approval_status: 'approved',
+            customer_id: data.customer_id || null,
+          });
+        }
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['allUsers']);
