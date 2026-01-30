@@ -11,16 +11,12 @@ const customerStatusConfig = {
 };
 
 const opsStatusConfig = {
-  requested: { label: 'Requested', class: 'bg-slate-50 text-slate-600 border-slate-200' },
-  accepted: { label: 'Accepted', class: 'bg-sky-50 text-sky-700 border-sky-200' },
   allocated: { label: 'Allocated', class: 'bg-blue-50 text-blue-700 border-blue-200' },
-  en_route: { label: 'En Route', class: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
-  on_site: { label: 'On Site', class: 'bg-violet-50 text-violet-700 border-violet-200' },
+  on_route_to_collection: { label: 'On Route to Collection', class: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
+  collected: { label: 'Collected', class: 'bg-purple-50 text-purple-700 border-purple-200' },
+  on_route_to_delivery: { label: 'On Route to Delivery', class: 'bg-violet-50 text-violet-700 border-violet-200' },
   delivered: { label: 'Delivered', class: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-  pod_uploaded: { label: 'POD Uploaded', class: 'bg-teal-50 text-teal-700 border-teal-200' },
-  pod_verified: { label: 'POD Verified', class: 'bg-cyan-50 text-cyan-700 border-cyan-200' },
-  closed: { label: 'Closed', class: 'bg-green-50 text-green-700 border-green-200' },
-  cancelled: { label: 'Cancelled', class: 'bg-slate-50 text-slate-500 border-slate-200' },
+  failed: { label: 'Failed', class: 'bg-red-50 text-red-700 border-red-200' },
 };
 
 const priorityConfig = {
