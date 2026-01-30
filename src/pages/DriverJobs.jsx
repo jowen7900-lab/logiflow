@@ -57,6 +57,8 @@ export default function DriverJobs() {
   const [podData, setPodData] = useState({ name: '', notes: '' });
   const [failDialog, setFailDialog] = useState(null);
   const [failReason, setFailReason] = useState('');
+  const [etaDialog, setEtaDialog] = useState(null);
+  const [collectionEta, setCollectionEta] = useState('');
 
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
@@ -81,9 +83,10 @@ export default function DriverJobs() {
   });
 
   const updateStatusMutation = useMutation({
-    mutationFn: async ({ jobId, jobNumber, newStatus, customerStatus, notes }) => {
+    mutationFn: async ({ jobId, jobNumber, newStatus, customerStatus, notes, eta }) => {
       const updates = { ops_status: newStatus };
       if (customerStatus) updates.customer_status = customerStatus;
+      if (eta) updates.eta = eta;
       if (newStatus === 'collected') updates.actual_arrival = new Date().toISOString();
       if (newStatus === 'delivered') updates.actual_completion = new Date().toISOString();
 
@@ -101,6 +104,8 @@ export default function DriverJobs() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['driverJobs']);
+      setEtaDialog(null);
+      setCollectionEta('');
     },
   });
 
@@ -173,6 +178,10 @@ export default function DriverJobs() {
   });
 
   const handleStatusUpdate = (job, newStatus) => {
+    if (newStatus === 'on_route_to_collection') {
+      setEtaDialog(job);
+      return;
+    }
     if (newStatus === 'delivered') {
       setPodDialog(job);
       return;
@@ -193,6 +202,20 @@ export default function DriverJobs() {
       newStatus,
       customerStatus,
       notes: `Status updated to ${newStatus}`,
+    });
+  };
+
+  const handleStartCollection = () => {
+    if (!collectionEta) {
+      return;
+    }
+    updateStatusMutation.mutate({
+      jobId: etaDialog.id,
+      jobNumber: etaDialog.job_number,
+      newStatus: 'on_route_to_collection',
+      customerStatus: 'in_progress',
+      notes: `Started collection route with ETA ${collectionEta}`,
+      eta: collectionEta,
     });
   };
 
@@ -402,6 +425,43 @@ export default function DriverJobs() {
               {completePodMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               <CheckCircle2 className="w-4 h-4 mr-2" />
               Complete Delivery
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ETA Dialog */}
+      <Dialog open={!!etaDialog} onOpenChange={() => setEtaDialog(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Collection ETA Required</DialogTitle>
+            <DialogDescription>
+              Provide estimated arrival time for {etaDialog?.job_number}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-4">
+            <Label>Collection ETA *</Label>
+            <Input
+              type="datetime-local"
+              value={collectionEta}
+              onChange={(e) => setCollectionEta(e.target.value)}
+              className="mt-1.5"
+            />
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEtaDialog(null)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleStartCollection}
+              disabled={!collectionEta || updateStatusMutation.isPending}
+              className="bg-indigo-600 hover:bg-indigo-700"
+            >
+              {updateStatusMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              <Play className="w-4 h-4 mr-2" />
+              Start Collection
             </Button>
           </DialogFooter>
         </DialogContent>
