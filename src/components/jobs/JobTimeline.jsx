@@ -56,28 +56,29 @@ export default function JobTimeline({ history, showDetails = true }) {
       <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-slate-200" />
       
       <div className="space-y-4">
-        {history.map((entry, index) => {
-          const Icon = getStatusIcon(entry.new_ops_status);
-          const isLast = index === history.length - 1;
-          
-          return (
-            <div key={entry.id} className="relative pl-10">
-              <div className={cn(
-                'absolute left-2 w-5 h-5 rounded-full flex items-center justify-center',
-                getStatusColor(entry.new_ops_status)
-              )}>
-                <Icon className="w-3 h-3 text-white" />
-              </div>
-              
-              <div className={cn(
-                'bg-white rounded-lg border border-slate-200 p-3',
-                isLast && 'ring-2 ring-indigo-100 border-indigo-200'
-              )}>
-                <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <p className="font-medium text-slate-900 text-sm">
-                      {entry.new_ops_status?.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                    </p>
+         {history.map((entry, index) => {
+           const normalized = LEGACY_TO_CANONICAL[entry.new_ops_status] ?? entry.new_ops_status;
+           const Icon = getStatusIcon(normalized);
+           const isLast = index === history.length - 1;
+
+           return (
+             <div key={entry.id} className="relative pl-10">
+               <div className={cn(
+                 'absolute left-2 w-5 h-5 rounded-full flex items-center justify-center',
+                 getStatusColor(normalized)
+               )}>
+                 <Icon className="w-3 h-3 text-white" />
+               </div>
+
+               <div className={cn(
+                 'bg-white rounded-lg border border-slate-200 p-3',
+                 isLast && 'ring-2 ring-indigo-100 border-indigo-200'
+               )}>
+                 <div className="flex items-start justify-between gap-2">
+                   <div>
+                     <p className="font-medium text-slate-900 text-sm">
+                       {normalized?.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                     </p>
                     {showDetails && entry.notes && (
                       <p className="text-sm text-slate-500 mt-1">{entry.notes}</p>
                     )}
