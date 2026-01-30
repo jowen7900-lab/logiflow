@@ -51,6 +51,7 @@ export default function OpsJobs() {
   const [customerFilter, setCustomerFilter] = useState('all');
   const [assignDialog, setAssignDialog] = useState(null);
   const [selectedDriver, setSelectedDriver] = useState('');
+  const [assignReason, setAssignReason] = useState('');
 
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
@@ -95,13 +96,14 @@ export default function OpsJobs() {
         changed_by: user?.email,
         changed_by_name: user?.full_name,
         changed_by_role: 'admin',
-        notes: `Assigned driver: ${driver?.full_name}`,
+        notes: `Assigned driver: ${driver?.full_name}. Reason: ${assignReason}`,
       });
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['allJobs']);
       setAssignDialog(null);
       setSelectedDriver('');
+      setAssignReason('');
     },
   });
   
@@ -311,6 +313,7 @@ export default function OpsJobs() {
       <Dialog open={!!assignDialog} onOpenChange={() => {
         setAssignDialog(null);
         setSelectedDriver('');
+        setAssignReason('');
       }}>
         <DialogContent>
           <DialogHeader>
@@ -345,12 +348,23 @@ export default function OpsJobs() {
                 No drivers available. Add drivers in Driver Management.
               </p>
             )}
+
+            <div className="mt-4">
+              <Label>Reason (required)</Label>
+              <Textarea
+                value={assignReason}
+                onChange={(e) => setAssignReason(e.target.value)}
+                placeholder="Why are you assigning this driver?"
+                className="mt-1.5"
+              />
+            </div>
           </div>
           
           <DialogFooter>
             <Button variant="outline" onClick={() => {
               setAssignDialog(null);
               setSelectedDriver('');
+              setAssignReason('');
             }}>
               Cancel
             </Button>
@@ -361,7 +375,7 @@ export default function OpsJobs() {
                   driverId: selectedDriver 
                 });
               }}
-              disabled={!selectedDriver || assignDriverMutation.isPending}
+              disabled={!selectedDriver || !assignReason.trim() || assignDriverMutation.isPending}
               className="bg-indigo-600 hover:bg-indigo-700"
             >
               {assignDriverMutation.isPending && (
