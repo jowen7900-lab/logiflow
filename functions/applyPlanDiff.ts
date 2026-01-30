@@ -96,7 +96,7 @@ function planLineToJob(lineData, customerId, planId, planVersionId, jobKey) {
     customer_name: '',
     job_type: 'delivery',
     customer_status: 'requested',
-    ops_status: 'requested',
+    ops_status: 'allocated',
     collection_address: lineData.collectionAddress || '',
     collection_postcode: lineData.collectionPostcode || '',
     collection_name: lineData.collectionName || '',
