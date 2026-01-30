@@ -190,6 +190,7 @@ export default function UserManagement() {
                   <TableHead>Role</TableHead>
                   <TableHead>Organization</TableHead>
                   <TableHead>Details</TableHead>
+                  <TableHead>Approval</TableHead>
                   <TableHead>Joined</TableHead>
                   <TableHead></TableHead>
                 </TableRow>
@@ -197,7 +198,7 @@ export default function UserManagement() {
               <TableBody>
                 {filteredUsers.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8 text-slate-500">
+                    <TableCell colSpan={7} className="text-center py-8 text-slate-500">
                       No users found
                     </TableCell>
                   </TableRow>
@@ -237,6 +238,14 @@ export default function UserManagement() {
                           {user.phone && (
                             <div className="text-sm text-slate-500">{user.phone}</div>
                           )}
+                        </TableCell>
+                        <TableCell>
+                          <span className="text-sm text-slate-600">
+                            {user.approval_status === 'pending_review' && 'Pending'}
+                            {user.approval_status === 'approved' && 'Approved'}
+                            {user.approval_status === 'rejected' && 'Rejected'}
+                            {!user.approval_status && '—'}
+                          </span>
                         </TableCell>
                         <TableCell className="text-sm text-slate-500">
                           {user.created_date && format(new Date(user.created_date), 'MMM d, yyyy')}
