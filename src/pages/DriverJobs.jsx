@@ -59,6 +59,8 @@ export default function DriverJobs() {
   const [failReason, setFailReason] = useState('');
   const [etaDialog, setEtaDialog] = useState(null);
   const [collectionEta, setCollectionEta] = useState('');
+  const [collectedDialog, setCollectedDialog] = useState(null);
+  const [collectedData, setCollectedData] = useState({ name: '', time: '' });
 
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
@@ -83,11 +85,12 @@ export default function DriverJobs() {
   });
 
   const updateStatusMutation = useMutation({
-    mutationFn: async ({ jobId, jobNumber, newStatus, customerStatus, notes, eta }) => {
+    mutationFn: async ({ jobId, jobNumber, newStatus, customerStatus, notes, eta, collectedByName, collectedTime }) => {
       const updates = { ops_status: newStatus };
       if (customerStatus) updates.customer_status = customerStatus;
       if (eta) updates.eta = eta;
-      if (newStatus === 'collected') updates.actual_arrival = new Date().toISOString();
+      if (collectedByName) updates.collection_contact = collectedByName;
+      if (collectedTime) updates.actual_arrival = collectedTime;
       if (newStatus === 'delivered') updates.actual_completion = new Date().toISOString();
 
       await base44.entities.Job.update(jobId, updates);
@@ -106,6 +109,8 @@ export default function DriverJobs() {
       queryClient.invalidateQueries(['driverJobs']);
       setEtaDialog(null);
       setCollectionEta('');
+      setCollectedDialog(null);
+      setCollectedData({ name: '', time: '' });
     },
   });
 
@@ -182,6 +187,10 @@ export default function DriverJobs() {
       setEtaDialog(job);
       return;
     }
+    if (newStatus === 'collected') {
+      setCollectedDialog(job);
+      return;
+    }
     if (newStatus === 'delivered') {
       setPodDialog(job);
       return;
@@ -217,6 +226,22 @@ export default function DriverJobs() {
       customerStatus: 'in_progress',
       notes: `Started collection route with ETA ${etaIso}`,
       eta: etaIso,
+    });
+  };
+
+  const handleMarkCollected = () => {
+    if (!collectedData.name || !collectedData.time) {
+      return;
+    }
+    const collectedTimeIso = new Date(collectedData.time).toISOString();
+    updateStatusMutation.mutate({
+      jobId: collectedDialog.id,
+      jobNumber: collectedDialog.job_number,
+      newStatus: 'collected',
+      customerStatus: 'in_progress',
+      notes: `Collected by ${collectedData.name} at ${collectedTimeIso}`,
+      collectedByName: collectedData.name,
+      collectedTime: collectedTimeIso,
     });
   };
 
@@ -463,6 +488,54 @@ export default function DriverJobs() {
               {updateStatusMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               <Play className="w-4 h-4 mr-2" />
               Start Collection
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Collected Dialog */}
+      <Dialog open={!!collectedDialog} onOpenChange={() => setCollectedDialog(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Collection Proof Required</DialogTitle>
+            <DialogDescription>
+              Confirm collection details for {collectedDialog?.job_number}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div>
+              <Label>Collected By (Name) *</Label>
+              <Input
+                value={collectedData.name}
+                onChange={(e) => setCollectedData({ ...collectedData, name: e.target.value })}
+                placeholder="Name of person handing over goods"
+                className="mt-1.5"
+              />
+            </div>
+            <div>
+              <Label>Collection Time *</Label>
+              <Input
+                type="datetime-local"
+                value={collectedData.time}
+                onChange={(e) => setCollectedData({ ...collectedData, time: e.target.value })}
+                className="mt-1.5"
+              />
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCollectedDialog(null)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleMarkCollected}
+              disabled={!collectedData.name || !collectedData.time || updateStatusMutation.isPending}
+              className="bg-indigo-600 hover:bg-indigo-700"
+            >
+              {updateStatusMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              <CheckCircle2 className="w-4 h-4 mr-2" />
+              Confirm Collection
             </Button>
           </DialogFooter>
         </DialogContent>
