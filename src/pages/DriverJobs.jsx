@@ -338,7 +338,6 @@ export default function DriverJobs() {
                 </Link>
                 <StatusBadge status={job.ops_status} type="ops" size="sm" />
               </div>
-              <p className="text-sm text-slate-500">{job.customer_name}</p>
             </div>
             {job.job_value && (
               <div className="flex items-center gap-1 px-2 py-1 bg-emerald-50 rounded-lg">
@@ -364,16 +363,6 @@ export default function DriverJobs() {
                 <Navigation className="w-4 h-4 text-indigo-600" />
               </a>
             </div>
-
-            {job.delivery_phone && (
-              <a 
-                href={`tel:${job.delivery_phone}`}
-                className="flex items-center gap-2 text-sm text-indigo-600"
-              >
-                <Phone className="w-4 h-4" />
-                {job.delivery_phone}
-              </a>
-            )}
 
             <div className="flex items-center gap-4 text-sm text-slate-500">
               <div className="flex items-center gap-1">
