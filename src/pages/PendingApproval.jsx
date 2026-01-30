@@ -19,15 +19,15 @@ export default function PendingApproval() {
   React.useEffect(() => {
     if (user?.approval_status === 'approved') {
       const homePage = {
+        'admin': 'OpsDashboard',
         'customer': 'CustomerDashboard',
-        'customer_admin': 'CustomerDashboard',
         'driver': 'DriverJobs',
         'fitter': 'FitterJobs',
-        'ops': 'OpsDashboard',
-        'app_admin': 'OpsDashboard',
-      }[user.app_role] || 'CustomerDashboard';
+      }[user.app_role];
       
-      navigate(createPageUrl(homePage));
+      if (homePage) {
+        navigate(createPageUrl(homePage));
+      }
     }
   }, [user, navigate]);
 
@@ -66,15 +66,6 @@ export default function PendingApproval() {
   const Icon = statusInfo.icon;
 
   const getApproverInfo = () => {
-    if (user?.app_role === 'driver' || user?.app_role === 'customer') {
-      return 'Operations Admin';
-    }
-    if (user?.app_role === 'fitter') {
-      return 'Customer Admin';
-    }
-    if (user?.app_role === 'ops') {
-      return 'App Admin';
-    }
     return 'Admin';
   };
 
