@@ -164,7 +164,7 @@ export default function DriverJobs() {
         changed_by: user?.email,
         changed_by_name: user?.full_name,
         changed_by_role: 'driver',
-        notes: `POD signed by ${podData.name}. ${podData.notes}`,
+        notes: `POD signed by ${podData.name}. ${podPhotos.length} photo${podPhotos.length > 1 ? 's' : ''} uploaded. ${podData.notes || ''}`,
       });
     },
     onSuccess: () => {
@@ -200,7 +200,7 @@ export default function DriverJobs() {
         changed_by: user?.email,
         changed_by_name: user?.full_name,
         changed_by_role: 'driver',
-        notes: `Reported by ${failName}. Reason: ${failReason}`,
+        notes: `Reported by ${failName}. Reason: ${failReason}. ${failPhotos.length} evidence photo${failPhotos.length > 1 ? 's' : ''} uploaded.`,
       });
 
       await base44.entities.OpsTask.create({
@@ -278,7 +278,7 @@ export default function DriverJobs() {
       currentStatus: etaDialog.ops_status,
       newStatus: 'on_route_to_collection',
       customerStatus: 'in_progress',
-      notes: `Started collection route with ETA ${etaIso}`,
+      notes: `Started collection route. ETA: ${format(new Date(etaIso), 'PPP HH:mm')}`,
       eta: etaIso,
     });
   };
@@ -294,7 +294,7 @@ export default function DriverJobs() {
       currentStatus: collectedDialog.ops_status,
       newStatus: 'collected',
       customerStatus: 'in_progress',
-      notes: `Collected by ${collectedData.name} at ${collectedTimeIso}`,
+      notes: `Collected by ${collectedData.name}. Collection time: ${format(new Date(collectedTimeIso), 'PPP HH:mm')}`,
       collectionContactName: collectedData.name,
       actualArrivalIso: collectedTimeIso,
     });
@@ -311,7 +311,7 @@ export default function DriverJobs() {
       currentStatus: deliveryEtaDialog.ops_status,
       newStatus: 'on_route_to_delivery',
       customerStatus: 'in_progress',
-      notes: `Started delivery route with ETA ${etaIso}`,
+      notes: `Started delivery route. ETA: ${format(new Date(etaIso), 'PPP HH:mm')}`,
       eta: etaIso,
     });
   };
