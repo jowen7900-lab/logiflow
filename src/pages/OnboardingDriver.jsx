@@ -26,11 +26,28 @@ export default function OnboardingDriver() {
     queryFn: () => base44.auth.me(),
   });
 
+  // Pre-fill form for rejected drivers
+  React.useEffect(() => {
+    if (user && user.app_role === 'driver' && user.approval_status === 'rejected') {
+      setFormData({
+        fullName: user.full_name || '',
+        phone: user.phone || '',
+        email: user.email || '',
+        vehicleSize: user.vehicle_type || '',
+        homePostcode: user.homePostcode || '',
+        driverId: user.driverId || '',
+      });
+    }
+  }, [user]);
+
   const submitMutation = useMutation({
     mutationFn: async () => {
       await base44.auth.updateMe({
         ...formData,
         approval_status: 'pending_review',
+        rejection_reason: null,
+        reviewed_by_user_id: null,
+        reviewed_at: null,
       });
     },
     onSuccess: () => {
@@ -143,7 +160,7 @@ export default function OnboardingDriver() {
                 disabled={submitMutation.isPending}
               >
                 {submitMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                Submit for Approval
+                {user?.approval_status === 'rejected' ? 'Resubmit for Approval' : 'Submit for Approval'}
               </Button>
             </div>
           </form>
