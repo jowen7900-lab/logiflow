@@ -65,6 +65,8 @@ export default function JobDetail() {
   
   const [changeDialog, setChangeDialog] = useState(null);
   const [changeData, setChangeData] = useState({});
+  const [assignFitterDialog, setAssignFitterDialog] = useState(false);
+  const [selectedFitter, setSelectedFitter] = useState('');
 
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
@@ -92,12 +94,18 @@ export default function JobDetail() {
     enabled: !!jobId,
   });
 
-  // Strict role checks
-  const isOps = user?.app_role === 'ops';
-  const isAppAdmin = user?.app_role === 'app_admin';
+  // Fetch available fitters for customer assignment
+  const { data: fitters = [] } = useQuery({
+    queryKey: ['approvedFitters'],
+    queryFn: () => base44.entities.User.filter({ app_role: 'fitter', approval_status: 'approved' }),
+    enabled: isCustomer && user?.customer_id === job?.customer_id,
+  });
+
+  // Strict role checks (locked roles only)
+  const isAdmin = user?.app_role === 'admin';
+  const isCustomer = user?.app_role === 'customer';
   const isDriver = user?.app_role === 'driver';
   const isFitter = user?.app_role === 'fitter';
-  const isCustomer = user?.app_role === 'customer' || user?.app_role === 'customer_admin';
 
   // Fetch driver details if current user is fitter
   const { data: driverDetails } = useQuery({
@@ -120,8 +128,7 @@ export default function JobDetail() {
   });
 
   // Verify access rights
-  const hasAccess = isOps || 
-    isAppAdmin ||
+  const hasAccess = isAdmin || 
     isCustomer ||
     (isDriver && job?.driver_id === user?.email) ||
     (isFitter && job?.fitter_id === user?.email);
@@ -166,6 +173,31 @@ export default function JobDetail() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['jobMessages', jobId]);
+    },
+  });
+
+  const assignFitterMutation = useMutation({
+    mutationFn: async ({ fitterId }) => {
+      const fitter = fitters.find(f => f.id === fitterId);
+      await base44.entities.Job.update(job.id, {
+        fitter_id: fitter?.email,
+        fitter_name: fitter?.full_name,
+      });
+
+      await base44.entities.JobStatusHistory.create({
+        job_id: job.id,
+        job_number: job.job_number,
+        new_ops_status: job.ops_status,
+        changed_by: user?.email,
+        changed_by_name: user?.full_name,
+        changed_by_role: 'customer',
+        notes: `Assigned fitter: ${fitter?.full_name}`,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['job', jobId]);
+      setAssignFitterDialog(false);
+      setSelectedFitter('');
     },
   });
 
@@ -247,7 +279,7 @@ export default function JobDetail() {
               <div className="flex items-center gap-3 flex-wrap">
                 <h1 className="text-2xl font-bold text-slate-900">{job.job_number}</h1>
                 <StatusBadge status={job.customer_status} type="customer" />
-                {isOps && <StatusBadge status={job.ops_status} type="ops" />}
+                {isAdmin && <StatusBadge status={job.ops_status} type="ops" />}
                 {job.priority !== 'standard' && (
                   <StatusBadge status={job.priority} type="priority" />
                 )}
@@ -388,27 +420,47 @@ export default function JobDetail() {
                 )}
 
                 {/* Fitter */}
-                {job.fitter_name && (
+                {(job.fitter_name || (isCustomer && user?.customer_id === job?.customer_id)) && (
                   <div className="space-y-2">
                     <div className="flex items-center gap-2 text-sm font-medium text-slate-500">
                       <User className="w-4 h-4" />
                       Fitter
                     </div>
                     <div className="p-3 bg-slate-50 rounded-lg">
-                      <p className="font-medium text-slate-900">{job.fitter_name}</p>
-                      {isDriver && fitterDetails && (
-                        <div className="mt-2 pt-2 border-t border-slate-200 space-y-1">
-                          {fitterDetails.phone && (
-                            <a href={`tel:${fitterDetails.phone}`} className="flex items-center gap-2 text-sm text-indigo-600 hover:text-indigo-700">
-                              <Phone className="w-3.5 h-3.5" />
-                              {fitterDetails.phone}
-                            </a>
+                      {job.fitter_name ? (
+                        <>
+                          <p className="font-medium text-slate-900">{job.fitter_name}</p>
+                          {isDriver && fitterDetails && (
+                            <div className="mt-2 pt-2 border-t border-slate-200 space-y-1">
+                              {fitterDetails.phone && (
+                                <a href={`tel:${fitterDetails.phone}`} className="flex items-center gap-2 text-sm text-indigo-600 hover:text-indigo-700">
+                                  <Phone className="w-3.5 h-3.5" />
+                                  {fitterDetails.phone}
+                                </a>
+                              )}
+                              {fitterDetails.email && (
+                                <a href={`mailto:${fitterDetails.email}`} className="flex items-center gap-2 text-sm text-indigo-600 hover:text-indigo-700">
+                                  {fitterDetails.email}
+                                </a>
+                              )}
+                            </div>
                           )}
-                          {fitterDetails.email && (
-                            <a href={`mailto:${fitterDetails.email}`} className="flex items-center gap-2 text-sm text-indigo-600 hover:text-indigo-700">
-                              {fitterDetails.email}
-                            </a>
-                          )}
+                        </>
+                      ) : (
+                        <p className="text-sm text-slate-500">No fitter assigned</p>
+                      )}
+                      
+                      {/* Customer-only fitter assignment */}
+                      {isCustomer && user?.customer_id === job?.customer_id && !['closed', 'cancelled'].includes(job.customer_status) && (
+                        <div className="mt-3">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => setAssignFitterDialog(true)}
+                            className="w-full"
+                          >
+                            {job.fitter_name ? 'Change Fitter' : 'Assign Fitter'}
+                          </Button>
                         </div>
                       )}
                     </div>
@@ -528,7 +580,7 @@ export default function JobDetail() {
               <CardTitle className="text-lg">Status History</CardTitle>
             </CardHeader>
             <CardContent>
-              <JobTimeline history={history.slice().reverse()} showDetails={isOps} />
+              <JobTimeline history={history.slice().reverse()} showDetails={isAdmin} />
             </CardContent>
           </Card>
         </div>
@@ -671,6 +723,71 @@ export default function JobDetail() {
             >
               {createTaskMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               Request Cancellation
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Assign Fitter Dialog - Customer Only */}
+      <Dialog open={assignFitterDialog} onOpenChange={() => {
+        setAssignFitterDialog(false);
+        setSelectedFitter('');
+      }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Assign Fitter</DialogTitle>
+            <DialogDescription>
+              Select a fitter for job {job?.job_number}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-4">
+            <Label>Select Fitter</Label>
+            <Select value={selectedFitter} onValueChange={setSelectedFitter}>
+              <SelectTrigger className="mt-1.5">
+                <SelectValue placeholder="Choose a fitter" />
+              </SelectTrigger>
+              <SelectContent>
+                {fitters.map(fitter => (
+                  <SelectItem key={fitter.id} value={fitter.id}>
+                    <div className="flex items-center gap-2">
+                      <span>{fitter.full_name}</span>
+                      {fitter.specialization && (
+                        <span className="text-xs text-slate-400">({fitter.specialization})</span>
+                      )}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            
+            {fitters.length === 0 && (
+              <p className="text-sm text-amber-600 mt-2">
+                No fitters currently available.
+              </p>
+            )}
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setAssignFitterDialog(false);
+              setSelectedFitter('');
+            }}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                assignFitterMutation.mutate({ 
+                  fitterId: selectedFitter 
+                });
+              }}
+              disabled={!selectedFitter || assignFitterMutation.isPending}
+              className="bg-indigo-600 hover:bg-indigo-700"
+            >
+              {assignFitterMutation.isPending && (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              )}
+              Assign Fitter
             </Button>
           </DialogFooter>
         </DialogContent>
