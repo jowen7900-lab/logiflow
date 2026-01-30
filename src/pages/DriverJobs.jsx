@@ -90,7 +90,7 @@ export default function DriverJobs() {
     enabled: !!user?.email && isDriver,
   });
 
-  const activeJobs = jobs.filter(j => !['delivered', 'cancelled', 'failed'].includes(j.ops_status));
+  const activeJobs = jobs.filter(j => !['delivered', 'failed'].includes(j.ops_status));
   const completedJobs = jobs.filter(j => ['delivered', 'failed'].includes(j.ops_status));
   const todayJobs = activeJobs.filter(j => {
     const today = new Date();
