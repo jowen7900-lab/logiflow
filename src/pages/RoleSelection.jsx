@@ -52,11 +52,32 @@ export default function RoleSelection() {
         'customer': 'CustomerDashboard',
         'driver': 'DriverJobs',
         'fitter': 'FitterJobs',
-      }[user.app_role] || 'CustomerDashboard';
+      }[user.app_role];
       
-      navigate(createPageUrl(homePage));
+      if (homePage) {
+        navigate(createPageUrl(homePage));
+      }
     }
   }, [user, navigate]);
+
+  // Check for invalid role
+  if (user?.app_role && user?.approval_status === 'approved' && 
+      !['admin', 'customer', 'driver', 'fitter'].includes(user.app_role)) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
+        <Card className="max-w-md w-full">
+          <CardHeader>
+            <CardTitle className="text-center">Invalid Role</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-center text-slate-600">
+              Your account has an invalid role assigned. Please contact support for assistance.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   const selectRoleMutation = useMutation({
     mutationFn: async (role) => {
