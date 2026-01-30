@@ -99,7 +99,7 @@ export default function DriverJobs() {
   });
 
   const updateStatusMutation = useMutation({
-    mutationFn: async ({ jobId, jobNumber, currentStatus, newStatus, customerStatus, notes, eta, collectionContactName, actualArrivalIso }) => {
+    mutationFn: async ({ jobId, jobNumber, currentStatus, newStatus, customerStatus, notes, collectionEta, deliveryEta, collectionContactName, actualArrivalIso }) => {
       // GUARD: Enforce sequential transitions - prevent skipping steps
       // Example blocked: allocated -> delivered (must go through collection steps first)
       if (!isTransitionAllowed(currentStatus, newStatus)) {
@@ -108,7 +108,8 @@ export default function DriverJobs() {
 
       const updates = { ops_status: newStatus };
       if (customerStatus) updates.customer_status = customerStatus;
-      if (eta) updates.eta = eta;
+      if (collectionEta) updates.collection_eta = collectionEta;
+      if (deliveryEta) updates.delivery_eta = deliveryEta;
       if (collectionContactName) updates.collection_contact = collectionContactName;
       if (actualArrivalIso) updates.actual_arrival = actualArrivalIso;
       if (newStatus === 'delivered') updates.actual_completion = new Date().toISOString();
@@ -279,7 +280,7 @@ export default function DriverJobs() {
       newStatus: 'on_route_to_collection',
       customerStatus: 'in_progress',
       notes: `Started collection route. ETA: ${etaIso}`,
-      eta: etaIso,
+      collectionEta: etaIso,
     });
   };
 
@@ -312,7 +313,7 @@ export default function DriverJobs() {
       newStatus: 'on_route_to_delivery',
       customerStatus: 'in_progress',
       notes: `Started delivery route. ETA: ${etaIso}`,
-      eta: etaIso,
+      deliveryEta: etaIso,
     });
   };
 
