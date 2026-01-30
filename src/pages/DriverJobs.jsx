@@ -55,6 +55,8 @@ export default function DriverJobs() {
   const queryClient = useQueryClient();
   const [podDialog, setPodDialog] = useState(null);
   const [podData, setPodData] = useState({ name: '', notes: '' });
+  const [podPhotos, setPodPhotos] = useState([]);
+  const [uploadingPhotos, setUploadingPhotos] = useState(false);
   const [failDialog, setFailDialog] = useState(null);
   const [failReason, setFailReason] = useState('');
   const [etaDialog, setEtaDialog] = useState(null);
@@ -126,6 +128,7 @@ export default function DriverJobs() {
         pod_name: podData.name,
         pod_timestamp: new Date().toISOString(),
         actual_completion: new Date().toISOString(),
+        pod_images: podPhotos,
       });
 
       await base44.entities.JobStatusHistory.create({
@@ -143,6 +146,7 @@ export default function DriverJobs() {
       queryClient.invalidateQueries(['driverJobs']);
       setPodDialog(null);
       setPodData({ name: '', notes: '' });
+      setPodPhotos([]);
     },
   });
 
@@ -266,6 +270,25 @@ export default function DriverJobs() {
       notes: `Started delivery route with ETA ${etaIso}`,
       eta: etaIso,
     });
+  };
+
+  const handlePhotoUpload = async (e) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    setUploadingPhotos(true);
+    try {
+      const uploadPromises = files.map(file => 
+        base44.integrations.Core.UploadFile({ file })
+      );
+      const results = await Promise.all(uploadPromises);
+      const urls = results.map(r => r.file_url);
+      setPodPhotos(prev => [...prev, ...urls]);
+    } catch (error) {
+      console.error('Photo upload failed:', error);
+    } finally {
+      setUploadingPhotos(false);
+    }
   };
 
   const JobCard = ({ job }) => {
@@ -440,7 +463,7 @@ export default function DriverJobs() {
               Complete the delivery for {podDialog?.job_number}
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="space-y-4 py-4">
             <div>
               <Label>Signed By *</Label>
@@ -452,6 +475,28 @@ export default function DriverJobs() {
               />
             </div>
             <div>
+              <Label>Delivery Photos *</Label>
+              <Input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handlePhotoUpload}
+                disabled={uploadingPhotos}
+                className="mt-1.5"
+              />
+              {uploadingPhotos && (
+                <p className="text-xs text-slate-500 mt-1">Uploading...</p>
+              )}
+              {podPhotos.length > 0 && (
+                <p className="text-xs text-emerald-600 mt-1">
+                  {podPhotos.length} photo{podPhotos.length > 1 ? 's' : ''} uploaded
+                </p>
+              )}
+              {!podPhotos.length && (
+                <p className="text-xs text-red-500 mt-1">At least 1 photo required</p>
+              )}
+            </div>
+            <div>
               <Label>Notes (optional)</Label>
               <Textarea
                 value={podData.notes}
@@ -461,14 +506,14 @@ export default function DriverJobs() {
               />
             </div>
           </div>
-          
+
           <DialogFooter>
             <Button variant="outline" onClick={() => setPodDialog(null)}>
               Cancel
             </Button>
             <Button
               onClick={() => completePodMutation.mutate({ job: podDialog })}
-              disabled={!podData.name || completePodMutation.isPending}
+              disabled={!podData.name || podPhotos.length === 0 || completePodMutation.isPending || uploadingPhotos}
               className="bg-emerald-600 hover:bg-emerald-700"
             >
               {completePodMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
