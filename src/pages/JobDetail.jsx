@@ -254,7 +254,7 @@ export default function JobDetail() {
                 {job.has_pending_change && <ChangeFlag type="change" />}
                 {job.has_rule_breach && !job.has_pending_change && <ChangeFlag type="rule_breach" />}
               </div>
-              <p className="text-slate-500 mt-1">{job.customer_name}</p>
+              {!isDriver && <p className="text-slate-500 mt-1">{job.customer_name}</p>}
             </div>
           </div>
         </div>
@@ -313,24 +313,26 @@ export default function JobDetail() {
                   <div className="p-3 bg-slate-50 rounded-lg">
                     <p className="font-medium text-slate-900">{job.delivery_address}</p>
                     <p className="text-slate-600">{job.delivery_postcode}</p>
-                    {job.delivery_contact && (
+                    {!isDriver && job.delivery_contact && (
                       <p className="text-sm text-slate-500 mt-2">
                         <User className="w-3.5 h-3.5 inline mr-1" />
                         {job.delivery_contact}
                       </p>
                     )}
-                    {job.delivery_phone && (
+                    {!isDriver && job.delivery_phone && (
                       <p className="text-sm text-slate-500">
                         <Phone className="w-3.5 h-3.5 inline mr-1" />
                         {job.delivery_phone}
                       </p>
                     )}
-                    <RecipientIntelligence
-                      recipientName={job.delivery_contact}
-                      recipientPostcode={job.delivery_postcode}
-                      userRole={user?.app_role}
-                      currentJobId={job.id}
-                    />
+                    {!isDriver && (
+                      <RecipientIntelligence
+                        recipientName={job.delivery_contact}
+                        recipientPostcode={job.delivery_postcode}
+                        userRole={user?.app_role}
+                        currentJobId={job.id}
+                      />
+                    )}
                   </div>
                 </div>
 
