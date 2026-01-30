@@ -64,7 +64,7 @@ Deno.serve(async (req) => {
         const existingJobs = await base44.asServiceRole.entities.Job.filter({ job_key: item.job_key });
         if (existingJobs.length > 0) {
           await base44.asServiceRole.entities.Job.update(existingJobs[0].id, {
-            ops_status: 'cancelled',
+            ops_status: 'failed',
             customer_status: 'cancelled',
           });
           appliedCount++;
