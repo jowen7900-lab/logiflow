@@ -384,10 +384,16 @@ export default function JobDetail() {
                       {job.scheduled_date && format(new Date(job.scheduled_date), 'EEEE, MMMM d, yyyy')}
                     </p>
                     <p className="text-slate-600 uppercase">{job.scheduled_time_slot}</p>
-                    {job.eta && (
+                    {job.ops_status === 'on_route_to_collection' && (job.collection_eta ?? job.eta) && (
                       <p className="text-indigo-600 font-medium mt-2">
                         <Clock className="w-3.5 h-3.5 inline mr-1" />
-                        ETA: {format(new Date(job.eta), 'HH:mm')}
+                        Collection ETA: {new Date(job.collection_eta ?? job.eta).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    )}
+                    {job.ops_status === 'on_route_to_delivery' && (job.delivery_eta ?? job.eta) && (
+                      <p className="text-indigo-600 font-medium mt-2">
+                        <Clock className="w-3.5 h-3.5 inline mr-1" />
+                        Delivery ETA: {new Date(job.delivery_eta ?? job.eta).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </p>
                     )}
                   </div>
