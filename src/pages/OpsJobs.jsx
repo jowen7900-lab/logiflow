@@ -290,7 +290,7 @@ export default function OpsJobs() {
                                 setSelectedDriver('');
                                 setAssignDialog(job);
                               }}
-                              disabled={['delivered', 'cancelled', 'failed'].includes(job.ops_status)}
+                              disabled={['delivered', 'failed'].includes(job.ops_status)}
                               className="h-7 px-2 text-xs"
                             >
                               Change
@@ -303,7 +303,7 @@ export default function OpsJobs() {
                             onClick={() => {
                               setAssignDialog(job);
                             }}
-                            disabled={['delivered', 'cancelled', 'failed'].includes(job.ops_status)}
+                            disabled={['delivered', 'failed'].includes(job.ops_status)}
                           >
                             <Truck className="w-3.5 h-3.5 mr-1" />
                             Assign
