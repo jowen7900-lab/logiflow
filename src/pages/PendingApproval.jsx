@@ -5,6 +5,7 @@ import { base44 } from '@/api/base44Client';
 import { createPageUrl } from '@/utils';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 import { Clock, CheckCircle2, XCircle, AlertTriangle } from 'lucide-react';
 
 export default function PendingApproval() {
@@ -121,7 +122,15 @@ export default function PendingApproval() {
           </div>
 
           {user?.approval_status === 'rejected' && (
-            <div className="pt-4 border-t">
+            <div className="pt-4 border-t space-y-4">
+              {user?.app_role === 'driver' && (
+                <Button
+                  onClick={() => navigate(createPageUrl('OnboardingDriver'))}
+                  className="w-full bg-indigo-600 hover:bg-indigo-700"
+                >
+                  Edit details & resubmit
+                </Button>
+              )}
               <p className="text-sm text-slate-600">
                 If you believe this is an error, please contact support at{' '}
                 <a href="mailto:support@logiflow.com" className="text-indigo-600 hover:underline">
