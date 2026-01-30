@@ -116,7 +116,7 @@ export default function CreateJob() {
         customer_id: user?.customer_id,
         customer_name: customer?.name || user?.customer_name,
         customer_status: 'requested',
-        ops_status: 'requested',
+        ops_status: 'allocated',
         has_rule_breach: ruleWarnings.length > 0,
         has_exception: ruleWarnings.length > 0,
         exception_reason: ruleWarnings.length > 0 ? ruleWarnings.map(w => w.message).join('; ') : null,
