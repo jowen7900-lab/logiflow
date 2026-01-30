@@ -94,18 +94,18 @@ export default function JobDetail() {
     enabled: !!jobId,
   });
 
+  // Strict role checks (locked roles only)
+  const isAdmin = user?.app_role === 'admin';
+  const isCustomer = user?.app_role === 'customer';
+  const isDriver = user?.app_role === 'driver';
+  const isFitter = user?.app_role === 'fitter';
+
   // Fetch available fitters for customer assignment
   const { data: fitters = [] } = useQuery({
     queryKey: ['approvedFitters'],
     queryFn: () => base44.entities.User.filter({ app_role: 'fitter', approval_status: 'approved' }),
     enabled: isCustomer && user?.customer_id === job?.customer_id,
   });
-
-  // Strict role checks (locked roles only)
-  const isAdmin = user?.app_role === 'admin';
-  const isCustomer = user?.app_role === 'customer';
-  const isDriver = user?.app_role === 'driver';
-  const isFitter = user?.app_role === 'fitter';
 
   // Fetch driver details if current user is fitter
   const { data: driverDetails } = useQuery({
