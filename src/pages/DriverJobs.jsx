@@ -61,6 +61,8 @@ export default function DriverJobs() {
   const [collectionEta, setCollectionEta] = useState('');
   const [collectedDialog, setCollectedDialog] = useState(null);
   const [collectedData, setCollectedData] = useState({ name: '', time: '' });
+  const [deliveryEtaDialog, setDeliveryEtaDialog] = useState(null);
+  const [deliveryEta, setDeliveryEta] = useState('');
 
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
@@ -111,6 +113,8 @@ export default function DriverJobs() {
       setCollectionEta('');
       setCollectedDialog(null);
       setCollectedData({ name: '', time: '' });
+      setDeliveryEtaDialog(null);
+      setDeliveryEta('');
     },
   });
 
@@ -191,6 +195,10 @@ export default function DriverJobs() {
       setCollectedDialog(job);
       return;
     }
+    if (newStatus === 'on_route_to_delivery') {
+      setDeliveryEtaDialog(job);
+      return;
+    }
     if (newStatus === 'delivered') {
       setPodDialog(job);
       return;
@@ -242,6 +250,21 @@ export default function DriverJobs() {
       notes: `Collected by ${collectedData.name} at ${collectedTimeIso}`,
       collectionContactName: collectedData.name,
       actualArrivalIso: collectedTimeIso,
+    });
+  };
+
+  const handleStartDelivery = () => {
+    if (!deliveryEta) {
+      return;
+    }
+    const etaIso = new Date(deliveryEta).toISOString();
+    updateStatusMutation.mutate({
+      jobId: deliveryEtaDialog.id,
+      jobNumber: deliveryEtaDialog.job_number,
+      newStatus: 'on_route_to_delivery',
+      customerStatus: 'in_progress',
+      notes: `Started delivery route with ETA ${etaIso}`,
+      eta: etaIso,
     });
   };
 
@@ -536,6 +559,43 @@ export default function DriverJobs() {
               {updateStatusMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               <CheckCircle2 className="w-4 h-4 mr-2" />
               Confirm Collection
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delivery ETA Dialog */}
+      <Dialog open={!!deliveryEtaDialog} onOpenChange={() => setDeliveryEtaDialog(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delivery ETA Required</DialogTitle>
+            <DialogDescription>
+              Provide estimated delivery time for {deliveryEtaDialog?.job_number}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-4">
+            <Label>Delivery ETA *</Label>
+            <Input
+              type="datetime-local"
+              value={deliveryEta}
+              onChange={(e) => setDeliveryEta(e.target.value)}
+              className="mt-1.5"
+            />
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeliveryEtaDialog(null)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleStartDelivery}
+              disabled={!deliveryEta || updateStatusMutation.isPending}
+              className="bg-indigo-600 hover:bg-indigo-700"
+            >
+              {updateStatusMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              <Play className="w-4 h-4 mr-2" />
+              Start Delivery
             </Button>
           </DialogFooter>
         </DialogContent>
