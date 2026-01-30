@@ -37,25 +37,17 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
 const statusTransitions = {
-  driver_assigned: ['en_route_collection', 'en_route_delivery'],
-  en_route_collection: ['collected'],
-  collected: ['in_transit'],
-  in_transit: ['en_route_delivery'],
-  en_route_delivery: ['arrived'],
-  arrived: ['delivering'],
-  delivering: ['pod_pending', 'failed'],
-  pod_pending: ['completed'],
+  allocated: ['on_route_to_collection'],
+  on_route_to_collection: ['collected'],
+  collected: ['on_route_to_delivery'],
+  on_route_to_delivery: ['delivered', 'failed'],
 };
 
 const statusLabels = {
-  en_route_collection: 'Start Collection',
+  on_route_to_collection: 'Start Collection',
   collected: 'Mark Collected',
-  in_transit: 'Start Transit',
-  en_route_delivery: 'Start Delivery',
-  arrived: 'Mark Arrived',
-  delivering: 'Start Delivering',
-  pod_pending: 'Capture POD',
-  completed: 'Complete Job',
+  on_route_to_delivery: 'Start Delivery',
+  delivered: 'Complete Delivery',
   failed: 'Mark Failed',
 };
 
@@ -80,8 +72,8 @@ export default function DriverJobs() {
     enabled: !!user?.email && isDriver,
   });
 
-  const activeJobs = jobs.filter(j => !['completed', 'cancelled', 'failed'].includes(j.ops_status));
-  const completedJobs = jobs.filter(j => ['completed', 'failed'].includes(j.ops_status));
+  const activeJobs = jobs.filter(j => !['delivered', 'cancelled', 'failed'].includes(j.ops_status));
+  const completedJobs = jobs.filter(j => ['delivered', 'failed'].includes(j.ops_status));
   const todayJobs = activeJobs.filter(j => {
     const today = new Date();
     const jobDate = new Date(j.scheduled_date);
@@ -92,8 +84,8 @@ export default function DriverJobs() {
     mutationFn: async ({ jobId, jobNumber, newStatus, customerStatus, notes }) => {
       const updates = { ops_status: newStatus };
       if (customerStatus) updates.customer_status = customerStatus;
-      if (newStatus === 'arrived') updates.actual_arrival = new Date().toISOString();
-      if (newStatus === 'completed') updates.actual_completion = new Date().toISOString();
+      if (newStatus === 'collected') updates.actual_arrival = new Date().toISOString();
+      if (newStatus === 'delivered') updates.actual_completion = new Date().toISOString();
 
       await base44.entities.Job.update(jobId, updates);
       await base44.entities.JobStatusHistory.create({
@@ -115,8 +107,8 @@ export default function DriverJobs() {
   const completePodMutation = useMutation({
     mutationFn: async ({ job }) => {
       await base44.entities.Job.update(job.id, {
-        ops_status: 'completed',
-        customer_status: 'completed',
+        ops_status: 'delivered',
+        customer_status: 'delivered',
         pod_name: podData.name,
         pod_timestamp: new Date().toISOString(),
         actual_completion: new Date().toISOString(),
@@ -125,8 +117,8 @@ export default function DriverJobs() {
       await base44.entities.JobStatusHistory.create({
         job_id: job.id,
         job_number: job.job_number,
-        new_ops_status: 'completed',
-        new_customer_status: 'completed',
+        new_ops_status: 'delivered',
+        new_customer_status: 'delivered',
         changed_by: user?.email,
         changed_by_name: user?.full_name,
         changed_by_role: 'driver',
@@ -181,7 +173,7 @@ export default function DriverJobs() {
   });
 
   const handleStatusUpdate = (job, newStatus) => {
-    if (newStatus === 'pod_pending') {
+    if (newStatus === 'delivered') {
       setPodDialog(job);
       return;
     }
@@ -191,7 +183,7 @@ export default function DriverJobs() {
     }
 
     let customerStatus = job.customer_status;
-    if (['en_route_collection', 'en_route_delivery', 'in_transit'].includes(newStatus)) {
+    if (['on_route_to_collection', 'on_route_to_delivery'].includes(newStatus)) {
       customerStatus = 'in_progress';
     }
 
@@ -290,13 +282,13 @@ export default function DriverJobs() {
                   disabled={updateStatusMutation.isPending}
                   className={cn(
                     status === 'failed' ? 'bg-red-600 hover:bg-red-700' :
-                    status === 'pod_pending' ? 'bg-emerald-600 hover:bg-emerald-700' :
+                    status === 'delivered' ? 'bg-emerald-600 hover:bg-emerald-700' :
                     'bg-indigo-600 hover:bg-indigo-700'
                   )}
                 >
                   {status === 'failed' && <AlertTriangle className="w-4 h-4 mr-1" />}
-                  {status === 'pod_pending' && <Camera className="w-4 h-4 mr-1" />}
-                  {['en_route_collection', 'en_route_delivery', 'in_transit'].includes(status) && (
+                  {status === 'delivered' && <Camera className="w-4 h-4 mr-1" />}
+                  {['on_route_to_collection', 'on_route_to_delivery'].includes(status) && (
                     <Play className="w-4 h-4 mr-1" />
                   )}
                   {statusLabels[status]}
