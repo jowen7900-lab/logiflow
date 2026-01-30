@@ -51,7 +51,7 @@ const roleNavigation = {
 };
 
 export default function Sidebar({ user, currentPage, pendingTasks = 0 }) {
-  const appRole = user?.app_role || 'customer';
+  const appRole = user?.app_role;
   const navigation = roleNavigation[appRole] || [];
   
   const handleLogout = () => {
