@@ -85,12 +85,12 @@ export default function DriverJobs() {
   });
 
   const updateStatusMutation = useMutation({
-    mutationFn: async ({ jobId, jobNumber, newStatus, customerStatus, notes, eta, collectedByName, collectedTime }) => {
+    mutationFn: async ({ jobId, jobNumber, newStatus, customerStatus, notes, eta, collectionContactName, actualArrivalIso }) => {
       const updates = { ops_status: newStatus };
       if (customerStatus) updates.customer_status = customerStatus;
       if (eta) updates.eta = eta;
-      if (collectedByName) updates.collection_contact = collectedByName;
-      if (collectedTime) updates.actual_arrival = collectedTime;
+      if (collectionContactName) updates.collection_contact = collectionContactName;
+      if (actualArrivalIso) updates.actual_arrival = actualArrivalIso;
       if (newStatus === 'delivered') updates.actual_completion = new Date().toISOString();
 
       await base44.entities.Job.update(jobId, updates);
@@ -240,8 +240,8 @@ export default function DriverJobs() {
       newStatus: 'collected',
       customerStatus: 'in_progress',
       notes: `Collected by ${collectedData.name} at ${collectedTimeIso}`,
-      collectedByName: collectedData.name,
-      collectedTime: collectedTimeIso,
+      collectionContactName: collectedData.name,
+      actualArrivalIso: collectedTimeIso,
     });
   };
 
