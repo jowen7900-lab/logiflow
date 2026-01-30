@@ -94,6 +94,11 @@ export default function UserManagement() {
     queryFn: () => base44.entities.Customer.list(),
   });
 
+  const { data: currentUser } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: () => base44.auth.me(),
+  });
+
   const inviteUserMutation = useMutation({
     mutationFn: async (data) => {
       // First invite the user
@@ -121,6 +126,20 @@ export default function UserManagement() {
         vehicle_reg: '',
         vehicle_type: '',
       });
+    },
+  });
+
+  const approveDriverMutation = useMutation({
+    mutationFn: async (userId) => {
+      await base44.asServiceRole.entities.User.update(userId, {
+        approval_status: 'approved',
+        reviewed_by_user_id: currentUser?.id,
+        reviewed_at: new Date().toISOString(),
+        rejection_reason: null,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['allUsers']);
     },
   });
 
@@ -258,6 +277,11 @@ export default function UserManagement() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
+                              {user.app_role === 'driver' && user.approval_status === 'pending_review' && (
+                                <DropdownMenuItem onClick={() => approveDriverMutation.mutate(user.id)}>
+                                  Approve Driver
+                                </DropdownMenuItem>
+                              )}
                               <DropdownMenuItem>Edit User</DropdownMenuItem>
                               <DropdownMenuItem>Change Role</DropdownMenuItem>
                             </DropdownMenuContent>
