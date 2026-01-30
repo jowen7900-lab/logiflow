@@ -9,9 +9,15 @@ import { cn } from '@/lib/utils';
 
 const roleColors = {
   customer: 'bg-blue-500',
-  ops: 'bg-indigo-500',
+  admin: 'bg-indigo-500',
   driver: 'bg-emerald-500',
   fitter: 'bg-purple-500',
+};
+
+const getNormalizedRole = (role) => {
+  // Map legacy "ops" to "admin"
+  if (role === 'ops') return 'admin';
+  return role;
 };
 
 export default function JobChat({ messages = [], currentUserId, currentUserRole, onSendMessage, isLoading }) {
@@ -49,35 +55,36 @@ export default function JobChat({ messages = [], currentUserId, currentUserRole,
         )}
         
         {messages.map((message, index) => {
-          const isOwn = message.sender_id === currentUserId;
-          const isSystem = message.message_type === 'system';
-          
-          if (isSystem) {
-            return (
-              <div key={message.id} className="flex justify-center">
-                <span className="text-xs text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
-                  {message.message}
-                </span>
-              </div>
-            );
-          }
-          
-          return (
-            <div 
-              key={message.id} 
-              className={cn('flex gap-3', isOwn && 'flex-row-reverse')}
-            >
-              <Avatar className={cn('w-8 h-8', roleColors[message.sender_role])}>
-                <AvatarFallback className="text-white text-xs">
-                  {message.sender_name?.charAt(0) || '?'}
-                </AvatarFallback>
-              </Avatar>
-              
-              <div className={cn('max-w-[70%]', isOwn && 'items-end')}>
-                <div className={cn('flex items-center gap-2 mb-1', isOwn && 'flex-row-reverse')}>
-                  <span className="text-xs font-medium text-slate-700">{message.sender_name}</span>
-                  <span className="text-xs text-slate-400 capitalize">{message.sender_role}</span>
-                </div>
+           const isOwn = message.sender_id === currentUserId;
+           const isSystem = message.message_type === 'system';
+           const displayRole = getNormalizedRole(message.sender_role);
+
+           if (isSystem) {
+             return (
+               <div key={message.id} className="flex justify-center">
+                 <span className="text-xs text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
+                   {message.message}
+                 </span>
+               </div>
+             );
+           }
+
+           return (
+             <div 
+               key={message.id} 
+               className={cn('flex gap-3', isOwn && 'flex-row-reverse')}
+             >
+               <Avatar className={cn('w-8 h-8', roleColors[displayRole] || 'bg-slate-400')}>
+                 <AvatarFallback className="text-white text-xs">
+                   {message.sender_name?.charAt(0) || '?'}
+                 </AvatarFallback>
+               </Avatar>
+
+               <div className={cn('max-w-[70%]', isOwn && 'items-end')}>
+                 <div className={cn('flex items-center gap-2 mb-1', isOwn && 'flex-row-reverse')}>
+                   <span className="text-xs font-medium text-slate-700">{message.sender_name}</span>
+                   <span className="text-xs text-slate-400 capitalize">{displayRole}</span>
+                 </div>
                 
                 <div className={cn(
                   'rounded-2xl px-4 py-2.5',
