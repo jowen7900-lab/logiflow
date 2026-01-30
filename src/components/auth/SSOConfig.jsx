@@ -20,12 +20,25 @@ import { CheckCircle2, Building2 } from 'lucide-react';
  * 5. Role cannot be changed by user during session
  * 
  * Supported Roles:
+ * - admin: Administrator users
  * - customer: End customer users
- * - customer_admin: Customer organization admins
- * - ops: Operations team
  * - driver: Delivery drivers
  * - fitter: Installation fitters
  */
+
+export const ROLES = {
+  ADMIN: 'admin',
+  CUSTOMER: 'customer',
+  DRIVER: 'driver',
+  FITTER: 'fitter'
+};
+
+export const ROLE_LABELS = {
+  admin: 'Administrator',
+  customer: 'Customer',
+  driver: 'Driver',
+  fitter: 'Fitter'
+};
 
 export default function SSOConfig() {
   return (
