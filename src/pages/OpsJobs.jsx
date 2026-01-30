@@ -60,11 +60,8 @@ export default function OpsJobs() {
     queryFn: () => base44.auth.me(),
   });
 
-  // Allow ops, app_admin, customer, and customer_admin to access
-  const hasAccess = user?.app_role === 'ops' || 
-                    user?.app_role === 'app_admin' || 
-                    user?.app_role === 'customer' || 
-                    user?.app_role === 'customer_admin';
+  // Admin-only access for operations management
+  const hasAccess = user?.app_role === 'admin';
   
   const { data: jobs = [], isLoading } = useQuery({
     queryKey: ['allJobs'],
@@ -94,7 +91,7 @@ export default function OpsJobs() {
         driver_id: driver?.email,
         driver_name: driver?.full_name,
         vehicle_reg: driver?.vehicle_reg,
-        ops_status: 'driver_assigned',
+        ops_status: 'allocated',
         customer_status: 'confirmed',
       });
 
@@ -102,10 +99,10 @@ export default function OpsJobs() {
         job_id: jobId,
         job_number: assignDialog?.job_number,
         new_customer_status: 'confirmed',
-        new_ops_status: 'driver_assigned',
+        new_ops_status: 'allocated',
         changed_by: user?.email,
         changed_by_name: user?.full_name,
-        changed_by_role: 'ops',
+        changed_by_role: 'admin',
         notes: `Assigned driver: ${driver?.full_name}`,
       });
     },
@@ -130,7 +127,7 @@ export default function OpsJobs() {
         new_ops_status: assignDialog?.ops_status,
         changed_by: user?.email,
         changed_by_name: user?.full_name,
-        changed_by_role: 'ops',
+        changed_by_role: 'admin',
         notes: `Assigned fitter: ${fitter?.full_name}`,
       });
     },
@@ -188,18 +185,12 @@ export default function OpsJobs() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Statuses</SelectItem>
-            <SelectItem value="awaiting_allocation">Awaiting Allocation</SelectItem>
             <SelectItem value="allocated">Allocated</SelectItem>
-            <SelectItem value="driver_assigned">Driver Assigned</SelectItem>
-            <SelectItem value="en_route_collection">En Route Collection</SelectItem>
+            <SelectItem value="on_route_to_collection">On Route to Collection</SelectItem>
             <SelectItem value="collected">Collected</SelectItem>
-            <SelectItem value="in_transit">In Transit</SelectItem>
-            <SelectItem value="en_route_delivery">En Route Delivery</SelectItem>
-            <SelectItem value="arrived">Arrived</SelectItem>
-            <SelectItem value="delivering">Delivering</SelectItem>
-            <SelectItem value="completed">Completed</SelectItem>
+            <SelectItem value="on_route_to_delivery">On Route to Delivery</SelectItem>
+            <SelectItem value="delivered">Delivered</SelectItem>
             <SelectItem value="failed">Failed</SelectItem>
-            <SelectItem value="on_hold">On Hold</SelectItem>
           </SelectContent>
         </Select>
         
@@ -315,7 +306,7 @@ export default function OpsJobs() {
                                 setSelectedDriver('');
                                 setAssignDialog(job);
                               }}
-                              disabled={['completed', 'cancelled'].includes(job.ops_status)}
+                              disabled={['delivered', 'cancelled', 'failed'].includes(job.ops_status)}
                               className="h-7 px-2 text-xs"
                             >
                               Change
@@ -353,7 +344,7 @@ export default function OpsJobs() {
                                 setSelectedFitter('');
                                 setAssignDialog(job);
                               }}
-                              disabled={['completed', 'cancelled'].includes(job.ops_status)}
+                              disabled={['delivered', 'cancelled', 'failed'].includes(job.ops_status)}
                               className="h-7 px-2 text-xs"
                             >
                               Change
