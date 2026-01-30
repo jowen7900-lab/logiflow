@@ -52,7 +52,7 @@ export default function Layout({ children, currentPageName }) {
   const { data: pendingTasks = [] } = useQuery({
     queryKey: ['pendingTasks'],
     queryFn: () => base44.entities.OpsTask.filter({ status: 'pending' }),
-    enabled: user?.app_role === 'ops' || user?.app_role === 'admin',
+    enabled: user?.app_role === 'admin',
   });
 
   const handleMarkRead = async (notificationId) => {
