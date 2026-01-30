@@ -51,30 +51,24 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 
 const roleIcons = {
+  admin: Shield,
   customer: Building2,
-  customer_admin: Building2,
-  ops: Shield,
   driver: Truck,
   fitter: Wrench,
-  admin: Shield,
 };
 
 const roleColors = {
+  admin: 'bg-red-100 text-red-700',
   customer: 'bg-blue-100 text-blue-700',
-  customer_admin: 'bg-indigo-100 text-indigo-700',
-  ops: 'bg-purple-100 text-purple-700',
   driver: 'bg-emerald-100 text-emerald-700',
   fitter: 'bg-amber-100 text-amber-700',
-  admin: 'bg-red-100 text-red-700',
 };
 
 const roleLabels = {
+  admin: 'Admin',
   customer: 'Customer',
-  customer_admin: 'Customer Admin',
-  ops: 'Operations',
   driver: 'Driver',
   fitter: 'Fitter',
-  admin: 'Admin',
 };
 
 export default function UserManagement() {
@@ -153,12 +147,10 @@ export default function UserManagement() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Roles</SelectItem>
+              <SelectItem value="admin">Admin</SelectItem>
               <SelectItem value="customer">Customer</SelectItem>
-              <SelectItem value="customer_admin">Customer Admin</SelectItem>
-              <SelectItem value="ops">Operations</SelectItem>
               <SelectItem value="driver">Driver</SelectItem>
               <SelectItem value="fitter">Fitter</SelectItem>
-              <SelectItem value="admin">Admin</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -293,17 +285,15 @@ export default function UserManagement() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="admin">Admin</SelectItem>
                   <SelectItem value="customer">Customer</SelectItem>
-                  <SelectItem value="customer_admin">Customer Admin</SelectItem>
-                  <SelectItem value="ops">Operations</SelectItem>
                   <SelectItem value="driver">Driver</SelectItem>
                   <SelectItem value="fitter">Fitter</SelectItem>
-                  <SelectItem value="admin">Admin</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             
-            {(inviteData.app_role === 'customer' || inviteData.app_role === 'customer_admin') && (
+            {inviteData.app_role === 'customer' && (
               <div>
                 <Label>Customer Organization</Label>
                 <Select 
