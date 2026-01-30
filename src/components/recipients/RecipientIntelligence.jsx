@@ -12,6 +12,9 @@ export default function RecipientIntelligence({
   userRole,
   currentJobId = null 
 }) {
+  // Early return: never render for drivers
+  if (userRole === 'driver' || userRole === 'fitter') return null;
+  
   const [history, setHistory] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
