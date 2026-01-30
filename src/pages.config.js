@@ -61,7 +61,6 @@ import DriverManagement from './pages/DriverManagement';
 import DriverPerformance from './pages/DriverPerformance';
 import FitterJobs from './pages/FitterJobs';
 import FitterManagement from './pages/FitterManagement';
-import JobDetail from './pages/JobDetail';
 import Messages from './pages/Messages';
 import onboardingcalAdmin from './pages/OnboardingCal_admin';
 import OnboardingCustomer from './pages/OnboardingCustomer';
@@ -78,6 +77,7 @@ import Plans from './pages/Plans';
 import RoleGuard from './pages/RoleGuard';
 import RoleSelection from './pages/RoleSelection';
 import UserManagement from './pages/UserManagement';
+import JobDetail from './pages/JobDetail';
 import __Layout from './Layout.jsx';
 
 
@@ -96,7 +96,6 @@ export const PAGES = {
     "DriverPerformance": DriverPerformance,
     "FitterJobs": FitterJobs,
     "FitterManagement": FitterManagement,
-    "JobDetail": JobDetail,
     "Messages": Messages,
     "OnboardingCal_admin": onboardingcalAdmin,
     "OnboardingCustomer": OnboardingCustomer,
@@ -113,6 +112,7 @@ export const PAGES = {
     "RoleGuard": RoleGuard,
     "RoleSelection": RoleSelection,
     "UserManagement": UserManagement,
+    "JobDetail": JobDetail,
 }
 
 export const pagesConfig = {

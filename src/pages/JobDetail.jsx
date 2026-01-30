@@ -297,7 +297,7 @@ export default function JobDetail() {
         </div>
         
         {/* Only customers can request changes, not drivers or fitters */}
-        {isCustomer && !['completed', 'cancelled'].includes(job.customer_status) && (
+        {isCustomer && !['delivered', 'cancelled'].includes(job.customer_status) && (
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={() => handleRequestChange('date')}>
               <CalendarIcon className="w-4 h-4 mr-2" />
@@ -515,7 +515,7 @@ export default function JobDetail() {
           </Card>
 
           {/* POD Section */}
-          {job.customer_status === 'completed' && (
+          {job.customer_status === 'delivered' && (
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
