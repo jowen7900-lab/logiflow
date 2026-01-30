@@ -13,30 +13,32 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+// Legacy to canonical ops_status mapping for UI normalization
+const LEGACY_TO_CANONICAL = {
+  en_route_collection: 'on_route_to_collection',
+  in_transit: 'on_route_to_delivery',
+  en_route_delivery: 'on_route_to_delivery',
+  arrived: 'collected',
+  delivering: 'on_route_to_delivery',
+  completed: 'delivered',
+  cancelled: 'failed',
+};
+
 const getStatusIcon = (status) => {
   const iconMap = {
-    awaiting_allocation: Clock,
     allocated: Package,
-    driver_assigned: User,
-    en_route_collection: Truck,
+    on_route_to_collection: Truck,
     collected: Package,
-    in_transit: Truck,
-    en_route_delivery: Truck,
-    arrived: MapPin,
-    delivering: Package,
-    pod_pending: FileText,
-    completed: CheckCircle2,
+    on_route_to_delivery: Truck,
+    delivered: CheckCircle2,
     failed: AlertTriangle,
-    on_hold: Clock,
-    cancelled: AlertTriangle,
   };
   return iconMap[status] || Clock;
 };
 
 const getStatusColor = (status) => {
-  if (['completed'].includes(status)) return 'bg-emerald-500';
-  if (['failed', 'cancelled'].includes(status)) return 'bg-red-500';
-  if (['on_hold'].includes(status)) return 'bg-amber-500';
+  if (['delivered'].includes(status)) return 'bg-emerald-500';
+  if (['failed'].includes(status)) return 'bg-red-500';
   return 'bg-indigo-500';
 };
 
