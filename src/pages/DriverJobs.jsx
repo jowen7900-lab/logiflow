@@ -278,7 +278,7 @@ export default function DriverJobs() {
       currentStatus: etaDialog.ops_status,
       newStatus: 'on_route_to_collection',
       customerStatus: 'in_progress',
-      notes: `Started collection route. ETA: ${format(new Date(etaIso), 'PPP HH:mm')}`,
+      notes: `Started collection route. ETA: ${etaIso}`,
       eta: etaIso,
     });
   };
@@ -294,7 +294,7 @@ export default function DriverJobs() {
       currentStatus: collectedDialog.ops_status,
       newStatus: 'collected',
       customerStatus: 'in_progress',
-      notes: `Collected by ${collectedData.name}. Collection time: ${format(new Date(collectedTimeIso), 'PPP HH:mm')}`,
+      notes: `Collected by ${collectedData.name}. Collection time: ${collectedTimeIso}`,
       collectionContactName: collectedData.name,
       actualArrivalIso: collectedTimeIso,
     });
@@ -311,7 +311,7 @@ export default function DriverJobs() {
       currentStatus: deliveryEtaDialog.ops_status,
       newStatus: 'on_route_to_delivery',
       customerStatus: 'in_progress',
-      notes: `Started delivery route. ETA: ${format(new Date(etaIso), 'PPP HH:mm')}`,
+      notes: `Started delivery route. ETA: ${etaIso}`,
       eta: etaIso,
     });
   };
