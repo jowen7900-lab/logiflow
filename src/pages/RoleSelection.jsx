@@ -17,22 +17,6 @@ const roles = [
     color: 'bg-blue-50 border-blue-200 hover:bg-blue-100',
     iconColor: 'text-blue-600',
   },
-  {
-    value: 'fitter',
-    label: 'Fitter',
-    icon: Wrench,
-    description: 'Install and fit products',
-    color: 'bg-amber-50 border-amber-200 hover:bg-amber-100',
-    iconColor: 'text-amber-600',
-  },
-  {
-    value: 'customer',
-    label: 'Customer',
-    icon: Building2,
-    description: 'Book and manage deliveries',
-    color: 'bg-indigo-50 border-indigo-200 hover:bg-indigo-100',
-    iconColor: 'text-indigo-600',
-  },
 ];
 
 export default function RoleSelection() {
