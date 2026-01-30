@@ -209,13 +209,14 @@ export default function DriverJobs() {
     if (!collectionEta) {
       return;
     }
+    const etaIso = new Date(collectionEta).toISOString();
     updateStatusMutation.mutate({
       jobId: etaDialog.id,
       jobNumber: etaDialog.job_number,
       newStatus: 'on_route_to_collection',
       customerStatus: 'in_progress',
-      notes: `Started collection route with ETA ${collectionEta}`,
-      eta: collectionEta,
+      notes: `Started collection route with ETA ${etaIso}`,
+      eta: etaIso,
     });
   };
 
