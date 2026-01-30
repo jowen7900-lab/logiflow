@@ -166,7 +166,7 @@ export default function JobDetail() {
         job_number: job.job_number,
         sender_id: user?.email,
         sender_name: user?.full_name,
-        sender_role: user?.app_role?.includes('customer') ? 'customer' : user?.app_role,
+        sender_role: user?.app_role,
         message,
         message_type: 'text',
       });
@@ -178,6 +178,11 @@ export default function JobDetail() {
 
   const assignFitterMutation = useMutation({
     mutationFn: async ({ fitterId }) => {
+      // Guard: Only customers owning the job can assign fitters
+      if (!isCustomer || user?.customer_id !== job?.customer_id) {
+        throw new Error('Unauthorized: Only customers can assign fitters to their own jobs');
+      }
+
       const fitter = fitters.find(f => f.id === fitterId);
       await base44.entities.Job.update(job.id, {
         fitter_id: fitter?.email,
