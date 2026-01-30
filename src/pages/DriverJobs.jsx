@@ -36,11 +36,18 @@ import {
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
-const statusTransitions = {
+// LOCKED: Enforce sequential 6-step ops_status transitions - no skipping allowed
+const ALLOWED_TRANSITIONS = {
   allocated: ['on_route_to_collection'],
   on_route_to_collection: ['collected'],
   collected: ['on_route_to_delivery'],
   on_route_to_delivery: ['delivered', 'failed'],
+};
+
+// Validate transition is allowed (e.g., cannot skip allocated -> delivered)
+const isTransitionAllowed = (currentStatus, newStatus) => {
+  const allowedNext = ALLOWED_TRANSITIONS[currentStatus] || [];
+  return allowedNext.includes(newStatus);
 };
 
 const statusLabels = {
@@ -92,7 +99,13 @@ export default function DriverJobs() {
   });
 
   const updateStatusMutation = useMutation({
-    mutationFn: async ({ jobId, jobNumber, newStatus, customerStatus, notes, eta, collectionContactName, actualArrivalIso }) => {
+    mutationFn: async ({ jobId, jobNumber, currentStatus, newStatus, customerStatus, notes, eta, collectionContactName, actualArrivalIso }) => {
+      // GUARD: Enforce sequential transitions - prevent skipping steps
+      // Example blocked: allocated -> delivered (must go through collection steps first)
+      if (!isTransitionAllowed(currentStatus, newStatus)) {
+        throw new Error(`Invalid transition: cannot skip from ${currentStatus} to ${newStatus}`);
+      }
+
       const updates = { ops_status: newStatus };
       if (customerStatus) updates.customer_status = customerStatus;
       if (eta) updates.eta = eta;
@@ -121,10 +134,19 @@ export default function DriverJobs() {
       setDeliveryEtaDialog(null);
       setDeliveryEta('');
     },
+    onError: (error) => {
+      // Display error message when invalid transition is attempted
+      alert(error.message || 'Status update failed');
+    },
   });
 
   const completePodMutation = useMutation({
     mutationFn: async ({ job }) => {
+      // GUARD: Enforce sequential transitions - can only deliver from on_route_to_delivery
+      if (!isTransitionAllowed(job.ops_status, 'delivered')) {
+        throw new Error(`Invalid transition: cannot skip from ${job.ops_status} to delivered`);
+      }
+
       await base44.entities.Job.update(job.id, {
         ops_status: 'delivered',
         customer_status: 'delivered',
@@ -151,10 +173,18 @@ export default function DriverJobs() {
       setPodData({ name: '', notes: '' });
       setPodPhotos([]);
     },
+    onError: (error) => {
+      alert(error.message || 'POD completion failed');
+    },
   });
 
   const markFailedMutation = useMutation({
     mutationFn: async ({ job }) => {
+      // GUARD: Enforce sequential transitions - can only fail from on_route_to_delivery
+      if (!isTransitionAllowed(job.ops_status, 'failed')) {
+        throw new Error(`Invalid transition: cannot fail from ${job.ops_status}, must be on_route_to_delivery`);
+      }
+
       await base44.entities.Job.update(job.id, {
         ops_status: 'failed',
         has_exception: true,
@@ -195,6 +225,9 @@ export default function DriverJobs() {
       setFailName('');
       setFailPhotos([]);
     },
+    onError: (error) => {
+      alert(error.message || 'Failed to mark job as failed');
+    },
   });
 
   const handleStatusUpdate = (job, newStatus) => {
@@ -227,6 +260,7 @@ export default function DriverJobs() {
     updateStatusMutation.mutate({
       jobId: job.id,
       jobNumber: job.job_number,
+      currentStatus: job.ops_status,
       newStatus,
       customerStatus,
       notes: `Status updated to ${newStatus}`,
@@ -241,6 +275,7 @@ export default function DriverJobs() {
     updateStatusMutation.mutate({
       jobId: etaDialog.id,
       jobNumber: etaDialog.job_number,
+      currentStatus: etaDialog.ops_status,
       newStatus: 'on_route_to_collection',
       customerStatus: 'in_progress',
       notes: `Started collection route with ETA ${etaIso}`,
@@ -256,6 +291,7 @@ export default function DriverJobs() {
     updateStatusMutation.mutate({
       jobId: collectedDialog.id,
       jobNumber: collectedDialog.job_number,
+      currentStatus: collectedDialog.ops_status,
       newStatus: 'collected',
       customerStatus: 'in_progress',
       notes: `Collected by ${collectedData.name} at ${collectedTimeIso}`,
@@ -272,6 +308,7 @@ export default function DriverJobs() {
     updateStatusMutation.mutate({
       jobId: deliveryEtaDialog.id,
       jobNumber: deliveryEtaDialog.job_number,
+      currentStatus: deliveryEtaDialog.ops_status,
       newStatus: 'on_route_to_delivery',
       customerStatus: 'in_progress',
       notes: `Started delivery route with ETA ${etaIso}`,
@@ -318,7 +355,7 @@ export default function DriverJobs() {
   };
 
   const JobCard = ({ job }) => {
-    const nextStatuses = statusTransitions[job.ops_status] || [];
+    const nextStatuses = ALLOWED_TRANSITIONS[job.ops_status] || [];
     
     return (
       <Card className={cn(
