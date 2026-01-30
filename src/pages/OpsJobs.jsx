@@ -268,7 +268,6 @@ export default function OpsJobs() {
                               variant="ghost"
                               size="sm"
                               onClick={() => {
-                                setAssignType('driver');
                                 setSelectedDriver('');
                                 setAssignDialog(job);
                               }}
@@ -283,50 +282,11 @@ export default function OpsJobs() {
                             variant="outline"
                             size="sm"
                             onClick={() => {
-                              setAssignType('driver');
                               setAssignDialog(job);
                             }}
-                            disabled={['completed', 'cancelled'].includes(job.ops_status)}
+                            disabled={['delivered', 'cancelled', 'failed'].includes(job.ops_status)}
                           >
                             <Truck className="w-3.5 h-3.5 mr-1" />
-                            Assign
-                          </Button>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {job.fitter_name ? (
-                          <div className="flex items-center gap-2">
-                            <div className="flex items-center gap-2">
-                              <div className="w-6 h-6 bg-amber-100 rounded-full flex items-center justify-center">
-                                <Wrench className="w-3.5 h-3.5 text-amber-600" />
-                              </div>
-                              <span className="text-sm">{job.fitter_name}</span>
-                            </div>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => {
-                                setAssignType('fitter');
-                                setSelectedFitter('');
-                                setAssignDialog(job);
-                              }}
-                              disabled={['delivered', 'cancelled', 'failed'].includes(job.ops_status)}
-                              className="h-7 px-2 text-xs"
-                            >
-                              Change
-                            </Button>
-                          </div>
-                        ) : (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              setAssignType('fitter');
-                              setAssignDialog(job);
-                            }}
-                            disabled={['completed', 'cancelled'].includes(job.ops_status)}
-                          >
-                            <Wrench className="w-3.5 h-3.5 mr-1" />
                             Assign
                           </Button>
                         )}
