@@ -45,6 +45,16 @@ import {
 import { format } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
 
+// Guard: Enforce that ALL admin ops_status changes require a reason
+// Throws error if reason is missing, blocking the mutation
+// Example blocked: admin tries to update ops_status without providing reason
+const requireAdminReason = (reason) => {
+  if (!reason || !reason.trim()) {
+    throw new Error('Admin override requires a reason. Please provide a valid reason for this status change.');
+  }
+  return reason.trim();
+};
+
 export default function OpsJobs() {
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
@@ -80,6 +90,9 @@ export default function OpsJobs() {
 
   const assignDriverMutation = useMutation({
     mutationFn: async ({ jobId, driverId }) => {
+      // GUARD: Enforce admin reason requirement for ops_status changes
+      const validatedReason = requireAdminReason(assignReason);
+
       const driver = drivers.find(d => d.id === driverId);
       await base44.entities.Job.update(jobId, {
         driver_id: driver?.email,
@@ -97,8 +110,11 @@ export default function OpsJobs() {
         changed_by: user?.email,
         changed_by_name: user?.full_name,
         changed_by_role: 'admin',
-        notes: `Assigned driver: ${driver?.full_name}. Reason: ${assignReason}`,
+        notes: `Assigned driver: ${driver?.full_name}. Reason: ${validatedReason}`,
       });
+    },
+    onError: (error) => {
+      alert(error.message || 'Failed to assign driver');
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['allJobs']);
