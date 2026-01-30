@@ -59,6 +59,9 @@ export default function DriverJobs() {
   const [uploadingPhotos, setUploadingPhotos] = useState(false);
   const [failDialog, setFailDialog] = useState(null);
   const [failReason, setFailReason] = useState('');
+  const [failName, setFailName] = useState('');
+  const [failPhotos, setFailPhotos] = useState([]);
+  const [uploadingFailPhotos, setUploadingFailPhotos] = useState(false);
   const [etaDialog, setEtaDialog] = useState(null);
   const [collectionEta, setCollectionEta] = useState('');
   const [collectedDialog, setCollectedDialog] = useState(null);
@@ -156,6 +159,8 @@ export default function DriverJobs() {
         ops_status: 'failed',
         has_exception: true,
         exception_reason: failReason,
+        pod_name: failName,
+        pod_images: failPhotos,
       });
 
       await base44.entities.JobStatusHistory.create({
@@ -165,7 +170,7 @@ export default function DriverJobs() {
         changed_by: user?.email,
         changed_by_name: user?.full_name,
         changed_by_role: 'driver',
-        notes: failReason,
+        notes: `Reported by ${failName}. Reason: ${failReason}`,
       });
 
       await base44.entities.OpsTask.create({
@@ -176,7 +181,7 @@ export default function DriverJobs() {
         status: 'pending',
         priority: 'high',
         title: `Failed Delivery: ${job.job_number}`,
-        description: failReason,
+        description: `Reported by ${failName}. Reason: ${failReason}`,
         requested_by: user?.email,
         requested_by_name: user?.full_name,
         customer_id: job.customer_id,
@@ -187,6 +192,8 @@ export default function DriverJobs() {
       queryClient.invalidateQueries(['driverJobs']);
       setFailDialog(null);
       setFailReason('');
+      setFailName('');
+      setFailPhotos([]);
     },
   });
 
@@ -288,6 +295,25 @@ export default function DriverJobs() {
       console.error('Photo upload failed:', error);
     } finally {
       setUploadingPhotos(false);
+    }
+  };
+
+  const handleFailPhotoUpload = async (e) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    setUploadingFailPhotos(true);
+    try {
+      const uploadPromises = files.map(file => 
+        base44.integrations.Core.UploadFile({ file })
+      );
+      const results = await Promise.all(uploadPromises);
+      const urls = results.map(r => r.file_url);
+      setFailPhotos(prev => [...prev, ...urls]);
+    } catch (error) {
+      console.error('Photo upload failed:', error);
+    } finally {
+      setUploadingFailPhotos(false);
     }
   };
 
@@ -655,17 +681,50 @@ export default function DriverJobs() {
               Report delivery failure for {failDialog?.job_number}
             </DialogDescription>
           </DialogHeader>
-          
-          <div className="py-4">
-            <Label>Reason for failure *</Label>
-            <Textarea
-              value={failReason}
-              onChange={(e) => setFailReason(e.target.value)}
-              placeholder="Explain why delivery could not be completed..."
-              className="mt-1.5"
-            />
+
+          <div className="space-y-4 py-4">
+            <div>
+              <Label>Reported By (Name) *</Label>
+              <Input
+                value={failName}
+                onChange={(e) => setFailName(e.target.value)}
+                placeholder="Your name"
+                className="mt-1.5"
+              />
+            </div>
+            <div>
+              <Label>Reason for failure *</Label>
+              <Textarea
+                value={failReason}
+                onChange={(e) => setFailReason(e.target.value)}
+                placeholder="Explain why delivery could not be completed..."
+                className="mt-1.5"
+              />
+            </div>
+            <div>
+              <Label>Evidence Photos *</Label>
+              <Input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleFailPhotoUpload}
+                disabled={uploadingFailPhotos}
+                className="mt-1.5"
+              />
+              {uploadingFailPhotos && (
+                <p className="text-xs text-slate-500 mt-1">Uploading...</p>
+              )}
+              {failPhotos.length > 0 && (
+                <p className="text-xs text-emerald-600 mt-1">
+                  {failPhotos.length} photo{failPhotos.length > 1 ? 's' : ''} uploaded
+                </p>
+              )}
+              {!failPhotos.length && (
+                <p className="text-xs text-red-500 mt-1">At least 1 photo required</p>
+              )}
+            </div>
           </div>
-          
+
           <DialogFooter>
             <Button variant="outline" onClick={() => setFailDialog(null)}>
               Cancel
@@ -673,7 +732,7 @@ export default function DriverJobs() {
             <Button
               variant="destructive"
               onClick={() => markFailedMutation.mutate({ job: failDialog })}
-              disabled={!failReason || markFailedMutation.isPending}
+              disabled={!failReason || !failName || failPhotos.length === 0 || markFailedMutation.isPending || uploadingFailPhotos}
             >
               {markFailedMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               Mark as Failed
