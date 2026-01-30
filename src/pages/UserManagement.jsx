@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Dialog,
   DialogContent,
@@ -83,6 +84,9 @@ export default function UserManagement() {
     vehicle_reg: '',
     vehicle_type: '',
   });
+  const [rejectDialog, setRejectDialog] = useState(false);
+  const [rejectUser, setRejectUser] = useState(null);
+  const [rejectionReason, setRejectionReason] = useState('');
 
   const { data: users = [], isLoading } = useQuery({
     queryKey: ['allUsers'],
@@ -140,6 +144,23 @@ export default function UserManagement() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['allUsers']);
+    },
+  });
+
+  const rejectDriverMutation = useMutation({
+    mutationFn: async ({ userId, reason }) => {
+      await base44.asServiceRole.entities.User.update(userId, {
+        approval_status: 'rejected',
+        reviewed_by_user_id: currentUser?.id,
+        reviewed_at: new Date().toISOString(),
+        rejection_reason: reason,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['allUsers']);
+      setRejectDialog(false);
+      setRejectUser(null);
+      setRejectionReason('');
     },
   });
 
@@ -278,9 +299,17 @@ export default function UserManagement() {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               {user.app_role === 'driver' && user.approval_status === 'pending_review' && (
-                                <DropdownMenuItem onClick={() => approveDriverMutation.mutate(user.id)}>
-                                  Approve Driver
-                                </DropdownMenuItem>
+                                <>
+                                  <DropdownMenuItem onClick={() => approveDriverMutation.mutate(user.id)}>
+                                    Approve Driver
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => {
+                                    setRejectUser(user);
+                                    setRejectDialog(true);
+                                  }}>
+                                    Reject Driver
+                                  </DropdownMenuItem>
+                                </>
                               )}
                               <DropdownMenuItem>Edit User</DropdownMenuItem>
                               <DropdownMenuItem>Change Role</DropdownMenuItem>
@@ -391,6 +420,51 @@ export default function UserManagement() {
             >
               {inviteUserMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               Send Invitation
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reject Driver Dialog */}
+      <Dialog open={rejectDialog} onOpenChange={setRejectDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Reject Driver Application</DialogTitle>
+            <DialogDescription>
+              Provide a reason for rejecting {rejectUser?.full_name || rejectUser?.email}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div>
+              <Label>Rejection Reason *</Label>
+              <Textarea
+                value={rejectionReason}
+                onChange={(e) => setRejectionReason(e.target.value)}
+                placeholder="Please provide a clear reason for rejection..."
+                className="mt-1.5 min-h-[100px]"
+              />
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setRejectDialog(false);
+              setRejectUser(null);
+              setRejectionReason('');
+            }}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => rejectDriverMutation.mutate({ 
+                userId: rejectUser?.id, 
+                reason: rejectionReason 
+              })}
+              disabled={!rejectionReason.trim() || rejectDriverMutation.isPending}
+              variant="destructive"
+            >
+              {rejectDriverMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              Confirm Reject
             </Button>
           </DialogFooter>
         </DialogContent>
