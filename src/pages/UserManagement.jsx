@@ -312,8 +312,8 @@ export default function UserManagement() {
                               {user.app_role === 'driver' && user.approval_status === 'pending_review' && (
                                 <>
                                   <DropdownMenuItem 
-                                    onSelect={(e) => {
-                                      e.preventDefault();
+                                    onClick={(e) => {
+                                      e.stopPropagation();
                                       approveDriverMutation.mutate(user.id);
                                     }}
                                     disabled={approveDriverMutation.isPending}
@@ -321,8 +321,8 @@ export default function UserManagement() {
                                     {approveDriverMutation.isPending ? 'Approving...' : 'Approve Driver'}
                                   </DropdownMenuItem>
                                   <DropdownMenuItem 
-                                    onSelect={(e) => {
-                                      e.preventDefault();
+                                    onClick={(e) => {
+                                      e.stopPropagation();
                                       setRejectUser(user);
                                       setRejectDialog(true);
                                     }}
