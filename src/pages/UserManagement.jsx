@@ -50,6 +50,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Skeleton } from '@/components/ui/skeleton';
+import toast from 'react-hot-toast';
 
 const roleIcons = {
   admin: Shield,
@@ -87,6 +88,10 @@ export default function UserManagement() {
   const [rejectDialog, setRejectDialog] = useState(false);
   const [rejectUser, setRejectUser] = useState(null);
   const [rejectionReason, setRejectionReason] = useState('');
+  const [editDialog, setEditDialog] = useState(false);
+  const [editUser, setEditUser] = useState(null);
+  const [changeRoleDialog, setChangeRoleDialog] = useState(false);
+  const [changeRoleUser, setChangeRoleUser] = useState(null);
 
   const { data: users = [], isLoading } = useQuery({
     queryKey: ['allUsers'],
@@ -144,6 +149,10 @@ export default function UserManagement() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['allUsers'] });
+      toast.success('Driver approved successfully');
+    },
+    onError: (error) => {
+      toast.error(`Failed to approve driver: ${error.message}`);
     },
   });
 
@@ -311,8 +320,18 @@ export default function UserManagement() {
                                   </DropdownMenuItem>
                                 </>
                               )}
-                              <DropdownMenuItem>Edit User</DropdownMenuItem>
-                              <DropdownMenuItem>Change Role</DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => {
+                                setEditUser(user);
+                                setEditDialog(true);
+                              }}>
+                                Edit User
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => {
+                                setChangeRoleUser(user);
+                                setChangeRoleDialog(true);
+                              }}>
+                                Change Role
+                              </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </TableCell>
@@ -420,6 +439,46 @@ export default function UserManagement() {
             >
               {inviteUserMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               Send Invitation
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit User Dialog */}
+      <Dialog open={editDialog} onOpenChange={setEditDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit User</DialogTitle>
+            <DialogDescription>
+              Update details for {editUser?.full_name || editUser?.email}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-sm text-slate-500">Edit functionality coming soon</p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditDialog(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Change Role Dialog */}
+      <Dialog open={changeRoleDialog} onOpenChange={setChangeRoleDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Change User Role</DialogTitle>
+            <DialogDescription>
+              Update role for {changeRoleUser?.full_name || changeRoleUser?.email}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-sm text-slate-500">Role change functionality coming soon</p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setChangeRoleDialog(false)}>
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>
