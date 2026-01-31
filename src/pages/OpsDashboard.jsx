@@ -38,6 +38,7 @@ export default function OpsDashboard() {
   const { data: drivers = [] } = useQuery({
     queryKey: ['drivers'],
     queryFn: () => base44.entities.User.filter({ app_role: 'driver' }),
+    refetchInterval: 5000, // Auto-refresh every 5 seconds
   });
 
   // Metrics calculations
