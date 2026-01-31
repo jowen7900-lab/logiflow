@@ -266,7 +266,7 @@ export default function OpsJobs() {
                         <span className="text-sm capitalize">{job.job_type}</span>
                       </TableCell>
                       <TableCell>
-                        <StatusBadge status={job.ops_status} type="ops" size="sm" />
+                        <StatusBadge status={job.ops_status} type="ops" size="sm" job={job} />
                       </TableCell>
                       <TableCell>
                         <div className="text-sm">

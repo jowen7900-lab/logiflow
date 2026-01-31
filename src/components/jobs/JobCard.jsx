@@ -35,7 +35,7 @@ export default function JobCard({ job, showOpsStatus = false, compact = false })
               </Link>
               <StatusBadge status={job.customer_status} type="customer" size="sm" />
               {showOpsStatus && (
-                <StatusBadge status={job.ops_status} type="ops" size="sm" />
+                <StatusBadge status={job.ops_status} type="ops" size="sm" job={job} />
               )}
               {job.priority !== 'standard' && (
                 <StatusBadge status={job.priority} type="priority" size="sm" />
