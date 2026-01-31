@@ -31,7 +31,8 @@ import {
   Loader2,
   Play,
   PoundSterling,
-  ChevronRight
+  ChevronRight,
+  User
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -389,8 +390,16 @@ export default function DriverJobs() {
             <div className="flex items-start gap-2">
               <MapPin className="w-4 h-4 text-slate-400 mt-0.5" />
               <div className="flex-1">
+                <p className="text-xs text-slate-400 uppercase font-medium mb-0.5">Delivery</p>
                 <p className="text-sm font-medium">{job.delivery_address}</p>
                 <p className="text-xs text-slate-500">{job.delivery_postcode}</p>
+                {job.delivery_contact && (
+                  <div className="flex items-center gap-1 mt-1 text-xs text-slate-600">
+                    <Phone className="w-3 h-3" />
+                    {job.delivery_contact}
+                    {job.delivery_phone && ` • ${job.delivery_phone}`}
+                  </div>
+                )}
               </div>
               <a
                 href={`https://maps.google.com/?q=${encodeURIComponent(job.delivery_address + ' ' + job.delivery_postcode)}`}
@@ -401,6 +410,16 @@ export default function DriverJobs() {
                 <Navigation className="w-4 h-4 text-indigo-600" />
               </a>
             </div>
+
+            {job.fitter_name && (
+              <div className="flex items-start gap-2 p-2 bg-blue-50 rounded-lg">
+                <User className="w-4 h-4 text-blue-600 mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-xs text-blue-600 uppercase font-medium mb-0.5">Fitter Assigned</p>
+                  <p className="text-sm font-medium text-blue-900">{job.fitter_name}</p>
+                </div>
+              </div>
+            )}
 
             <div className="flex items-center gap-4 text-sm text-slate-500">
               <div className="flex items-center gap-1">
