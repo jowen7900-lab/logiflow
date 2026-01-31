@@ -163,7 +163,6 @@ export default function CreateJob() {
         job_id: job.id,
         job_number: jobNumber,
         new_customer_status: 'requested',
-        new_ops_status: job.ops_status,
         changed_by: user?.email,
         changed_by_name: user?.full_name,
         changed_by_role: 'customer',
