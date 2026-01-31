@@ -41,7 +41,6 @@ const steps = [
   { id: 'type', title: 'Job Type', icon: Package },
   { id: 'collection', title: 'Collection', icon: MapPin },
   { id: 'delivery', title: 'Delivery', icon: MapPin },
-  { id: 'schedule', title: 'Schedule', icon: CalendarIcon },
   { id: 'items', title: 'Items', icon: FileText },
   { id: 'review', title: 'Review', icon: Check },
 ];
@@ -60,10 +59,16 @@ export default function CreateJob() {
     collection_postcode: '',
     collection_contact: '',
     collection_phone: '',
+    collection_date: null,
+    collection_time_slot: '',
+    collection_time: '',
     delivery_address: '',
     delivery_postcode: '',
     delivery_contact: '',
     delivery_phone: '',
+    delivery_date: null,
+    delivery_time_slot: '',
+    delivery_time: '',
     scheduled_date: null,
     scheduled_time_slot: '',
     scheduled_time: '',
@@ -179,10 +184,10 @@ export default function CreateJob() {
     const warnings = [];
     const rules = customer?.booking_rules || {};
     
-    // Lead time check
-    if (rules.min_lead_time_hours && formData.scheduled_date) {
+    // Lead time check - use delivery_date
+    if (rules.min_lead_time_hours && formData.delivery_date) {
       const minDate = addDays(new Date(), Math.ceil(rules.min_lead_time_hours / 24));
-      if (new Date(formData.scheduled_date) < minDate) {
+      if (new Date(formData.delivery_date) < minDate) {
         warnings.push({
           rule: 'Lead Time',
           message: `Minimum ${rules.min_lead_time_hours} hours lead time required`,
@@ -262,12 +267,12 @@ export default function CreateJob() {
       case 'type':
         return !!formData.job_type;
       case 'collection':
-        return formData.job_type !== 'delivery' || 
-          (formData.collection_address && formData.collection_postcode);
+        if (formData.job_type === 'delivery') return true;
+        return formData.collection_address && formData.collection_postcode && 
+               formData.collection_date && formData.collection_time_slot;
       case 'delivery':
-        return formData.delivery_address && formData.delivery_postcode;
-      case 'schedule':
-        return formData.scheduled_date && formData.scheduled_time_slot;
+        return formData.delivery_address && formData.delivery_postcode &&
+               formData.delivery_date && formData.delivery_time_slot;
       case 'items':
         return true;
       default:
@@ -278,6 +283,14 @@ export default function CreateJob() {
   const handleNext = () => {
     if (currentStep === steps.length - 2) {
       validateRules();
+    }
+    // Set scheduled_date/time_slot for backward compatibility with existing job entity
+    if (currentStep === 2 && formData.delivery_date) {
+      updateFormData({ 
+        scheduled_date: formData.delivery_date,
+        scheduled_time_slot: formData.delivery_time_slot,
+        scheduled_time: formData.delivery_time
+      });
     }
     setCurrentStep(prev => Math.min(prev + 1, steps.length - 1));
   };
@@ -334,11 +347,10 @@ export default function CreateJob() {
           <CardTitle>{steps[currentStep].title}</CardTitle>
           <CardDescription>
             {currentStep === 0 && 'Select the type of job you want to create'}
-            {currentStep === 1 && 'Enter collection address details'}
-            {currentStep === 2 && 'Enter delivery address details'}
-            {currentStep === 3 && 'Choose your preferred date and time'}
-            {currentStep === 4 && 'Add the items to be delivered'}
-            {currentStep === 5 && 'Review and confirm your job'}
+            {currentStep === 1 && 'Enter collection address and schedule'}
+            {currentStep === 2 && 'Enter delivery address and schedule'}
+            {currentStep === 3 && 'Add the items to be delivered'}
+            {currentStep === 4 && 'Review and confirm your job'}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -671,8 +683,8 @@ export default function CreateJob() {
             </div>
           )}
 
-          {/* Step 6: Review */}
-          {currentStep === 5 && (
+          {/* Step 4: Review */}
+          {currentStep === 4 && (
             <div className="space-y-6">
               {ruleWarnings.length > 0 && (
                 <Alert className="border-amber-200 bg-amber-50">
@@ -696,17 +708,34 @@ export default function CreateJob() {
                       <span className="text-slate-500">Type:</span>
                       <span className="font-medium capitalize">{formData.job_type.replace('_', ' ')}</span>
                     </div>
+                    {formData.collection_date && (
+                      <>
+                        <div className="flex justify-between">
+                          <span className="text-slate-500">Collection Date:</span>
+                          <span className="font-medium">
+                            {format(formData.collection_date, 'PPP')}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-500">Collection Time:</span>
+                          <span className="font-medium uppercase">
+                            {formData.collection_time_slot}
+                            {formData.collection_time && ` (${formData.collection_time})`}
+                          </span>
+                        </div>
+                      </>
+                    )}
                     <div className="flex justify-between">
-                      <span className="text-slate-500">Date:</span>
+                      <span className="text-slate-500">Delivery Date:</span>
                       <span className="font-medium">
-                        {formData.scheduled_date && format(formData.scheduled_date, 'PPP')}
+                        {formData.delivery_date && format(formData.delivery_date, 'PPP')}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-slate-500">Time:</span>
+                      <span className="text-slate-500">Delivery Time:</span>
                       <span className="font-medium uppercase">
-                        {formData.scheduled_time_slot}
-                        {formData.scheduled_time && ` (${formData.scheduled_time})`}
+                        {formData.delivery_time_slot}
+                        {formData.delivery_time && ` (${formData.delivery_time})`}
                       </span>
                     </div>
                   </div>
