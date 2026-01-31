@@ -143,7 +143,7 @@ export default function UserManagement() {
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['allUsers']);
+      queryClient.invalidateQueries({ queryKey: ['allUsers'] });
     },
   });
 
@@ -157,7 +157,7 @@ export default function UserManagement() {
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['allUsers']);
+      queryClient.invalidateQueries({ queryKey: ['allUsers'] });
       setRejectDialog(false);
       setRejectUser(null);
       setRejectionReason('');
