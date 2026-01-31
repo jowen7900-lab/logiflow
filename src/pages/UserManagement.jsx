@@ -136,40 +136,34 @@ export default function UserManagement() {
 
   const approveDriverMutation = useMutation({
     mutationFn: async (userId) => {
-      console.log('Approving user:', userId);
-      const result = await base44.asServiceRole.entities.User.update(userId, {
-        approval_status: 'approved',
-        reviewed_by_user_id: currentUser?.id,
-        reviewed_at: new Date().toISOString(),
-        rejection_reason: null,
+      const response = await base44.functions.invoke('approveDriver', {
+        userId,
+        action: 'approve'
       });
-      console.log('Update result:', result);
-      return result;
+      return response.data;
     },
-    onSuccess: async (data, userId) => {
-      console.log('Approval successful, refetching...');
+    onSuccess: async () => {
       await queryClient.refetchQueries({ queryKey: ['allUsers'] });
       await queryClient.refetchQueries({ queryKey: ['drivers'] });
       toast.success('Driver approved successfully');
     },
     onError: (error) => {
-      console.error('Approval error:', error);
       toast.error(`Failed to approve driver: ${error.message}`);
     },
   });
 
   const rejectDriverMutation = useMutation({
     mutationFn: async ({ userId, reason }) => {
-      await base44.asServiceRole.entities.User.update(userId, {
-        approval_status: 'rejected',
-        reviewed_by_user_id: currentUser?.id,
-        reviewed_at: new Date().toISOString(),
-        rejection_reason: reason,
+      const response = await base44.functions.invoke('approveDriver', {
+        userId,
+        action: 'reject',
+        rejectionReason: reason
       });
+      return response.data;
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['allUsers'] });
       await queryClient.refetchQueries({ queryKey: ['allUsers'] });
+      await queryClient.refetchQueries({ queryKey: ['drivers'] });
       toast.success('Driver rejected');
       setRejectDialog(false);
       setRejectUser(null);
