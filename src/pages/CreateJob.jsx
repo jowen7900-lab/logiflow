@@ -306,8 +306,8 @@ export default function CreateJob() {
           {/* Step 1: Job Type */}
           {currentStep === 0 && (
             <div className="space-y-4">
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {['delivery', 'collection', 'install', 'removal', 'exchange'].map((type) => (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {['install', 'rubbish_collection', 'remedial'].map((type) => (
                   <button
                     key={type}
                     onClick={() => updateFormData({ job_type: type })}
@@ -322,33 +322,14 @@ export default function CreateJob() {
                       'w-8 h-8 mb-2',
                       formData.job_type === type ? 'text-indigo-600' : 'text-slate-400'
                     )} />
-                    <p className="font-medium capitalize">{type}</p>
+                    <p className="font-medium capitalize">{type.replace('_', ' ')}</p>
                     <p className="text-xs text-slate-500 mt-1">
-                      {type === 'delivery' && 'Standard delivery service'}
-                      {type === 'collection' && 'Pickup from location'}
                       {type === 'install' && 'Delivery with installation'}
-                      {type === 'removal' && 'Remove existing items'}
-                      {type === 'exchange' && 'Swap for new items'}
+                      {type === 'rubbish_collection' && 'Waste collection service'}
+                      {type === 'remedial' && 'Repair and remedial work'}
                     </p>
                   </button>
                 ))}
-              </div>
-              
-              <div className="pt-4">
-                <Label>Priority</Label>
-                <Select 
-                  value={formData.priority} 
-                  onValueChange={(value) => updateFormData({ priority: value })}
-                >
-                  <SelectTrigger className="mt-1.5">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="standard">Standard</SelectItem>
-                    <SelectItem value="express">Express (Same Day)</SelectItem>
-                    <SelectItem value="critical">Critical (Urgent)</SelectItem>
-                  </SelectContent>
-                </Select>
               </div>
             </div>
           )}
@@ -619,11 +600,7 @@ export default function CreateJob() {
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span className="text-slate-500">Type:</span>
-                      <span className="font-medium capitalize">{formData.job_type}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-500">Priority:</span>
-                      <span className="font-medium capitalize">{formData.priority}</span>
+                      <span className="font-medium capitalize">{formData.job_type.replace('_', ' ')}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-slate-500">Date:</span>
