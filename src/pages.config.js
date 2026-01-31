@@ -78,6 +78,7 @@ import Plans from './pages/Plans';
 import RoleGuard from './pages/RoleGuard';
 import RoleSelection from './pages/RoleSelection';
 import UserManagement from './pages/UserManagement';
+import AddressList from './pages/AddressList';
 import __Layout from './Layout.jsx';
 
 
@@ -113,6 +114,7 @@ export const PAGES = {
     "RoleGuard": RoleGuard,
     "RoleSelection": RoleSelection,
     "UserManagement": UserManagement,
+    "AddressList": AddressList,
 }
 
 export const pagesConfig = {

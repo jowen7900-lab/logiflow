@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,7 +30,8 @@ import {
   AlertTriangle,
   ArrowRight,
   ArrowLeft,
-  Loader2
+  Loader2,
+  BookOpen
 } from 'lucide-react';
 import { format, addDays, isWeekend } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -50,6 +51,8 @@ export default function CreateJob() {
   const queryClient = useQueryClient();
   const [currentStep, setCurrentStep] = useState(0);
   const [ruleWarnings, setRuleWarnings] = useState([]);
+  const [selectedCollectionAddress, setSelectedCollectionAddress] = useState('');
+  const [selectedDeliveryAddress, setSelectedDeliveryAddress] = useState('');
   const [formData, setFormData] = useState({
     job_type: '',
     priority: 'standard',
@@ -73,6 +76,12 @@ export default function CreateJob() {
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
     queryFn: () => base44.auth.me(),
+  });
+
+  const { data: savedAddresses = [] } = useQuery({
+    queryKey: ['savedAddresses', user?.id],
+    queryFn: () => base44.entities.SavedAddress.filter({ user_id: user?.id }),
+    enabled: !!user?.id,
   });
   
   // Strict role checks (locked roles only)
@@ -198,6 +207,36 @@ export default function CreateJob() {
 
   const updateFormData = (updates) => {
     setFormData(prev => ({ ...prev, ...updates }));
+  };
+
+  const handleCollectionAddressSelect = (addressId) => {
+    setSelectedCollectionAddress(addressId);
+    if (!addressId) return;
+    
+    const address = savedAddresses.find(a => a.id === addressId);
+    if (address) {
+      updateFormData({
+        collection_address: `${address.line1}${address.line2 ? ', ' + address.line2 : ''}${address.city ? ', ' + address.city : ''}`,
+        collection_postcode: address.postcode,
+        collection_contact: address.contact_name,
+        collection_phone: address.phone || '',
+      });
+    }
+  };
+
+  const handleDeliveryAddressSelect = (addressId) => {
+    setSelectedDeliveryAddress(addressId);
+    if (!addressId) return;
+    
+    const address = savedAddresses.find(a => a.id === addressId);
+    if (address) {
+      updateFormData({
+        delivery_address: `${address.line1}${address.line2 ? ', ' + address.line2 : ''}${address.city ? ', ' + address.city : ''}`,
+        delivery_postcode: address.postcode,
+        delivery_contact: address.contact_name,
+        delivery_phone: address.phone || '',
+      });
+    }
   };
 
   const addItem = () => {
@@ -340,6 +379,36 @@ export default function CreateJob() {
                 </Alert>
               ) : (
                 <>
+                  <div className="mb-4">
+                    <Label>Address Book</Label>
+                    <Select value={selectedCollectionAddress} onValueChange={handleCollectionAddressSelect}>
+                      <SelectTrigger className="mt-1.5">
+                        <SelectValue placeholder="Choose saved address or enter manually" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value={null}>Manual entry</SelectItem>
+                        {savedAddresses.length === 0 ? (
+                          <SelectItem value="none" disabled>
+                            No saved addresses
+                          </SelectItem>
+                        ) : (
+                          savedAddresses.map((addr) => (
+                            <SelectItem key={addr.id} value={addr.id}>
+                              {addr.label} - {addr.postcode}
+                            </SelectItem>
+                          ))
+                        )}
+                      </SelectContent>
+                    </Select>
+                    {savedAddresses.length === 0 && (
+                      <Link to={createPageUrl('AddressList')}>
+                        <Button variant="link" size="sm" className="px-0 mt-1 text-indigo-600">
+                          <BookOpen className="w-3.5 h-3.5 mr-1" />
+                          Add address to address book
+                        </Button>
+                      </Link>
+                    )}
+                  </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="md:col-span-2">
                       <Label>Address</Label>
@@ -386,6 +455,36 @@ export default function CreateJob() {
           {/* Step 3: Delivery */}
           {currentStep === 2 && (
             <div className="space-y-4">
+              <div className="mb-4">
+                <Label>Address Book</Label>
+                <Select value={selectedDeliveryAddress} onValueChange={handleDeliveryAddressSelect}>
+                  <SelectTrigger className="mt-1.5">
+                    <SelectValue placeholder="Choose saved address or enter manually" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={null}>Manual entry</SelectItem>
+                    {savedAddresses.length === 0 ? (
+                      <SelectItem value="none" disabled>
+                        No saved addresses
+                      </SelectItem>
+                    ) : (
+                      savedAddresses.map((addr) => (
+                        <SelectItem key={addr.id} value={addr.id}>
+                          {addr.label} - {addr.postcode}
+                        </SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
+                {savedAddresses.length === 0 && (
+                  <Link to={createPageUrl('AddressList')}>
+                    <Button variant="link" size="sm" className="px-0 mt-1 text-indigo-600">
+                      <BookOpen className="w-3.5 h-3.5 mr-1" />
+                      Add address to address book
+                    </Button>
+                  </Link>
+                )}
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="md:col-span-2">
                   <Label>Address *</Label>
