@@ -91,11 +91,17 @@ export default function OpsJobs() {
   });
 
   const assignDriverMutation = useMutation({
-    mutationFn: async ({ jobId, driverId }) => {
-      // GUARD: Enforce admin reason requirement for ops_status changes
-      const validatedReason = requireAdminReason(assignReason);
+    mutationFn: async ({ jobId, driverId, isReassignment }) => {
+      // GUARD: Only require reason when UNASSIGNING or REASSIGNING a driver
+      if (isReassignment && (!assignReason || !assignReason.trim())) {
+        throw new Error('Reason is required when changing or unassigning a driver');
+      }
 
       const driver = drivers.find(d => d.id === driverId);
+      const notesText = isReassignment 
+        ? `Changed driver to: ${driver?.full_name}. Reason: ${assignReason.trim()}`
+        : `Assigned driver: ${driver?.full_name}`;
+
       await base44.entities.Job.update(jobId, {
         driver_id: driver?.email,
         driver_name: driver?.full_name,
@@ -112,7 +118,7 @@ export default function OpsJobs() {
         changed_by: user?.email,
         changed_by_name: user?.full_name,
         changed_by_role: 'admin',
-        notes: `Assigned driver: ${driver?.full_name}. Reason: ${validatedReason}`,
+        notes: notesText,
       });
     },
     onError: (error) => {
@@ -298,16 +304,16 @@ export default function OpsJobs() {
                               <span className="text-sm">{job.driver_name}</span>
                             </div>
                             <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => {
-                                setSelectedDriver('');
-                                setAssignDialog(job);
-                              }}
-                              disabled={['delivered', 'failed'].includes(job.ops_status)}
-                              className="h-7 px-2 text-xs"
+                             variant="ghost"
+                             size="sm"
+                             onClick={() => {
+                               setSelectedDriver('');
+                               setAssignDialog({ ...job, isReassignment: true });
+                             }}
+                             disabled={['delivered', 'failed'].includes(job.ops_status)}
+                             className="h-7 px-2 text-xs"
                             >
-                              Change
+                             Change
                             </Button>
                           </div>
                         ) : (
@@ -380,15 +386,17 @@ export default function OpsJobs() {
               </p>
             )}
 
-            <div className="mt-4">
-              <Label>Reason (required)</Label>
-              <Textarea
-                value={assignReason}
-                onChange={(e) => setAssignReason(e.target.value)}
-                placeholder="Why are you assigning this driver?"
-                className="mt-1.5"
-              />
-            </div>
+            {assignDialog?.isReassignment && (
+              <div className="mt-4">
+                <Label>Reason (required)</Label>
+                <Textarea
+                  value={assignReason}
+                  onChange={(e) => setAssignReason(e.target.value)}
+                  placeholder="Why are you changing the driver?"
+                  className="mt-1.5"
+                />
+              </div>
+            )}
           </div>
           
           <DialogFooter>
@@ -403,10 +411,11 @@ export default function OpsJobs() {
               onClick={() => {
                 assignDriverMutation.mutate({ 
                   jobId: assignDialog?.id, 
-                  driverId: selectedDriver 
+                  driverId: selectedDriver,
+                  isReassignment: assignDialog?.isReassignment
                 });
               }}
-              disabled={!selectedDriver || !assignReason.trim() || assignDriverMutation.isPending}
+              disabled={!selectedDriver || (assignDialog?.isReassignment && !assignReason.trim()) || assignDriverMutation.isPending}
               className="bg-indigo-600 hover:bg-indigo-700"
             >
               {assignDriverMutation.isPending && (
