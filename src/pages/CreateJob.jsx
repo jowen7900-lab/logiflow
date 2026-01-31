@@ -36,6 +36,7 @@ import {
 import { format, addDays, isWeekend } from 'date-fns';
 import { cn } from '@/lib/utils';
 import RecipientIntelligence from '@/components/recipients/RecipientIntelligence';
+import toast from 'react-hot-toast';
 
 const steps = [
   { id: 'type', title: 'Job Type', icon: Package },
@@ -172,8 +173,12 @@ export default function CreateJob() {
       return job;
     },
     onSuccess: (job) => {
+      toast.success(`Job ${job.job_number} created successfully`);
       queryClient.invalidateQueries(['customerJobs']);
       navigate(createPageUrl(`JobDetail?id=${job.id}`));
+    },
+    onError: (error) => {
+      toast.error(`Failed to create job: ${error.message || 'Unknown error'}`);
     },
   });
 
