@@ -459,6 +459,74 @@ export default function CreateJob() {
                       />
                     </div>
                   </div>
+
+                  <div className="border-t pt-6 mt-6 space-y-4">
+                    <h3 className="font-medium text-slate-900">Collection Schedule</h3>
+                    <div>
+                      <Label>Collection Date *</Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              'w-full justify-start text-left font-normal mt-1.5',
+                              !formData.collection_date && 'text-muted-foreground'
+                            )}
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {formData.collection_date ? format(formData.collection_date, 'PPP') : 'Select date'}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0">
+                          <Calendar
+                            mode="single"
+                            selected={formData.collection_date}
+                            onSelect={(date) => updateFormData({ collection_date: date })}
+                            disabled={(date) => date < new Date()}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+
+                    <div>
+                      <Label>Time Slot *</Label>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-1.5">
+                        {[
+                          { value: 'am', label: 'AM', time: '08:00 - 12:00' },
+                          { value: 'pm', label: 'PM', time: '12:00 - 18:00' },
+                          { value: 'all_day', label: 'All Day', time: '08:00 - 18:00' },
+                          { value: 'timed', label: 'Timed', time: 'Specific time' },
+                        ].map((slot) => (
+                          <button
+                            key={slot.value}
+                            onClick={() => updateFormData({ collection_time_slot: slot.value })}
+                            className={cn(
+                              'p-3 rounded-lg border-2 text-left transition-all',
+                              formData.collection_time_slot === slot.value
+                                ? 'border-indigo-500 bg-indigo-50'
+                                : 'border-slate-200 hover:border-slate-300'
+                            )}
+                          >
+                            <p className="font-medium">{slot.label}</p>
+                            <p className="text-xs text-slate-500">{slot.time}</p>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {formData.collection_time_slot === 'timed' && (
+                      <div>
+                        <Label>Specific Time</Label>
+                        <Input
+                          type="time"
+                          value={formData.collection_time}
+                          onChange={(e) => updateFormData({ collection_time: e.target.value })}
+                          className="mt-1.5 w-40"
+                        />
+                      </div>
+                    )}
+                  </div>
                 </>
               )}
             </div>
@@ -540,81 +608,79 @@ export default function CreateJob() {
                   />
                 </div>
               </div>
-            </div>
-          )}
 
-          {/* Step 4: Schedule */}
-          {currentStep === 3 && (
-            <div className="space-y-6">
-              <div>
-                <Label>Delivery Date *</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        'w-full justify-start text-left font-normal mt-1.5',
-                        !formData.scheduled_date && 'text-muted-foreground'
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {formData.scheduled_date ? format(formData.scheduled_date, 'PPP') : 'Select date'}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={formData.scheduled_date}
-                      onSelect={(date) => updateFormData({ scheduled_date: date })}
-                      disabled={(date) => date < new Date()}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-              
-              <div>
-                <Label>Time Slot *</Label>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-1.5">
-                  {[
-                    { value: 'am', label: 'AM', time: '08:00 - 12:00' },
-                    { value: 'pm', label: 'PM', time: '12:00 - 18:00' },
-                    { value: 'all_day', label: 'All Day', time: '08:00 - 18:00' },
-                    { value: 'timed', label: 'Timed', time: 'Specific time' },
-                  ].map((slot) => (
-                    <button
-                      key={slot.value}
-                      onClick={() => updateFormData({ scheduled_time_slot: slot.value })}
-                      className={cn(
-                        'p-3 rounded-lg border-2 text-left transition-all',
-                        formData.scheduled_time_slot === slot.value
-                          ? 'border-indigo-500 bg-indigo-50'
-                          : 'border-slate-200 hover:border-slate-300'
-                      )}
-                    >
-                      <p className="font-medium">{slot.label}</p>
-                      <p className="text-xs text-slate-500">{slot.time}</p>
-                    </button>
-                  ))}
-                </div>
-              </div>
-              
-              {formData.scheduled_time_slot === 'timed' && (
+              <div className="border-t pt-6 mt-6 space-y-4">
+                <h3 className="font-medium text-slate-900">Delivery Schedule</h3>
                 <div>
-                  <Label>Specific Time</Label>
-                  <Input
-                    type="time"
-                    value={formData.scheduled_time}
-                    onChange={(e) => updateFormData({ scheduled_time: e.target.value })}
-                    className="mt-1.5 w-40"
-                  />
+                  <Label>Delivery Date *</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          'w-full justify-start text-left font-normal mt-1.5',
+                          !formData.delivery_date && 'text-muted-foreground'
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {formData.delivery_date ? format(formData.delivery_date, 'PPP') : 'Select date'}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={formData.delivery_date}
+                        onSelect={(date) => updateFormData({ delivery_date: date })}
+                        disabled={(date) => date < new Date()}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </div>
-              )}
+
+                <div>
+                  <Label>Time Slot *</Label>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-1.5">
+                    {[
+                      { value: 'am', label: 'AM', time: '08:00 - 12:00' },
+                      { value: 'pm', label: 'PM', time: '12:00 - 18:00' },
+                      { value: 'all_day', label: 'All Day', time: '08:00 - 18:00' },
+                      { value: 'timed', label: 'Timed', time: 'Specific time' },
+                    ].map((slot) => (
+                      <button
+                        key={slot.value}
+                        onClick={() => updateFormData({ delivery_time_slot: slot.value })}
+                        className={cn(
+                          'p-3 rounded-lg border-2 text-left transition-all',
+                          formData.delivery_time_slot === slot.value
+                            ? 'border-indigo-500 bg-indigo-50'
+                            : 'border-slate-200 hover:border-slate-300'
+                        )}
+                      >
+                        <p className="font-medium">{slot.label}</p>
+                        <p className="text-xs text-slate-500">{slot.time}</p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {formData.delivery_time_slot === 'timed' && (
+                  <div>
+                    <Label>Specific Time</Label>
+                    <Input
+                      type="time"
+                      value={formData.delivery_time}
+                      onChange={(e) => updateFormData({ delivery_time: e.target.value })}
+                      className="mt-1.5 w-40"
+                    />
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
-          {/* Step 5: Items */}
-          {currentStep === 4 && (
+          {/* Step 3: Items */}
+          {currentStep === 3 && (
             <div className="space-y-4">
               {formData.items.map((item, index) => (
                 <div key={index} className="p-4 border border-slate-200 rounded-lg space-y-3">
