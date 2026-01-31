@@ -143,8 +143,9 @@ export default function UserManagement() {
         rejection_reason: null,
       });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['allUsers'] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['allUsers'] });
+      await queryClient.refetchQueries({ queryKey: ['allUsers'] });
       toast.success('Driver approved successfully');
     },
     onError: (error) => {
@@ -161,8 +162,9 @@ export default function UserManagement() {
         rejection_reason: reason,
       });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['allUsers'] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['allUsers'] });
+      await queryClient.refetchQueries({ queryKey: ['allUsers'] });
       toast.success('Driver rejected');
       setRejectDialog(false);
       setRejectUser(null);
