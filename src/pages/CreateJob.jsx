@@ -131,7 +131,7 @@ export default function CreateJob() {
         job_number: jobNumber,
         customer_id: user?.customer_id,
         customer_name: customer?.name || user?.customer_name,
-        customer_status: 'requested',
+        customer_status: 'confirmed',
         has_rule_breach: ruleWarnings.length > 0,
         has_exception: ruleWarnings.length > 0,
         exception_reason: ruleWarnings.length > 0 ? ruleWarnings.map(w => w.message).join('; ') : null,
@@ -163,12 +163,12 @@ export default function CreateJob() {
       await base44.entities.JobStatusHistory.create({
         job_id: job.id,
         job_number: jobNumber,
-        new_customer_status: 'requested',
+        new_customer_status: 'confirmed',
         new_ops_status: job.ops_status,
         changed_by: user?.email,
         changed_by_name: user?.full_name,
         changed_by_role: 'customer',
-        notes: 'Job created',
+        notes: 'Job booked',
       });
 
       return job;
