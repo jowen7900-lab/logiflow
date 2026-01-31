@@ -51,7 +51,8 @@ const roleNavigation = {
 };
 
 export default function Sidebar({ user, currentPage, pendingTasks = 0 }) {
-  const appRole = user?.app_role;
+  // Map app_admin to admin navigation
+  const appRole = user?.app_role === 'app_admin' ? 'admin' : user?.app_role;
   const navigation = roleNavigation[appRole] || [];
   
   const handleLogout = () => {
