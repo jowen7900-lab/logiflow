@@ -269,7 +269,7 @@ export default function CreateJob() {
       case 'schedule':
         return formData.scheduled_date && formData.scheduled_time_slot;
       case 'items':
-        return formData.items.some(item => item.description);
+        return true;
       default:
         return true;
     }
@@ -554,7 +554,7 @@ export default function CreateJob() {
                       mode="single"
                       selected={formData.scheduled_date}
                       onSelect={(date) => updateFormData({ scheduled_date: date })}
-                      disabled={(date) => date < new Date() || isWeekend(date)}
+                      disabled={(date) => date < new Date()}
                       initialFocus
                     />
                   </PopoverContent>
