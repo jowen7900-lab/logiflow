@@ -341,6 +341,34 @@ export default function JobDetail() {
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Collection Address */}
+                {job.collection_address && (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm font-medium text-slate-500">
+                      <MapPin className="w-4 h-4" />
+                      Collection Address
+                    </div>
+                    <div className="p-3 bg-blue-50 rounded-lg">
+                      <p className="font-medium text-slate-900">{job.collection_address}</p>
+                      <p className="text-slate-600">{job.collection_postcode}</p>
+                      {job.collection_contact && (
+                        <p className="text-sm text-slate-500 mt-2">
+                          <User className="w-3.5 h-3.5 inline mr-1" />
+                          {job.collection_contact}
+                        </p>
+                      )}
+                      {job.collection_phone && (
+                        <p className="text-sm text-slate-500">
+                          <Phone className="w-3.5 h-3.5 inline mr-1" />
+                          <a href={`tel:${job.collection_phone}`} className="text-indigo-600 hover:text-indigo-700">
+                            {job.collection_phone}
+                          </a>
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 {/* Delivery Address */}
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-sm font-medium text-slate-500">
