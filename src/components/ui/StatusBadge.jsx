@@ -11,6 +11,7 @@ const customerStatusConfig = {
 };
 
 const opsStatusConfig = {
+  pending: { label: 'Pending', class: 'bg-slate-50 text-slate-600 border-slate-200' },
   allocated: { label: 'Allocated', class: 'bg-blue-50 text-blue-700 border-blue-200' },
   on_route_to_collection: { label: 'On Route to Collection', class: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
   collected: { label: 'Collected', class: 'bg-purple-50 text-purple-700 border-purple-200' },
