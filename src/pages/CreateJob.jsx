@@ -323,11 +323,6 @@ export default function CreateJob() {
                       formData.job_type === type ? 'text-indigo-600' : 'text-slate-400'
                     )} />
                     <p className="font-medium capitalize">{type.replace('_', ' ')}</p>
-                    <p className="text-xs text-slate-500 mt-1">
-                      {type === 'install' && 'Delivery with installation'}
-                      {type === 'rubbish_collection' && 'Waste collection service'}
-                      {type === 'remedial' && 'Repair and remedial work'}
-                    </p>
                   </button>
                 ))}
               </div>
