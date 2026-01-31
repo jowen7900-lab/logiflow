@@ -350,16 +350,18 @@ export default function JobDetail() {
                   <div className="p-3 bg-slate-50 rounded-lg">
                     <p className="font-medium text-slate-900">{job.delivery_address}</p>
                     <p className="text-slate-600">{job.delivery_postcode}</p>
-                    {!isDriver && job.delivery_contact && (
+                    {job.delivery_contact && (
                       <p className="text-sm text-slate-500 mt-2">
                         <User className="w-3.5 h-3.5 inline mr-1" />
                         {job.delivery_contact}
                       </p>
                     )}
-                    {!isDriver && job.delivery_phone && (
+                    {job.delivery_phone && (
                       <p className="text-sm text-slate-500">
                         <Phone className="w-3.5 h-3.5 inline mr-1" />
-                        {job.delivery_phone}
+                        <a href={`tel:${job.delivery_phone}`} className="text-indigo-600 hover:text-indigo-700">
+                          {job.delivery_phone}
+                        </a>
                       </p>
                     )}
                     {!isDriver && (
