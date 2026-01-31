@@ -29,9 +29,11 @@ import {
   CheckCircle2,
   Clock,
   AlertTriangle,
-  Loader2
+  Loader2,
+  Download
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { exportToCSV, prepareTasksForExport } from '@/components/utils/exportUtils';
 
 export default function OpsTaskQueue() {
   const queryClient = useQueryClient();
@@ -187,7 +189,8 @@ export default function OpsTaskQueue() {
   return (
     <div className="space-y-6">
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+        <div className="flex items-center gap-3 flex-wrap flex-1">
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <Input
@@ -226,6 +229,17 @@ export default function OpsTaskQueue() {
             <SelectItem value="escalation">Escalation</SelectItem>
           </SelectContent>
         </Select>
+        </div>
+        
+        <Button
+          variant="outline"
+          onClick={() => exportToCSV(prepareTasksForExport(filterTasks(allTasks)), 'tasks_export')}
+          disabled={allTasks.length === 0}
+          className="gap-2"
+        >
+          <Download className="w-4 h-4" />
+          Export CSV
+        </Button>
       </div>
 
       {/* Task Tabs */}

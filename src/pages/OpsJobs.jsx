@@ -40,10 +40,12 @@ import {
   ExternalLink,
   User,
   Truck,
-  Loader2
+  Loader2,
+  Download
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
+import { exportToCSV, prepareJobsForExport } from '@/components/utils/exportUtils';
 
 // Guard: Enforce that ALL admin ops_status changes require a reason
 // Throws error if reason is missing, blocking the mutation
@@ -154,7 +156,8 @@ export default function OpsJobs() {
   return (
     <div className="space-y-6">
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center flex-wrap">
+      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center flex-wrap justify-between">
+        <div className="flex items-center gap-3 flex-wrap flex-1">
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <Input
@@ -191,6 +194,17 @@ export default function OpsJobs() {
             ))}
           </SelectContent>
         </Select>
+        </div>
+        
+        <Button
+          variant="outline"
+          onClick={() => exportToCSV(prepareJobsForExport(filteredJobs), 'jobs_export')}
+          disabled={filteredJobs.length === 0}
+          className="gap-2"
+        >
+          <Download className="w-4 h-4" />
+          Export CSV
+        </Button>
       </div>
 
       {/* Results */}

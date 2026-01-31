@@ -38,10 +38,12 @@ import {
   ExternalLink,
   Edit2,
   Trash2,
-  Loader2
+  Loader2,
+  Download
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
+import { exportToCSV, prepareJobsForExport } from '@/components/utils/exportUtils';
 
 export default function CustomerJobs() {
   const queryClient = useQueryClient();
@@ -121,12 +123,24 @@ export default function CustomerJobs() {
           </Select>
         </div>
         
-        <Link to={createPageUrl('CreateJob')}>
-          <Button className="bg-indigo-600 hover:bg-indigo-700 gap-2">
-            <Plus className="w-4 h-4" />
-            Create Job
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => exportToCSV(prepareJobsForExport(filteredJobs), 'my_jobs_export')}
+            disabled={filteredJobs.length === 0}
+            className="gap-2"
+          >
+            <Download className="w-4 h-4" />
+            Export
           </Button>
-        </Link>
+          
+          <Link to={createPageUrl('CreateJob')}>
+            <Button className="bg-indigo-600 hover:bg-indigo-700 gap-2">
+              <Plus className="w-4 h-4" />
+              Create Job
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Results count */}
