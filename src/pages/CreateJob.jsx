@@ -298,6 +298,7 @@ export default function CreateJob() {
   };
 
   const handleSubmit = () => {
+    // Allow submission with 0 items (items are optional)
     createJobMutation.mutate(formData);
   };
 
@@ -311,7 +312,7 @@ export default function CreateJob() {
           const isComplete = index < currentStep;
           
           return (
-            <React.Fragment key={step.id}>
+            <div key={step.id} className="flex items-center">
               <div className="flex flex-col items-center">
                 <div className={cn(
                   'w-10 h-10 rounded-full flex items-center justify-center transition-all',
@@ -334,7 +335,7 @@ export default function CreateJob() {
                   index < currentStep ? 'bg-emerald-500' : 'bg-slate-200'
                 )} />
               )}
-            </React.Fragment>
+            </div>
           );
         })}
       </div>
