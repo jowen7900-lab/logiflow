@@ -10,12 +10,13 @@ Deno.serve(async (req) => {
     }
 
     const templateData = [
-      ['install', '123 Warehouse St', 'M1 1AA', 'John Smith', '07700900001', '2026-02-10', 'am', '', '456 Client Ave', 'M2 2BB', 'Jane Doe', '07700900002', '2026-02-10', 'pm', '', 'Office desk x2', '2', '50', 'Use service elevator', ''],
-      ['rubbish_collection', '789 Factory Rd', 'M3 3CC', 'Bob Jones', '07700900003', '2026-02-11', 'am', '09:00', '321 Shop St', 'M4 4DD', 'Alice Brown', '07700900004', '2026-02-11', 'pm', '', 'Old furniture', '1', '80', 'Collection from rear entrance', 'yes'],
-      ['remedial', '', '', '', '', '', '', '', '654 Office Park', 'M5 5EE', 'Charlie Davis', '07700900005', '2026-02-12', 'all_day', '', 'Repair equipment', '1', '20', 'Contact on arrival', 'yes'],
+      ['JOB001', 'install', '123 Warehouse St', 'M1 1AA', 'John Smith', '07700900001', '2026-02-10', 'am', '', '456 Client Ave', 'M2 2BB', 'Jane Doe', '07700900002', '2026-02-10', 'pm', '', 'Office desk', '1', '25', '', 'Use service elevator', '', ''],
+      ['JOB001', 'install', '123 Warehouse St', 'M1 1AA', 'John Smith', '07700900001', '2026-02-10', 'am', '', '456 Client Ave', 'M2 2BB', 'Jane Doe', '07700900002', '2026-02-10', 'pm', '', 'Office chair', '2', '15', 'Standard', '', '', ''],
+      ['JOB002', 'rubbish_collection', '789 Factory Rd', 'M3 3CC', 'Bob Jones', '07700900003', '2026-02-11', 'am', '09:00', '321 Shop St', 'M4 4DD', 'Alice Brown', '07700900004', '2026-02-11', 'pm', '', 'Old furniture', '1', '80', '2m x 1m', 'Collection from rear', 'FIT001', 'John Fitter'],
+      ['JOB003', 'remedial', '', '', '', '', '', '', '', '654 Office Park', 'M5 5EE', 'Charlie Davis', '07700900005', '2026-02-12', 'all_day', '', 'Repair equipment', '1', '20', '', 'Contact on arrival', 'FIT002', 'Sarah Fitter'],
     ];
 
-    const headers = ['job_type', 'collection_address', 'collection_postcode', 'collection_contact', 'collection_phone', 'collection_date', 'collection_time_slot', 'collection_time', 'delivery_address', 'delivery_postcode', 'delivery_contact', 'delivery_phone', 'delivery_date', 'delivery_time_slot', 'delivery_time', 'items_description', 'items_quantity', 'items_weight_kg', 'special_instructions', 'fitter_required'];
+    const headers = ['job_key', 'job_type', 'collection_address', 'collection_postcode', 'collection_contact', 'collection_phone', 'collection_date', 'collection_time_slot', 'collection_time', 'delivery_address', 'delivery_postcode', 'delivery_contact', 'delivery_phone', 'delivery_date', 'delivery_time_slot', 'delivery_time', 'item_description', 'item_quantity', 'item_weight_kg', 'item_dimensions', 'special_instructions', 'fitter_id', 'fitter_name'];
     
     const csv = [
       headers.join(','),

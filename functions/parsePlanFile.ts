@@ -30,14 +30,14 @@ Deno.serve(async (req) => {
     }
 
     // Header row
-    const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
-    const requiredFields = ['job_type', 'delivery_address', 'delivery_postcode', 'delivery_date', 'delivery_time_slot'];
-    const missingFields = requiredFields.filter(f => !headers.includes(f.toLowerCase()));
+    const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/\s+/g, '_'));
+    const requiredFields = ['job_key', 'job_type', 'delivery_address', 'delivery_postcode', 'delivery_date', 'delivery_time_slot'];
+    const missingFields = requiredFields.filter(f => !headers.includes(f));
     
     if (missingFields.length > 0) {
       return Response.json({
         status: 'failed',
-        errors: [{ row: 0, error: `Missing required columns: ${missingFields.join(', ')}` }]
+        errors: [{ row: 0, error: `Missing required columns: ${missingFields.join(', ')}. Please use the latest template.` }]
       });
     }
 
@@ -54,17 +54,32 @@ Deno.serve(async (req) => {
           row[header] = values[idx] || '';
         });
 
-        // Generate or use provided job_key
-        let jobKey = row['job_key'] || '';
+        const jobKey = row['job_key'] || '';
         if (!jobKey) {
-          const normalizedContact = (row['delivery_contact'] || '').toLowerCase().replace(/[^\w]/g, '');
-          const normalizedPostcode = (row['delivery_postcode'] || '').toUpperCase().replace(/\s/g, '');
-          const normalizedDate = row['delivery_date'] || '';
-          jobKey = `${normalizedContact}-${normalizedPostcode}-${normalizedDate}`.replace(/^-+|-+$/g, '');
+          errors.push({ row: i + 1, error: 'job_key is required' });
+          continue;
+        }
+
+        // Validate required fields per row
+        if (!row['job_type']) {
+          errors.push({ row: i + 1, column: 'job_type', error: 'Required field missing' });
+        }
+        if (!row['delivery_address']) {
+          errors.push({ row: i + 1, column: 'delivery_address', error: 'Required field missing' });
+        }
+        if (!row['delivery_postcode']) {
+          errors.push({ row: i + 1, column: 'delivery_postcode', error: 'Required field missing' });
+        }
+        if (!row['delivery_date']) {
+          errors.push({ row: i + 1, column: 'delivery_date', error: 'Required field missing' });
+        }
+        if (!row['delivery_time_slot']) {
+          errors.push({ row: i + 1, column: 'delivery_time_slot', error: 'Required field missing' });
         }
 
         // Compute line hash
         const hashInput = JSON.stringify({
+          job_key: jobKey,
           job_type: (row['job_type'] || '').toLowerCase().trim(),
           collection_address: (row['collection_address'] || '').toLowerCase().trim(),
           collection_postcode: (row['collection_postcode'] || '').toUpperCase().replace(/\s/g, ''),
@@ -75,7 +90,7 @@ Deno.serve(async (req) => {
           delivery_contact: (row['delivery_contact'] || '').toLowerCase().trim(),
           delivery_date: row['delivery_date'] || '',
           delivery_time_slot: (row['delivery_time_slot'] || '').toLowerCase().trim(),
-          items: (row['items_description'] || '').toLowerCase().trim(),
+          item_description: (row['item_description'] || '').toLowerCase().trim(),
           special_instructions: (row['special_instructions'] || '').toLowerCase().trim(),
         });
         const lineHash = await hashString(hashInput);
@@ -99,11 +114,13 @@ Deno.serve(async (req) => {
           delivery_date: row['delivery_date'] || '',
           delivery_time_slot: row['delivery_time_slot'] || '',
           delivery_time: row['delivery_time'] || '',
-          items_description: row['items_description'] || '',
-          items_quantity: row['items_quantity'] || '',
-          items_weight_kg: row['items_weight_kg'] || '',
+          item_description: row['item_description'] || '',
+          item_quantity: parseFloat(row['item_quantity']) || 1,
+          item_weight_kg: parseFloat(row['item_weight_kg']) || 0,
+          item_dimensions: row['item_dimensions'] || '',
           special_instructions: row['special_instructions'] || '',
-          fitter_required: row['fitter_required'] || '',
+          fitter_id: row['fitter_id'] || '',
+          fitter_name: row['fitter_name'] || '',
           line_hash: lineHash,
         });
       } catch (error) {
