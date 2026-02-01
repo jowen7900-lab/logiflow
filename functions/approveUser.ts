@@ -6,7 +6,21 @@ Deno.serve(async (req) => {
     
     // Verify admin authentication
     const user = await base44.auth.me();
-    if (user?.role !== 'admin') {
+    
+    // DEBUG: Return caller identity fields for verification
+    if (req.method === 'GET') {
+      return Response.json({
+        debug_caller_identity: {
+          id: user?.id,
+          email: user?.email,
+          role: user?.role,
+          app_role: user?.app_role,
+          approval_status: user?.approval_status,
+        }
+      });
+    }
+    
+    if (user?.app_role !== 'admin') {
       return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
     }
 
