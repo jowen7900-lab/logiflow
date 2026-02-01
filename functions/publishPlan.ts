@@ -51,28 +51,7 @@ export default async function publishPlan(req, ctx) {
     let created = 0;
     let skipped = 0;
 
-    // 5b. Ensure Customer entity exists (Option A: create if missing)
-    let customer = null;
-    let customerId = plan.customer_id;
-    try {
-      customer = await ctx.base44.asServiceRole.entities.Customer.get(plan.customer_id);
-    } catch (err) {
-      // Customer doesn't exist; create it
-      const newCustomer = await ctx.base44.asServiceRole.entities.Customer.create({
-        name: user.full_name || user.email || `Customer-${user.id}`,
-        code: `CUST-${user.id.slice(0, 8)}`,
-      });
-      customer = newCustomer;
-      customerId = newCustomer.id;
-      
-      // Persist new customer_id in Plan
-      await ctx.base44.asServiceRole.entities.Plan.update(planId, { customer_id: customerId });
-      
-      // Persist new customer_id in User
-      await ctx.base44.asServiceRole.entities.User.update(user.id, { customer_id: customerId });
-    }
-
-    // 6. Create jobs (idempotent)
+    // 5b. Create jobs (idempotent)
     for (const [jobKey, lines] of Object.entries(grouped)) {
       const existing = await ctx.base44.asServiceRole.entities.Job.filter({
         plan_id: planId,
@@ -93,7 +72,7 @@ export default async function publishPlan(req, ctx) {
         job_key: jobKey,
         plan_id: planId,
         plan_version_id: planVersionId,
-        customer_id: customerId,
+        customer_id: user.customer_id,
         customer_name: user.full_name || user.email || '',
         customer_status: 'confirmed',
         ops_status: 'allocated',
