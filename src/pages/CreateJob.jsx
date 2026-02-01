@@ -75,6 +75,8 @@ export default function CreateJob() {
     scheduled_time: '',
     special_instructions: '',
     requires_fitter: false,
+    fitter_id: '',
+    fitter_name: '',
     items: [{ description: '', quantity: 1, weight_kg: 0, dimensions: '' }],
   });
 
@@ -120,6 +122,11 @@ export default function CreateJob() {
       return [...customerRules, ...globalRules];
     },
     enabled: !!user?.customer_id,
+  });
+
+  const { data: fitters = [] } = useQuery({
+    queryKey: ['availableFitters'],
+    queryFn: () => base44.entities.User.filter({ app_role: 'fitter', approval_status: 'approved' }),
   });
 
   const createJobMutation = useMutation({
@@ -841,6 +848,51 @@ export default function CreateJob() {
                   <p className="text-sm text-slate-600">{formData.special_instructions}</p>
                 </div>
               )}
+
+              <div className="border-t pt-6 space-y-4">
+                <h3 className="font-semibold text-slate-900">Assign a Fitter (Optional)</h3>
+                <div>
+                  <Label>Fitter</Label>
+                  <Select 
+                    value={formData.fitter_id || 'unassigned'} 
+                    onValueChange={(value) => {
+                      if (value === 'unassigned') {
+                        updateFormData({ fitter_id: '', fitter_name: '' });
+                      } else {
+                        const fitter = fitters.find(f => f.id === value);
+                        updateFormData({ 
+                          fitter_id: value, 
+                          fitter_name: fitter?.full_name || ''
+                        });
+                      }
+                    }}
+                  >
+                    <SelectTrigger className="mt-1.5">
+                      <SelectValue placeholder="Select fitter" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="unassigned">Unassigned</SelectItem>
+                      {fitters.length === 0 ? (
+                        <SelectItem value="none" disabled>
+                          No fitters available
+                        </SelectItem>
+                      ) : (
+                        fitters.map((fitter) => (
+                          <SelectItem key={fitter.id} value={fitter.id}>
+                            {fitter.full_name || fitter.email}
+                            {fitter.phone && ` (${fitter.phone})`}
+                          </SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
+                {formData.fitter_name && (
+                  <div className="text-sm text-slate-600 bg-slate-50 p-3 rounded-lg">
+                    <span className="font-medium">Fitter:</span> {formData.fitter_name}
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </CardContent>
