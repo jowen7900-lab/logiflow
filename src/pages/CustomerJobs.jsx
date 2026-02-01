@@ -147,11 +147,13 @@ export default function CustomerJobs() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Jobs</SelectItem>
-              {jobImports.map(imp => (
-                <SelectItem key={imp.id} value={imp.id}>
-                  {imp.name} ({imp.jobs_created_count})
-                </SelectItem>
-              ))}
+              {jobImports
+                .filter(imp => imp.jobs_created_count > 0)
+                .map(imp => (
+                  <SelectItem key={imp.id} value={imp.id}>
+                    {imp.name} ({imp.jobs_created_count})
+                  </SelectItem>
+                ))}
             </SelectContent>
           </Select>
         </div>

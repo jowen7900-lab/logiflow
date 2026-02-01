@@ -16,12 +16,13 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // Create JobImport record
+    // Create JobImport record only on final confirmation
     const jobImport = await base44.asServiceRole.entities.JobImport.create({
       customer_id: user.customer_id,
       name: importName,
       created_by_user_id: user.id,
       status: 'created',
+      jobs_created_count: 0,
     });
 
     // Create Jobs from parsed data

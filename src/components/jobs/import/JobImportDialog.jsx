@@ -58,19 +58,8 @@ export default function JobImportDialog({ open, onOpenChange, user, onImportComp
   // Parse file
   const parseMutation = useMutation({
     mutationFn: async (fileUrl) => {
-      let jobImportId;
-
-      if (mode === 'new') {
-        const jobImport = await base44.entities.JobImport.create({
-          customer_id: user.customer_id,
-          name: importName,
-          created_by_user_id: user.id,
-          status: 'draft',
-        });
-        jobImportId = jobImport.id;
-      } else {
-        jobImportId = selectedImportId;
-      }
+      // For replace mode, pass the import ID; for new mode, pass null
+      const jobImportId = mode === 'replace' ? selectedImportId : null;
 
       const response = await base44.functions.invoke('parseJobImportFile', {
         jobImportId,
@@ -80,9 +69,6 @@ export default function JobImportDialog({ open, onOpenChange, user, onImportComp
 
       if (response.data.status === 'failed') {
         setParseErrors(response.data.errors || []);
-        if (mode === 'new') {
-          await base44.entities.JobImport.delete(jobImportId);
-        }
         throw new Error('Parse failed');
       }
 
