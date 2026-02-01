@@ -86,9 +86,9 @@ export default function DriverJobs() {
   const isDriver = user?.app_role === 'driver';
   
   const { data: jobs = [], isLoading } = useQuery({
-    queryKey: ['driverJobs', user?.email],
-    queryFn: () => base44.entities.Job.filter({ driver_id: user?.email }, '-scheduled_date'),
-    enabled: !!user?.email && isDriver,
+    queryKey: ['driverJobs', user?.id],
+    queryFn: () => base44.entities.Job.filter({ driver_id: user?.id }, '-scheduled_date'),
+    enabled: !!user?.id && isDriver,
   });
 
   const activeJobs = jobs.filter(j => !['delivered', 'failed'].includes(j.ops_status));
@@ -518,7 +518,7 @@ export default function DriverJobs() {
             <Card>
               <CardContent className="py-12 text-center text-slate-500">
                 <Package className="w-12 h-12 mx-auto mb-3 text-slate-300" />
-                <p>No active jobs assigned</p>
+                <p>No jobs assigned to you</p>
               </CardContent>
             </Card>
           ) : (
