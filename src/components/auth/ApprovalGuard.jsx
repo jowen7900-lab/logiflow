@@ -47,6 +47,12 @@ export default function ApprovalGuard({ children }) {
         return;
       }
 
+      // If user is rejected, redirect to role selection to try again
+      if (user.approval_status === 'rejected') {
+        navigate(createPageUrl('RoleSelection'));
+        return;
+      }
+
       // If user is not approved, redirect to pending approval page
       if (user.approval_status !== 'approved') {
         navigate(createPageUrl('PendingApproval'));

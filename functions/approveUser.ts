@@ -71,7 +71,10 @@ Deno.serve(async (req) => {
 
       await base44.asServiceRole.entities.User.update(userId, {
         approval_status: 'rejected',
-        rejection_reason: rejectionReason
+        rejection_reason: rejectionReason,
+        requested_app_role: null,  // Clear request so they can reapply
+        reviewed_by_user_id: user.id,
+        reviewed_at: new Date().toISOString(),
       });
 
       return Response.json({ 
