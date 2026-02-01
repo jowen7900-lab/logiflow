@@ -77,7 +77,7 @@ export default function CustomerJobs() {
       await base44.entities.Job.delete(jobId);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['customerJobs'] });
+      queryClient.invalidateQueries({ queryKey: ['customerJobs', user?.customer_id] });
       setDeleteDialog(null);
     },
   });

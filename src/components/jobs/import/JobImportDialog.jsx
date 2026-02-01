@@ -124,8 +124,11 @@ export default function JobImportDialog({ open, onOpenChange, user, onImportComp
         : `✓ Created ${jobCount} jobs`;
       toast.success(msg);
       
-      queryClient.invalidateQueries({ queryKey: ['customerJobs'] });
-      queryClient.invalidateQueries({ queryKey: ['jobImports'] });
+      // Invalidate and refetch with exact keys
+      queryClient.invalidateQueries({ queryKey: ['customerJobs', user?.customer_id] });
+      queryClient.invalidateQueries({ queryKey: ['jobImports', user?.customer_id] });
+      queryClient.refetchQueries({ queryKey: ['customerJobs', user?.customer_id] });
+      queryClient.refetchQueries({ queryKey: ['jobImports', user?.customer_id] });
       
       setStep('input');
       setMode('new');
