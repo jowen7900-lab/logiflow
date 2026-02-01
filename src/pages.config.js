@@ -77,6 +77,8 @@ import PlanDiffReview from './pages/PlanDiffReview';
 import RoleGuard from './pages/RoleGuard';
 import RoleSelection from './pages/RoleSelection';
 import UserManagement from './pages/UserManagement';
+import CustomerDrivers from './pages/CustomerDrivers';
+import CustomerFitters from './pages/CustomerFitters';
 import __Layout from './Layout.jsx';
 
 
@@ -111,6 +113,8 @@ export const PAGES = {
     "RoleGuard": RoleGuard,
     "RoleSelection": RoleSelection,
     "UserManagement": UserManagement,
+    "CustomerDrivers": CustomerDrivers,
+    "CustomerFitters": CustomerFitters,
 }
 
 export const pagesConfig = {
