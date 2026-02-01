@@ -30,9 +30,9 @@ export default function FitterJobs() {
   });
 
   const { data: jobs = [], isLoading } = useQuery({
-    queryKey: ['fitterJobs', user?.email],
-    queryFn: () => base44.entities.Job.filter({ fitter_id: user?.email }, '-scheduled_date'),
-    enabled: !!user?.email,
+    queryKey: ['fitterJobs', user?.id],
+    queryFn: () => base44.entities.Job.filter({ fitter_id: user?.id }, '-scheduled_date'),
+    enabled: !!user?.id,
   });
 
   // Get all jobs that aren't assigned to a fitter yet
