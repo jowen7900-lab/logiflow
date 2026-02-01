@@ -82,7 +82,7 @@ export default function DriverManagement() {
   const filteredDrivers = drivers.filter(d => {
     if (!searchTerm) return true;
     const search = searchTerm.toLowerCase();
-    return d.name?.toLowerCase().includes(search) ||
+    return d.full_name?.toLowerCase().includes(search) ||
            d.email?.toLowerCase().includes(search) ||
            d.vehicle_reg?.toLowerCase().includes(search);
   });
@@ -133,7 +133,7 @@ export default function DriverManagement() {
                         <User className={`w-5 h-5 ${isBusy ? 'text-amber-600' : 'text-emerald-600'}`} />
                       </div>
                       <div>
-                        <p className="font-semibold">{driver.name}</p>
+                        <p className="font-semibold">{driver.full_name}</p>
                         <div className="flex items-center gap-2 mt-0.5">
                           <div className="flex items-center gap-1">
                             <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
@@ -221,7 +221,7 @@ export default function DriverManagement() {
                   <User className="w-6 h-6 text-emerald-600" />
                 </div>
                 <div>
-                  <p>{selectedDriver.name}</p>
+                  <p>{selectedDriver.full_name}</p>
                   <div className="flex items-center gap-2 mt-1">
                     <div className="flex items-center gap-1">
                       <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
