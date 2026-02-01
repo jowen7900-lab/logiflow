@@ -33,7 +33,7 @@ import JobPreviewTable from './JobPreviewTable';
 
 export default function JobImportDialog({ open, onOpenChange, user }) {
   const queryClient = useQueryClient();
-  const [step, setStep] = useState('input'); // input | preview | confirming
+  const [step, setStep] = useState('input'); // input | preview | parsing
   const [mode, setMode] = useState('new'); // new | replace
   const [importName, setImportName] = useState('');
   const [selectedImportId, setSelectedImportId] = useState('');
@@ -60,7 +60,6 @@ export default function JobImportDialog({ open, onOpenChange, user }) {
       let jobImportId;
 
       if (mode === 'new') {
-        // Create temp JobImport in draft status
         const jobImport = await base44.entities.JobImport.create({
           customer_id: user.customer_id,
           name: importName,
@@ -69,11 +68,9 @@ export default function JobImportDialog({ open, onOpenChange, user }) {
         });
         jobImportId = jobImport.id;
       } else {
-        // Use existing import
         jobImportId = selectedImportId;
       }
 
-      // Parse file
       const response = await base44.functions.invoke('parseJobImportFile', {
         jobImportId,
         fileUrl,
@@ -82,7 +79,6 @@ export default function JobImportDialog({ open, onOpenChange, user }) {
 
       if (response.data.status === 'failed') {
         setParseErrors(response.data.errors || []);
-        // Delete draft import on parse failure (only if new)
         if (mode === 'new') {
           await base44.entities.JobImport.delete(jobImportId);
         }
@@ -105,18 +101,15 @@ export default function JobImportDialog({ open, onOpenChange, user }) {
   const createMutation = useMutation({
     mutationFn: async () => {
       if (mode === 'replace') {
-        // Call replace function
         const response = await base44.functions.invoke('replaceJobImport', {
           jobImportId: parsedData.job_import_id,
           parsedData: { ...parsedData, filename: file.name },
         });
         return response.data;
       } else {
-        // Original create logic
         const groupedJobs = parsedData.grouped_jobs;
         const jobImportId = parsedData.job_import_id;
 
-        // Create all jobs
         const jobs = [];
         for (const [jobKey, jobData] of Object.entries(groupedJobs)) {
           const jobNumber = `IMP-${jobImportId.slice(0, 8)}-${jobKey}`.slice(0, 50);
@@ -154,10 +147,8 @@ export default function JobImportDialog({ open, onOpenChange, user }) {
           });
         }
 
-        // Bulk create jobs
         await base44.asServiceRole.entities.Job.bulkCreate(jobs);
 
-        // Update JobImport status
         await base44.asServiceRole.entities.JobImport.update(jobImportId, {
           status: 'created',
           jobs_created_count: jobs.length,
@@ -168,7 +159,6 @@ export default function JobImportDialog({ open, onOpenChange, user }) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['customerJobs'] });
       queryClient.invalidateQueries({ queryKey: ['jobImports'] });
-      // Reset
       setStep('input');
       setMode('new');
       setImportName('');
@@ -190,10 +180,6 @@ export default function JobImportDialog({ open, onOpenChange, user }) {
     setParseErrors([]);
     setParsedData(null);
 
-    // Upload file and get URL
-    const formData = new FormData();
-    formData.append('file', selectedFile);
-    
     try {
       const uploadResponse = await base44.integrations.Core.UploadFile({
         file: selectedFile,
@@ -223,7 +209,6 @@ export default function JobImportDialog({ open, onOpenChange, user }) {
             </DialogDescription>
           </DialogHeader>
 
-          {/* Input Step */}
           {step === 'input' && (
             <div className="space-y-4">
               <div>
@@ -292,108 +277,106 @@ export default function JobImportDialog({ open, onOpenChange, user }) {
                 </div>
               )}
 
-            <div>
-              <label className="text-sm font-medium">CSV File *</label>
-              <div className="mt-1 border-2 border-dashed rounded-lg p-6 text-center">
-                <input
-                  type="file"
-                  accept=".csv"
-                  onChange={handleUpload}
-                  disabled={parseMutation.isPending}
-                  className="hidden"
-                  id="csv-upload"
-                />
-                <label htmlFor="csv-upload" className="cursor-pointer">
-                  <Upload className="w-8 h-8 mx-auto text-slate-400 mb-2" />
-                  <p className="text-sm font-medium text-slate-900">
-                    {file ? file.name : 'Click to upload or drag file'}
-                  </p>
-                  <p className="text-xs text-slate-500 mt-1">CSV format</p>
-                </label>
+              <div>
+                <label className="text-sm font-medium">CSV File *</label>
+                <div className="mt-1 border-2 border-dashed rounded-lg p-6 text-center">
+                  <input
+                    type="file"
+                    accept=".csv"
+                    onChange={handleUpload}
+                    disabled={parseMutation.isPending}
+                    className="hidden"
+                    id="csv-upload"
+                  />
+                  <label htmlFor="csv-upload" className="cursor-pointer">
+                    <Upload className="w-8 h-8 mx-auto text-slate-400 mb-2" />
+                    <p className="text-sm font-medium text-slate-900">
+                      {file ? file.name : 'Click to upload or drag file'}
+                    </p>
+                    <p className="text-xs text-slate-500 mt-1">CSV format</p>
+                  </label>
+                </div>
               </div>
+
+              {parseErrors.length > 0 && (
+                <Alert variant="destructive">
+                  <AlertTriangle className="w-4 h-4" />
+                  <AlertDescription>
+                    {parseErrors[0].error}
+                  </AlertDescription>
+                </Alert>
+              )}
             </div>
-
-            {parseErrors.length > 0 && (
-              <Alert variant="destructive">
-                <AlertTriangle className="w-4 h-4" />
-                <AlertDescription>
-                  {parseErrors[0].error}
-                </AlertDescription>
-              </Alert>
-            )}
-          </div>
-        )}
-
-        {/* Parsing Step */}
-        {step === 'parsing' && (
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="w-6 h-6 animate-spin text-indigo-600" />
-            <span className="ml-2 text-slate-600">Parsing file...</span>
-          </div>
-        )}
-
-        {/* Preview Step */}
-        {step === 'preview' && parsedData && (
-          <div className="space-y-4">
-            {hasErrors && (
-              <Alert variant="destructive">
-                <AlertTriangle className="w-4 h-4" />
-                <AlertDescription>
-                  {parseErrors.length} validation error(s) found
-                </AlertDescription>
-              </Alert>
-            )}
-
-            {!hasErrors && (
-              <Alert className="bg-green-50 border-green-200">
-                <AlertDescription className="text-green-800">
-                  ✓ {parsedData.jobs_count} jobs ready to create
-                </AlertDescription>
-              </Alert>
-            )}
-
-            <JobPreviewTable
-              jobs={Object.values(parsedData.grouped_jobs)}
-              expandedJob={expandedJob}
-              onToggleExpand={setExpandedJob}
-            />
-          </div>
-        )}
-
-        <DialogFooter>
-          <Button variant="outline" onClick={() => {
-            setStep('input');
-            setParseErrors([]);
-            setParsedData(null);
-            setExpandedJob(null);
-          }}>
-            {step === 'preview' ? 'Back' : 'Cancel'}
-          </Button>
-
-          {step === 'input' && (
-            <Button
-              onClick={() => parseMutation.mutate()}
-              disabled={!canParse || parseMutation.isPending}
-            >
-              {parseMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              Parse & Preview
-            </Button>
           )}
 
-          {step === 'preview' && (
-            <Button
-              onClick={() => mode === 'replace' ? setReplaceConfirm(true) : createMutation.mutate()}
-              disabled={hasErrors || createMutation.isPending}
-              className="bg-indigo-600 hover:bg-indigo-700"
-            >
-              {createMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              {mode === 'replace' ? 'Replace & Create' : 'Confirm & Create'}
-            </Button>
+          {step === 'parsing' && (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="w-6 h-6 animate-spin text-indigo-600" />
+              <span className="ml-2 text-slate-600">Parsing file...</span>
+            </div>
           )}
-        </DialogFooter>
+
+          {step === 'preview' && parsedData && (
+            <div className="space-y-4">
+              {hasErrors && (
+                <Alert variant="destructive">
+                  <AlertTriangle className="w-4 h-4" />
+                  <AlertDescription>
+                    {parseErrors.length} validation error(s) found
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {!hasErrors && (
+                <Alert className="bg-green-50 border-green-200">
+                  <AlertDescription className="text-green-800">
+                    ✓ {parsedData.jobs_count} jobs ready to create
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              <JobPreviewTable
+                jobs={Object.values(parsedData.grouped_jobs)}
+                expandedJob={expandedJob}
+                onToggleExpand={setExpandedJob}
+              />
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setStep('input');
+              setParseErrors([]);
+              setParsedData(null);
+              setExpandedJob(null);
+            }}>
+              {step === 'preview' ? 'Back' : 'Cancel'}
+            </Button>
+
+            {step === 'input' && (
+              <Button
+                onClick={() => parseMutation.mutate()}
+                disabled={!canParse || parseMutation.isPending}
+              >
+                {parseMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                Parse & Preview
+              </Button>
+            )}
+
+            {step === 'preview' && (
+              <Button
+                onClick={() => mode === 'replace' ? setReplaceConfirm(true) : createMutation.mutate()}
+                disabled={hasErrors || createMutation.isPending}
+                className="bg-indigo-600 hover:bg-indigo-700"
+              >
+                {createMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                {mode === 'replace' ? 'Replace & Create' : 'Confirm & Create'}
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
       </Dialog>
 
-      {/* Replace Confirmation Dialog */}
       <AlertDialog open={replaceConfirm} onOpenChange={setReplaceConfirm}>
         <AlertDialogContent>
           <AlertDialogHeader>
