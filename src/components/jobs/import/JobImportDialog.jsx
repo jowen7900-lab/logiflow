@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Dialog,
   DialogContent,
@@ -9,8 +9,24 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Upload, AlertTriangle } from 'lucide-react';
 import JobPreviewTable from './JobPreviewTable';
@@ -18,41 +34,65 @@ import JobPreviewTable from './JobPreviewTable';
 export default function JobImportDialog({ open, onOpenChange, user }) {
   const queryClient = useQueryClient();
   const [step, setStep] = useState('input'); // input | preview | confirming
+  const [mode, setMode] = useState('new'); // new | replace
   const [importName, setImportName] = useState('');
+  const [selectedImportId, setSelectedImportId] = useState('');
   const [file, setFile] = useState(null);
   const [parsedData, setParsedData] = useState(null);
   const [parseErrors, setParseErrors] = useState([]);
   const [expandedJob, setExpandedJob] = useState(null);
+  const [replaceConfirm, setReplaceConfirm] = useState(false);
+
+  // Fetch existing imports
+  const { data: existingImports = [] } = useQuery({
+    queryKey: ['jobImports', user?.customer_id],
+    queryFn: () => base44.entities.JobImport.filter(
+      { customer_id: user?.customer_id },
+      '-created_date',
+      100
+    ),
+    enabled: !!user?.customer_id && open,
+  });
 
   // Parse file
   const parseMutation = useMutation({
     mutationFn: async (fileUrl) => {
-      // Create temp JobImport in draft status
-      const jobImport = await base44.entities.JobImport.create({
-        customer_id: user.customer_id,
-        name: importName,
-        created_by_user_id: user.id,
-        status: 'draft',
-      });
+      let jobImportId;
+
+      if (mode === 'new') {
+        // Create temp JobImport in draft status
+        const jobImport = await base44.entities.JobImport.create({
+          customer_id: user.customer_id,
+          name: importName,
+          created_by_user_id: user.id,
+          status: 'draft',
+        });
+        jobImportId = jobImport.id;
+      } else {
+        // Use existing import
+        jobImportId = selectedImportId;
+      }
 
       // Parse file
       const response = await base44.functions.invoke('parseJobImportFile', {
-        jobImportId: jobImport.id,
+        jobImportId,
         fileUrl,
         fileName: file.name,
       });
 
       if (response.data.status === 'failed') {
         setParseErrors(response.data.errors || []);
-        // Delete draft import on parse failure
-        await base44.entities.JobImport.delete(jobImport.id);
+        // Delete draft import on parse failure (only if new)
+        if (mode === 'new') {
+          await base44.entities.JobImport.delete(jobImportId);
+        }
         throw new Error('Parse failed');
       }
 
-      return { jobImport, parsedData: response.data };
+      return { jobImportId, parsedData: response.data };
     },
     onSuccess: (result) => {
-      setParsedData(result.parsedData);
+      setParsedData({ ...result.parsedData, job_import_id: result.jobImportId });
       setParseErrors([]);
       setStep('preview');
     },
@@ -152,33 +192,91 @@ export default function JobImportDialog({ open, onOpenChange, user }) {
     }
   };
 
-  const canParse = importName.trim() && file;
+  const canParse = (mode === 'new' ? importName.trim() : selectedImportId) && file;
   const hasErrors = parseErrors.length > 0;
+  const selectedImport = existingImports.find(imp => imp.id === selectedImportId);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Import Jobs</DialogTitle>
-          <DialogDescription>
-            {step === 'input' && 'Upload a CSV file with your jobs'}
-            {step === 'preview' && 'Review your jobs before confirming'}
-            {step === 'parsing' && 'Parsing your file...'}
-          </DialogDescription>
-        </DialogHeader>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Import Jobs</DialogTitle>
+            <DialogDescription>
+              {step === 'input' && 'Upload a CSV file with your jobs'}
+              {step === 'preview' && 'Review your jobs before confirming'}
+              {step === 'parsing' && 'Parsing your file...'}
+            </DialogDescription>
+          </DialogHeader>
 
-        {/* Input Step */}
-        {step === 'input' && (
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium">Import Name *</label>
-              <Input
-                placeholder="e.g., February Bulk Upload"
-                value={importName}
-                onChange={(e) => setImportName(e.target.value)}
-                className="mt-1"
-              />
-            </div>
+          {/* Input Step */}
+          {step === 'input' && (
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Mode *</label>
+                <div className="flex gap-4 mt-2">
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      value="new"
+                      checked={mode === 'new'}
+                      onChange={(e) => {
+                        setMode(e.target.value);
+                        setSelectedImportId('');
+                        setImportName('');
+                      }}
+                    />
+                    <span className="text-sm">Create New Import</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      value="replace"
+                      checked={mode === 'replace'}
+                      onChange={(e) => {
+                        setMode(e.target.value);
+                        setImportName('');
+                      }}
+                    />
+                    <span className="text-sm">Replace Existing</span>
+                  </label>
+                </div>
+              </div>
+
+              {mode === 'new' && (
+                <div>
+                  <label className="text-sm font-medium">Import Name *</label>
+                  <Input
+                    placeholder="e.g., February Bulk Upload"
+                    value={importName}
+                    onChange={(e) => setImportName(e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+              )}
+
+              {mode === 'replace' && (
+                <div>
+                  <label className="text-sm font-medium">Select Import to Replace *</label>
+                  <Select value={selectedImportId} onValueChange={setSelectedImportId}>
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Choose import batch..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {existingImports.map(imp => (
+                        <SelectItem key={imp.id} value={imp.id}>
+                          {imp.name} ({imp.jobs_created_count} jobs)
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {selectedImport && (
+                    <p className="text-xs text-amber-600 mt-2">
+                      ⚠️ All {selectedImport.jobs_created_count} existing jobs will be deleted and replaced.
+                    </p>
+                  )}
+                </div>
+              )}
 
             <div>
               <label className="text-sm font-medium">CSV File *</label>
@@ -270,16 +368,39 @@ export default function JobImportDialog({ open, onOpenChange, user }) {
 
           {step === 'preview' && (
             <Button
-              onClick={() => createMutation.mutate()}
+              onClick={() => mode === 'replace' ? setReplaceConfirm(true) : createMutation.mutate()}
               disabled={hasErrors || createMutation.isPending}
               className="bg-indigo-600 hover:bg-indigo-700"
             >
               {createMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              Confirm & Create
+              {mode === 'replace' ? 'Replace & Create' : 'Confirm & Create'}
             </Button>
           )}
         </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      </Dialog>
+
+      {/* Replace Confirmation Dialog */}
+      <AlertDialog open={replaceConfirm} onOpenChange={setReplaceConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Replace Import?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will delete all {selectedImport?.jobs_created_count || 0} existing jobs from "{selectedImport?.name}" and create new ones. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={() => {
+              createMutation.mutate();
+              setReplaceConfirm(false);
+            }}
+            className="bg-destructive hover:bg-destructive/90"
+          >
+            {createMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+            Delete & Replace
+          </AlertDialogAction>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
