@@ -46,6 +46,13 @@ import JobImportDialog from '@/components/jobs/import/JobImportDialog';
 import { format } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
 import { exportToCSV, prepareJobsForExport } from '@/components/utils/exportUtils';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { ChevronDown } from 'lucide-react';
 
 export default function CustomerJobs() {
   const queryClient = useQueryClient();
@@ -54,6 +61,7 @@ export default function CustomerJobs() {
   const [importFilter, setImportFilter] = useState('all');
   const [deleteDialog, setDeleteDialog] = useState(null);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [fitterJobId, setFitterJobId] = useState(null);
 
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
@@ -72,6 +80,11 @@ export default function CustomerJobs() {
     enabled: !!user?.customer_id,
   });
 
+  const { data: fitters = [] } = useQuery({
+    queryKey: ['fitters'],
+    queryFn: () => base44.entities.Fitter.filter({ status: 'active' }, '-created_date', 100),
+  });
+
   const deleteJobMutation = useMutation({
     mutationFn: async (jobId) => {
       await base44.entities.Job.delete(jobId);
@@ -79,6 +92,20 @@ export default function CustomerJobs() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['customerJobs', user?.customer_id] });
       setDeleteDialog(null);
+    },
+  });
+
+  const updateFitterMutation = useMutation({
+    mutationFn: async ({ jobId, fitterId, fitterName }) => {
+      await base44.entities.Job.update(jobId, {
+        fitter_id: fitterId,
+        fitter_name: fitterName,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['customerJobs', user?.customer_id] });
+      setFitterJobId(null);
+      toast.success('Fitter assigned');
     },
   });
 
@@ -213,6 +240,7 @@ export default function CustomerJobs() {
                   <TableHead>Delivery Date</TableHead>
                   <TableHead>Delivery ETA</TableHead>
                   <TableHead>Driver</TableHead>
+                  <TableHead>Fitter</TableHead>
                   <TableHead></TableHead>
                 </TableRow>
               </TableHeader>
@@ -293,6 +321,35 @@ export default function CustomerJobs() {
                       </TableCell>
                       <TableCell>
                         <span className="text-sm">{job.driver_name || '-'}</span>
+                      </TableCell>
+                      <TableCell>
+                        <DropdownMenu open={fitterJobId === job.id} onOpenChange={(open) => !open && setFitterJobId(null)}>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setFitterJobId(job.id)}
+                              className="gap-1 text-xs"
+                            >
+                              {job.fitter_name || 'Assign'}
+                              <ChevronDown className="w-3 h-3" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            {fitters.map(fitter => (
+                              <DropdownMenuItem
+                                key={fitter.id}
+                                onClick={() => updateFitterMutation.mutate({
+                                  jobId: job.id,
+                                  fitterId: fitter.id,
+                                  fitterName: fitter.name,
+                                })}
+                              >
+                                {fitter.name}
+                              </DropdownMenuItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-1">
