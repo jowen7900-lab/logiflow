@@ -29,16 +29,6 @@ export default async function publishPlan(req, ctx) {
       );
     }
 
-    // 3b. Load customer safely (fallback if not found)
-    let customerName = '';
-    try {
-      const customer = await ctx.base44.asServiceRole.entities.Customer.get(plan.customer_id);
-      customerName = customer?.name || user.full_name || user.email || '';
-    } catch (err) {
-      console.warn('Customer entity not found, using fallback name');
-      customerName = user.full_name || user.email || '';
-    }
-
     // 4. Load plan lines
     const planLines = await ctx.base44.asServiceRole.entities.PlanLine.filter({
       plan_version_id: planVersionId,
@@ -81,7 +71,7 @@ export default async function publishPlan(req, ctx) {
         plan_id: planId,
         plan_version_id: planVersionId,
         customer_id: plan.customer_id,
-        customer_name: customerName,
+        customer_name: user.full_name || user.email || '',
         customer_status: 'confirmed',
 
         job_type: first.job_type,
