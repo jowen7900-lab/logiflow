@@ -29,8 +29,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Upload, AlertTriangle } from 'lucide-react';
+import { Loader2, Upload, AlertTriangle, History } from 'lucide-react';
 import JobPreviewTable from './JobPreviewTable';
+import JobImportAuditHistory from './JobImportAuditHistory';
 
 export default function JobImportDialog({ open, onOpenChange, user, onImportComplete }) {
   const queryClient = useQueryClient();
@@ -43,6 +44,7 @@ export default function JobImportDialog({ open, onOpenChange, user, onImportComp
   const [parseErrors, setParseErrors] = useState([]);
   const [expandedJob, setExpandedJob] = useState(null);
   const [replaceConfirm, setReplaceConfirm] = useState(false);
+  const [showAudit, setShowAudit] = useState(false);
 
   // Fetch existing imports
   const { data: existingImports = [] } = useQuery({
@@ -216,26 +218,40 @@ export default function JobImportDialog({ open, onOpenChange, user, onImportComp
               )}
 
               {mode === 'replace' && (
-                <div>
-                  <label className="text-sm font-medium">Select Import to Replace *</label>
-                  <Select value={selectedImportId} onValueChange={setSelectedImportId}>
-                    <SelectTrigger className="mt-1">
-                      <SelectValue placeholder="Choose import batch..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {existingImports.map(imp => (
-                        <SelectItem key={imp.id} value={imp.id}>
-                          {imp.name} ({imp.jobs_created_count} jobs)
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {selectedImport && (
-                    <p className="text-xs text-amber-600 mt-2">
-                      ⚠️ All {selectedImport.jobs_created_count} existing jobs will be deleted and replaced.
-                    </p>
-                  )}
-                </div>
+               <div>
+                 <label className="text-sm font-medium">Select Import to Replace *</label>
+                 <Select value={selectedImportId} onValueChange={setSelectedImportId}>
+                   <SelectTrigger className="mt-1">
+                     <SelectValue placeholder="Choose import batch..." />
+                   </SelectTrigger>
+                   <SelectContent>
+                     {existingImports.map(imp => (
+                       <SelectItem key={imp.id} value={imp.id}>
+                         {imp.name} ({imp.jobs_created_count} jobs)
+                       </SelectItem>
+                     ))}
+                   </SelectContent>
+                 </Select>
+                 {selectedImport && (
+                   <div className="space-y-2 mt-2">
+                     <p className="text-xs text-amber-600">
+                       ⚠️ All {selectedImport.jobs_created_count} existing jobs will be deleted and replaced.
+                     </p>
+                     <Button
+                       variant="ghost"
+                       size="sm"
+                       onClick={() => setShowAudit(!showAudit)}
+                       className="gap-1 text-xs"
+                     >
+                       <History className="w-3 h-3" />
+                       {showAudit ? 'Hide' : 'Show'} History
+                     </Button>
+                     {showAudit && (
+                       <JobImportAuditHistory jobImportId={selectedImportId} open={showAudit} />
+                     )}
+                   </div>
+                 )}
+               </div>
               )}
 
               <div>
