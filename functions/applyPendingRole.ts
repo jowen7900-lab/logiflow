@@ -19,16 +19,18 @@ Deno.serve(async (req) => {
     if (invitations.length === 0) {
       return Response.json({ 
         success: false,
-        message: 'No pending invitation found for this email'
+        message: 'No pending invitation found for this email',
+        debug: { email: user.email }
       });
     }
 
     const invitation = invitations[0];
 
     // Prepare update data based on role
-    const updateData = {
-      app_role: invitation.app_role,
-    };
+    const updateData = {};
+    
+    // Store role in user.data.app_role (custom field)
+    updateData.app_role = invitation.app_role;
 
     // For customer and fitter: pre-approve
     if (invitation.app_role === 'customer' || invitation.app_role === 'fitter') {
