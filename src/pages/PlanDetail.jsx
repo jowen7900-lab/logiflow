@@ -8,13 +8,13 @@ import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import PlanJobsView from '@/components/plans/PlanJobsView';
 
-const urlParams = new URLSearchParams(window.location.search);
-const planId = urlParams.get('id');
-
 export default function PlanDetailPage() {
   const [uploadOpen, setUploadOpen] = useState(false);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const planId = urlParams.get('id');
 
   const { data: user } = useQuery({
     queryKey: ['currentUser'],

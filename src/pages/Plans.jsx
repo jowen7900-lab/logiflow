@@ -28,6 +28,9 @@ export default function PlansPage() {
 
   const createPlanMutation = useMutation({
     mutationFn: async (data) => {
+      if (!user?.customer_id) {
+        throw new Error('Customer ID is required to create a plan');
+      }
       const plan = await base44.entities.Plan.create({
         customer_id: user.customer_id,
         name: data.planName,
@@ -45,6 +48,10 @@ export default function PlansPage() {
   });
 
   const handleCreatePlan = () => {
+    if (!user?.customer_id) {
+      alert('Unable to create plan: Customer ID not found. Please contact support.');
+      return;
+    }
     if (planName.trim()) {
       createPlanMutation.mutate({ planName });
     }
