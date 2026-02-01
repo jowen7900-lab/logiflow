@@ -29,6 +29,8 @@ Deno.serve(async (req) => {
         app_role: targetUser.requested_app_role,
         approval_status: 'approved',
         requested_app_role: null, // Clear the request
+        reviewed_by_user_id: user.id,
+        reviewed_at: new Date().toISOString(),
       };
 
       await base44.asServiceRole.entities.User.update(userId, updateData);
