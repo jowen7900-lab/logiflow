@@ -93,7 +93,7 @@ export default async function publishPlan(req, ctx) {
         job_key: jobKey,
         plan_id: planId,
         plan_version_id: planVersionId,
-        customer_id: plan.customer_id,
+        customer_id: customerId,
         customer_name: user.full_name || user.email || '',
         customer_status: 'confirmed',
         ops_status: 'allocated',
