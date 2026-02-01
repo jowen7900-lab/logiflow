@@ -44,6 +44,9 @@ Deno.serve(async (req) => {
     const errors = [];
     const planLines = [];
 
+    // Group rows by job_key for validation
+    const jobGroups = {};
+    
     // Parse data rows
     for (let i = 1; i < lines.length; i++) {
       try {
@@ -56,7 +59,7 @@ Deno.serve(async (req) => {
 
         const jobKey = row['job_key'] || '';
         if (!jobKey) {
-          errors.push({ row: i + 1, error: 'job_key is required' });
+          errors.push({ row: i + 1, column: 'job_key', error: 'Required field missing' });
           continue;
         }
 
@@ -77,7 +80,45 @@ Deno.serve(async (req) => {
           errors.push({ row: i + 1, column: 'delivery_time_slot', error: 'Required field missing' });
         }
 
-        // Compute line hash
+        // Group by job_key for consistency validation
+        if (!jobGroups[jobKey]) {
+          jobGroups[jobKey] = { rows: [], firstRow: i + 1 };
+        }
+        jobGroups[jobKey].rows.push({ rowNum: i + 1, data: row });
+
+      } catch (error) {
+        errors.push({ row: i + 1, error: error.message });
+      }
+    }
+
+    // Validate job-level field consistency across rows with same job_key
+    const jobLevelFields = ['job_type', 'collection_address', 'collection_postcode', 'collection_contact', 
+      'collection_phone', 'collection_date', 'collection_time_slot', 'collection_time',
+      'delivery_address', 'delivery_postcode', 'delivery_contact', 'delivery_phone',
+      'delivery_date', 'delivery_time_slot', 'delivery_time', 'special_instructions',
+      'fitter_id', 'fitter_name'];
+
+    for (const [jobKey, group] of Object.entries(jobGroups)) {
+      if (group.rows.length > 1) {
+        const firstRowData = group.rows[0].data;
+        for (let j = 1; j < group.rows.length; j++) {
+          const currentRowData = group.rows[j].data;
+          for (const field of jobLevelFields) {
+            if (firstRowData[field] !== currentRowData[field]) {
+              errors.push({
+                row: group.rows[j].rowNum,
+                column: field,
+                error: `Mismatch with row ${group.rows[0].rowNum} for job_key ${jobKey}. Job-level fields must be identical across all items.`
+              });
+            }
+          }
+        }
+      }
+    }
+
+    // Now create PlanLines
+    for (const [jobKey, group] of Object.entries(jobGroups)) {
+      for (const { rowNum, data: row } of group.rows) {
         const hashInput = JSON.stringify({
           job_key: jobKey,
           job_type: (row['job_type'] || '').toLowerCase().trim(),
@@ -97,7 +138,7 @@ Deno.serve(async (req) => {
 
         planLines.push({
           plan_version_id: planVersionId,
-          external_row_id: String(i),
+          external_row_id: String(rowNum),
           job_key: jobKey,
           job_type: row['job_type'] || '',
           collection_address: row['collection_address'] || '',
@@ -123,8 +164,6 @@ Deno.serve(async (req) => {
           fitter_name: row['fitter_name'] || '',
           line_hash: lineHash,
         });
-      } catch (error) {
-        errors.push({ row: i + 1, error: error.message });
       }
     }
 

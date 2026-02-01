@@ -32,15 +32,23 @@ Deno.serve(async (req) => {
       const afterData = item.after_snapshot ? JSON.parse(item.after_snapshot) : null;
 
       if (item.diff_type === 'added') {
-        // Create new job
-        const jobData = planLineToJob(afterData, plan.customer_id, planDiff.plan_id, toVersion.id, item.job_key);
+        // Get all PlanLines for this job_key to build items array
+        const planLines = await base44.asServiceRole.entities.PlanLine.filter({ 
+          plan_version_id: planDiff.to_version_id,
+          job_key: item.job_key 
+        });
+        const jobData = planLineToJob(planLines, plan.customer_id, planDiff.plan_id, toVersion.id, item.job_key);
         await base44.asServiceRole.entities.Job.create(jobData);
         appliedCount++;
       } else if (item.diff_type === 'changed') {
         // Find and update existing job by jobKey
         const existingJobs = await base44.asServiceRole.entities.Job.filter({ job_key: item.job_key });
         if (existingJobs.length > 0) {
-          const jobData = planLineToJob(afterData, plan.customer_id, planDiff.plan_id, toVersion.id, item.job_key);
+          const planLines = await base44.asServiceRole.entities.PlanLine.filter({ 
+            plan_version_id: planDiff.to_version_id,
+            job_key: item.job_key 
+          });
+          const jobData = planLineToJob(planLines, plan.customer_id, planDiff.plan_id, toVersion.id, item.job_key);
           await base44.asServiceRole.entities.Job.update(existingJobs[0].id, jobData);
           
           // Create OpsTask for change
@@ -87,33 +95,50 @@ Deno.serve(async (req) => {
   }
 });
 
-function planLineToJob(lineData, customerId, planId, planVersionId, jobKey) {
+function planLineToJob(planLines, customerId, planId, planVersionId, jobKey) {
+  // Group items from multiple rows with same job_key
+  const items = planLines.map(line => ({
+    description: line.item_description || '',
+    quantity: line.item_quantity || 1,
+    weight_kg: line.item_weight_kg || 0,
+    dimensions: line.item_dimensions || '',
+  })).filter(item => item.description);
+
+  // Use first row for job-level fields (all rows with same job_key must have identical job-level data)
+  const firstLine = planLines[0];
   const jobNumber = `PLAN-${planId}-${jobKey}`.slice(0, 50);
   
   return {
     job_number: jobNumber,
     customer_id: customerId,
     customer_name: '',
-    job_type: 'delivery',
+    job_type: firstLine.job_type || 'install',
     customer_status: 'requested',
     ops_status: 'allocated',
-    collection_address: lineData.collectionAddress || '',
-    collection_postcode: lineData.collectionPostcode || '',
-    collection_name: lineData.collectionName || '',
-    delivery_address: lineData.address || '',
-    delivery_postcode: lineData.postcode || '',
-    delivery_contact: lineData.recipientName || '',
-    scheduled_date: lineData.dateTime ? lineData.dateTime.split('T')[0] : null,
-    scheduled_time_slot: 'all_day',
-    vehicle_reg: lineData.vehicleType || '',
-    items: [{
-      description: lineData.goodsDescription || '',
-      quantity: 1,
-    }],
-    special_instructions: lineData.notes || '',
-    customer_reference: lineData.reference1 || '',
+    collection_address: firstLine.collection_address || '',
+    collection_postcode: firstLine.collection_postcode || '',
+    collection_contact: firstLine.collection_contact || '',
+    collection_phone: firstLine.collection_phone || '',
+    collection_date: firstLine.collection_date || null,
+    collection_time_slot: firstLine.collection_time_slot || '',
+    collection_time: firstLine.collection_time || '',
+    delivery_address: firstLine.delivery_address || '',
+    delivery_postcode: firstLine.delivery_postcode || '',
+    delivery_contact: firstLine.delivery_contact || '',
+    delivery_phone: firstLine.delivery_phone || '',
+    delivery_date: firstLine.delivery_date || null,
+    delivery_time_slot: firstLine.delivery_time_slot || '',
+    delivery_time: firstLine.delivery_time || '',
+    scheduled_date: firstLine.delivery_date || null,
+    scheduled_time_slot: firstLine.delivery_time_slot || '',
+    scheduled_time: firstLine.delivery_time || '',
+    special_instructions: firstLine.special_instructions || '',
+    requires_fitter: firstLine.fitter_id ? true : false,
+    fitter_id: firstLine.fitter_id || null,
+    fitter_name: firstLine.fitter_name || null,
+    items: items.length > 0 ? items : [{ description: '', quantity: 1, weight_kg: 0, dimensions: '' }],
     plan_id: planId,
     plan_version_id: planVersionId,
-    job_key: lineData.jobKey,
+    job_key: jobKey,
   };
 }
