@@ -135,74 +135,72 @@ export default function PlanJobsView({ planId, latestVersion }) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {jobsArray.map((jobGroup) => (
-                <React.Fragment key={jobGroup.job_key}>
-                  <TableRow>
-                    <TableCell>
+              {jobsArray.flatMap((jobGroup) => [
+                <TableRow key={`${jobGroup.job_key}-row`}>
+                  <TableCell>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => toggleExpand(jobGroup.job_key)}
+                      className="h-6 w-6"
+                    >
+                      {expandedJobs[jobGroup.job_key] ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                    </Button>
+                  </TableCell>
+                  <TableCell className="font-medium">{jobGroup.job_key}</TableCell>
+                  <TableCell>{(jobGroup.job_type || '—').replace(/_/g, ' ')}</TableCell>
+                  <TableCell>
+                    {jobGroup.collection_postcode && jobGroup.collection_address ? `${jobGroup.collection_postcode}, ${jobGroup.collection_address}` : '—'}
+                    <br />
+                    <span className="text-xs text-muted-foreground">
+                      {formatDisplayDate(jobGroup.collection_date)} {formatDisplayTime(jobGroup.collection_time_slot, jobGroup.collection_time)}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    {jobGroup.delivery_postcode && jobGroup.delivery_address ? `${jobGroup.delivery_postcode}, ${jobGroup.delivery_address}` : '—'}
+                    <br />
+                    <span className="text-xs text-muted-foreground">
+                      {formatDisplayDate(jobGroup.delivery_date)} {formatDisplayTime(jobGroup.delivery_time_slot, jobGroup.delivery_time)}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    {jobGroup.requires_fitter ? (jobGroup.fitter_name || 'Required') : 'No'}
+                  </TableCell>
+                  <TableCell>{jobGroup.items.length}</TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex gap-2 justify-end">
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => toggleExpand(jobGroup.job_key)}
-                        className="h-6 w-6"
+                        onClick={() => handleEditJob(jobGroup.items[0])}
+                        className="h-8 w-8"
                       >
-                        {expandedJobs[jobGroup.job_key] ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                        <Pencil className="w-4 h-4" />
                       </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => deleteJobMutation.mutate(jobGroup.job_key)}
+                        className="h-8 w-8 text-red-600 hover:text-red-700"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>,
+                ...(expandedJobs[jobGroup.job_key] ? jobGroup.items.map((item, index) => (
+                  <TableRow key={`${jobGroup.job_key}-item-${item.id}`} className="bg-slate-50">
+                    <TableCell className="text-right pr-2 text-xs text-slate-500">Item {index + 1}</TableCell>
+                    <TableCell colSpan={2}>
+                      <span className="font-medium">{item.item_description || 'N/A'}</span>
                     </TableCell>
-                    <TableCell className="font-medium">{jobGroup.job_key}</TableCell>
-                    <TableCell>{(jobGroup.job_type || '—').replace(/_/g, ' ')}</TableCell>
-                    <TableCell>
-                      {jobGroup.collection_postcode && jobGroup.collection_address ? `${jobGroup.collection_postcode}, ${jobGroup.collection_address}` : '—'}
-                      <br />
-                      <span className="text-xs text-muted-foreground">
-                        {formatDisplayDate(jobGroup.collection_date)} {formatDisplayTime(jobGroup.collection_time_slot, jobGroup.collection_time)}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      {jobGroup.delivery_postcode && jobGroup.delivery_address ? `${jobGroup.delivery_postcode}, ${jobGroup.delivery_address}` : '—'}
-                      <br />
-                      <span className="text-xs text-muted-foreground">
-                        {formatDisplayDate(jobGroup.delivery_date)} {formatDisplayTime(jobGroup.delivery_time_slot, jobGroup.delivery_time)}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      {jobGroup.requires_fitter ? (jobGroup.fitter_name || 'Required') : 'No'}
-                    </TableCell>
-                    <TableCell>{jobGroup.items.length}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex gap-2 justify-end">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleEditJob(jobGroup.items[0])}
-                          className="h-8 w-8"
-                        >
-                          <Pencil className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => deleteJobMutation.mutate(jobGroup.job_key)}
-                          className="h-8 w-8 text-red-600 hover:text-red-700"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
+                    <TableCell>Qty: {item.item_quantity}</TableCell>
+                    <TableCell>Weight: {item.item_weight_kg}kg</TableCell>
+                    <TableCell>Dims: {item.item_dimensions || 'N/A'}</TableCell>
+                    <TableCell colSpan={2}></TableCell>
                   </TableRow>
-                  {expandedJobs[jobGroup.job_key] && jobGroup.items.map((item, index) => (
-                    <TableRow key={item.id} className="bg-slate-50">
-                      <TableCell className="text-right pr-2 text-xs text-slate-500">Item {index + 1}</TableCell>
-                      <TableCell colSpan={2}>
-                        <span className="font-medium">{item.item_description || 'N/A'}</span>
-                      </TableCell>
-                      <TableCell>Qty: {item.item_quantity}</TableCell>
-                      <TableCell>Weight: {item.item_weight_kg}kg</TableCell>
-                      <TableCell>Dims: {item.item_dimensions || 'N/A'}</TableCell>
-                      <TableCell colSpan={2}></TableCell>
-                    </TableRow>
-                  ))}
-                </React.Fragment>
-              ))}
+                )) : [])
+              ])}
             </TableBody>
           </Table>
         </div>

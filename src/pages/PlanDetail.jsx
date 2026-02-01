@@ -7,6 +7,7 @@ import { Upload, FileText, AlertCircle, Download, CheckCircle } from 'lucide-rea
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import PlanJobsView from '@/components/plans/PlanJobsView';
+import { toast } from 'sonner';
 
 export default function PlanDetailPage() {
   const [uploadOpen, setUploadOpen] = useState(false);
@@ -124,15 +125,24 @@ export default function PlanDetailPage() {
         planId: planId,
         planVersionId: latestVersion.id,
       });
+      console.log('publishPlan response:', response.data);
       return response.data;
     },
     onSuccess: (data) => {
+      console.log('Publish success:', data);
+      toast.success(
+        `Plan published! Created ${data.jobs_created_count} jobs${data.jobs_skipped_count > 0 ? ` (${data.jobs_skipped_count} skipped)` : ''}`
+      );
       queryClient.invalidateQueries({ queryKey: ['plans', user?.customer_id] });
       queryClient.invalidateQueries({ queryKey: ['plan', planId] });
       queryClient.invalidateQueries({ queryKey: ['customerJobs'] });
       queryClient.invalidateQueries({ queryKey: ['opsJobs'] });
       queryClient.invalidateQueries({ queryKey: ['driverJobs'] });
       queryClient.invalidateQueries({ queryKey: ['fitterJobs'] });
+    },
+    onError: (error) => {
+      console.error('Publish error:', error);
+      toast.error(`Publish failed: ${error.message || 'Unknown error'}`);
     },
   });
 
