@@ -35,19 +35,8 @@ export default function FitterJobs() {
     enabled: !!user?.id,
   });
 
-  // Get all jobs that aren't assigned to a fitter yet
-  const { data: allJobs = [] } = useQuery({
-    queryKey: ['allJobs'],
-    queryFn: () => base44.entities.Job.list('-scheduled_date'),
-    enabled: !!user,
-  });
-
   const myActiveJobs = jobs.filter(j => !['completed', 'cancelled', 'failed'].includes(j.ops_status));
   const myCompletedJobs = jobs.filter(j => ['completed'].includes(j.ops_status));
-  const pendingJobs = allJobs.filter(j => 
-    !j.fitter_id && 
-    !['completed', 'cancelled', 'failed'].includes(j.ops_status)
-  );
 
   const getDateLabel = (date) => {
     if (!date) return '';
@@ -149,17 +138,11 @@ export default function FitterJobs() {
   return (
     <div className="space-y-6">
       {/* Summary */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 gap-4">
         <Card>
           <CardContent className="p-4 text-center">
             <p className="text-3xl font-bold text-purple-600">{myActiveJobs.length}</p>
             <p className="text-sm text-slate-500">My Jobs</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <p className="text-3xl font-bold text-amber-600">{pendingJobs.length}</p>
-            <p className="text-sm text-slate-500">Awaiting Fitter</p>
           </CardContent>
         </Card>
         <Card>
@@ -177,10 +160,6 @@ export default function FitterJobs() {
             <Wrench className="w-4 h-4 mr-2" />
             My Jobs ({myActiveJobs.length})
           </TabsTrigger>
-          <TabsTrigger value="pending">
-            <Clock className="w-4 h-4 mr-2" />
-            Awaiting Fitter ({pendingJobs.length})
-          </TabsTrigger>
           <TabsTrigger value="completed">
             <CheckCircle2 className="w-4 h-4 mr-2" />
             Completed ({myCompletedJobs.length})
@@ -192,24 +171,11 @@ export default function FitterJobs() {
             <Card>
               <CardContent className="py-12 text-center text-slate-500">
                 <Wrench className="w-12 h-12 mx-auto mb-3 text-slate-300" />
-                <p>No active jobs assigned</p>
+                <p>No jobs assigned to you</p>
               </CardContent>
             </Card>
           ) : (
             myActiveJobs.map(job => <JobCard key={job.id} job={job} />)
-          )}
-        </TabsContent>
-
-        <TabsContent value="pending" className="mt-4 space-y-4">
-          {pendingJobs.length === 0 ? (
-            <Card>
-              <CardContent className="py-12 text-center text-slate-500">
-                <Package className="w-12 h-12 mx-auto mb-3 text-slate-300" />
-                <p>No jobs awaiting fitter assignment</p>
-              </CardContent>
-            </Card>
-          ) : (
-            pendingJobs.map(job => <JobCard key={job.id} job={job} showAssign />)
           )}
         </TabsContent>
 
