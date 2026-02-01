@@ -43,6 +43,8 @@ const roleNavigation = {
     { name: 'Dashboard', icon: LayoutDashboard, page: 'CustomerDashboard' },
     { name: 'My Jobs', icon: Package, page: 'CustomerJobs' },
     { name: 'Create Job', icon: Plus, page: 'CreateJob' },
+    { name: 'Drivers', icon: Truck, page: 'CustomerDrivers' },
+    { name: 'Fitters', icon: Wrench, page: 'CustomerFitters' },
     { name: 'Address List', icon: Building2, page: 'AddressList' },
   ],
   driver: [
