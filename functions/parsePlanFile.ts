@@ -31,7 +31,7 @@ Deno.serve(async (req) => {
 
     // Header row
     const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
-    const requiredFields = ['delivery_recipient_name', 'delivery_address1', 'delivery_postcode', 'delivery_date_time'];
+    const requiredFields = ['job_type', 'delivery_address', 'delivery_postcode', 'delivery_date', 'delivery_time_slot'];
     const missingFields = requiredFields.filter(f => !headers.includes(f.toLowerCase()));
     
     if (missingFields.length > 0) {
@@ -57,21 +57,26 @@ Deno.serve(async (req) => {
         // Generate or use provided job_key
         let jobKey = row['job_key'] || '';
         if (!jobKey) {
-          const normalizedName = (row['delivery_recipient_name'] || '').toLowerCase().replace(/[^\w]/g, '');
+          const normalizedContact = (row['delivery_contact'] || '').toLowerCase().replace(/[^\w]/g, '');
           const normalizedPostcode = (row['delivery_postcode'] || '').toUpperCase().replace(/\s/g, '');
-          const normalizedDate = row['delivery_date_time'] || '';
-          const normalizedRef = row['reference1'] || '';
-          jobKey = `${normalizedName}-${normalizedPostcode}-${normalizedDate}-${normalizedRef}`.replace(/^-+|-+$/g, '');
+          const normalizedDate = row['delivery_date'] || '';
+          jobKey = `${normalizedContact}-${normalizedPostcode}-${normalizedDate}`.replace(/^-+|-+$/g, '');
         }
 
         // Compute line hash
         const hashInput = JSON.stringify({
-          recipient: (row['delivery_recipient_name'] || '').toLowerCase().trim(),
-          address: (row['delivery_address1'] || '').toLowerCase().trim(),
-          postcode: (row['delivery_postcode'] || '').toUpperCase().replace(/\s/g, ''),
-          datetime: row['delivery_date_time'] || '',
-          vehicle: (row['vehicle_type'] || '').toLowerCase().trim(),
-          goods: (row['goods_description'] || '').toLowerCase().trim(),
+          job_type: (row['job_type'] || '').toLowerCase().trim(),
+          collection_address: (row['collection_address'] || '').toLowerCase().trim(),
+          collection_postcode: (row['collection_postcode'] || '').toUpperCase().replace(/\s/g, ''),
+          collection_date: row['collection_date'] || '',
+          collection_time_slot: (row['collection_time_slot'] || '').toLowerCase().trim(),
+          delivery_address: (row['delivery_address'] || '').toLowerCase().trim(),
+          delivery_postcode: (row['delivery_postcode'] || '').toUpperCase().replace(/\s/g, ''),
+          delivery_contact: (row['delivery_contact'] || '').toLowerCase().trim(),
+          delivery_date: row['delivery_date'] || '',
+          delivery_time_slot: (row['delivery_time_slot'] || '').toLowerCase().trim(),
+          items: (row['items_description'] || '').toLowerCase().trim(),
+          special_instructions: (row['special_instructions'] || '').toLowerCase().trim(),
         });
         const lineHash = await hashString(hashInput);
 
@@ -79,19 +84,26 @@ Deno.serve(async (req) => {
           plan_version_id: planVersionId,
           external_row_id: String(i),
           job_key: jobKey,
-          collection_name: row['collection_name'] || null,
-          collection_address1: row['collection_address1'] || '',
+          job_type: row['job_type'] || '',
+          collection_address: row['collection_address'] || '',
           collection_postcode: row['collection_postcode'] || '',
-          collection_date_time: row['collection_date_time'] || null,
-          delivery_recipient_name: row['delivery_recipient_name'] || '',
-          delivery_address1: row['delivery_address1'] || '',
+          collection_contact: row['collection_contact'] || '',
+          collection_phone: row['collection_phone'] || '',
+          collection_date: row['collection_date'] || null,
+          collection_time_slot: row['collection_time_slot'] || '',
+          collection_time: row['collection_time'] || '',
+          delivery_address: row['delivery_address'] || '',
           delivery_postcode: row['delivery_postcode'] || '',
-          delivery_date_time: row['delivery_date_time'] || '',
-          vehicle_type: row['vehicle_type'] || '',
-          goods_description: row['goods_description'] || '',
-          notes: row['notes'] || '',
-          reference1: row['reference1'] || '',
-          reference2: row['reference2'] || '',
+          delivery_contact: row['delivery_contact'] || '',
+          delivery_phone: row['delivery_phone'] || '',
+          delivery_date: row['delivery_date'] || '',
+          delivery_time_slot: row['delivery_time_slot'] || '',
+          delivery_time: row['delivery_time'] || '',
+          items_description: row['items_description'] || '',
+          items_quantity: row['items_quantity'] || '',
+          items_weight_kg: row['items_weight_kg'] || '',
+          special_instructions: row['special_instructions'] || '',
+          fitter_required: row['fitter_required'] || '',
           line_hash: lineHash,
         });
       } catch (error) {

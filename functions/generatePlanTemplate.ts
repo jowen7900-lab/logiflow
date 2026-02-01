@@ -10,24 +10,12 @@ Deno.serve(async (req) => {
     }
 
     const templateData = [
-      ['John Smith', '123 Main Street', 'M1 1AA', '2026-02-01T09:00:00Z', 'Office Supplies', 'LWB', 'REF-001'],
-      ['Sarah Johnson', '456 Oak Avenue', 'M2 2BB', '2026-02-01T10:30:00Z', 'Furniture Set', 'LWB', 'REF-002'],
-      ['Mike Brown', '789 Pine Road', 'M3 3CC', '2026-02-01T13:00:00Z', 'Electrical Equipment', 'SWB', 'REF-003'],
-      ['Emma Davis', '321 Elm Street', 'M4 4DD', '2026-02-01T14:30:00Z', 'Tools & Hardware', 'LWB', 'REF-004'],
-      ['David Wilson', '654 Birch Lane', 'M5 5EE', '2026-02-01T15:45:00Z', 'Kitchen Appliances', 'SWB', 'REF-005'],
-      ['Lisa Martinez', '987 Maple Drive', 'M6 6FF', '2026-02-02T09:00:00Z', 'Textiles & Fabrics', 'LWB', 'REF-006'],
-      ['Robert Taylor', '147 Cedar Street', 'M7 7GG', '2026-02-02T10:15:00Z', 'Books & Media', 'SWB', 'REF-007'],
-      ['Jennifer Lee', '258 Walnut Avenue', 'M8 8HH', '2026-02-02T12:00:00Z', 'Industrial Parts', 'LWB', 'REF-008'],
-      ['Mark Anderson', '369 Ash Road', 'M9 9II', '2026-02-02T14:30:00Z', 'Packaging Materials', 'SWB', 'REF-009'],
-      ['Patricia White', '741 Spruce Lane', 'M10 10JJ', '2026-02-02T16:00:00Z', 'Miscellaneous Goods', 'LWB', 'REF-010'],
-      ['Chris Evans', '852 Poplar Street', 'M11 11KK', '2026-02-03T08:30:00Z', 'Office Equipment', 'SWB', 'REF-011'],
-      ['Diana Chen', '963 Willow Road', 'M12 12LL', '2026-02-03T11:00:00Z', 'Building Materials', 'LWB', 'REF-012'],
-      ['Eric Johnson', '147 Oak Lane', 'M13 13MM', '2026-02-03T13:15:00Z', 'Electronics', 'LWB', 'REF-013'],
-      ['Fiona Walsh', '258 Pine Street', 'M14 14NN', '2026-02-03T15:30:00Z', 'Clothing & Textiles', 'SWB', 'REF-014'],
-      ['George Miller', '369 Elm Avenue', 'M15 15OO', '2026-02-04T09:45:00Z', 'Food & Beverage', 'LWB', 'REF-015'],
+      ['install', '123 Warehouse St', 'M1 1AA', 'John Smith', '07700900001', '2026-02-10', 'am', '', '456 Client Ave', 'M2 2BB', 'Jane Doe', '07700900002', '2026-02-10', 'pm', '', 'Office desk x2', '2', '50', 'Use service elevator', ''],
+      ['rubbish_collection', '789 Factory Rd', 'M3 3CC', 'Bob Jones', '07700900003', '2026-02-11', 'am', '09:00', '321 Shop St', 'M4 4DD', 'Alice Brown', '07700900004', '2026-02-11', 'pm', '', 'Old furniture', '1', '80', 'Collection from rear entrance', 'yes'],
+      ['remedial', '', '', '', '', '', '', '', '654 Office Park', 'M5 5EE', 'Charlie Davis', '07700900005', '2026-02-12', 'all_day', '', 'Repair equipment', '1', '20', 'Contact on arrival', 'yes'],
     ];
 
-    const headers = ['delivery_recipient_name', 'delivery_address1', 'delivery_postcode', 'delivery_date_time', 'goods_description', 'vehicle_type', 'reference1'];
+    const headers = ['job_type', 'collection_address', 'collection_postcode', 'collection_contact', 'collection_phone', 'collection_date', 'collection_time_slot', 'collection_time', 'delivery_address', 'delivery_postcode', 'delivery_contact', 'delivery_phone', 'delivery_date', 'delivery_time_slot', 'delivery_time', 'items_description', 'items_quantity', 'items_weight_kg', 'special_instructions', 'fitter_required'];
     
     const csv = [
       headers.join(','),
