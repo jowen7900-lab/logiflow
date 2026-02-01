@@ -19,17 +19,28 @@ Deno.serve(async (req) => {
     // Invite the user
     await base44.users.inviteUser(email, 'user');
 
-    // Wait a moment for user creation to complete
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Wait for user creation to complete
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
-    // Find the newly created user
-    const users = await base44.asServiceRole.entities.User.filter({ email });
-    
-    if (users.length === 0) {
-      return Response.json({ error: 'User invitation sent but user record not found' }, { status: 404 });
+    // Find the newly created user with retries
+    let invitedUser = null;
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const users = await base44.asServiceRole.entities.User.filter({ email });
+      if (users.length > 0) {
+        invitedUser = users[0];
+        break;
+      }
+      await new Promise(resolve => setTimeout(resolve, 1000));
     }
-
-    const invitedUser = users[0];
+    
+    if (!invitedUser) {
+      // User invited but record creation is still pending
+      return Response.json({ 
+        success: true,
+        message: 'User invitation sent successfully',
+        pending: true 
+      });
+    }
     
     // Prepare update data based on role
     const updateData = {
