@@ -76,6 +76,7 @@ Deno.serve(async (req) => {
     return Response.json({
       status: 'success',
       job_import_id: jobImport.id,
+      job_import_name: jobImport.name,
       jobs_created_count: jobs.length,
     });
   } catch (error) {

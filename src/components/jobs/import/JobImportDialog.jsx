@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import {
   Dialog,
   DialogContent,
@@ -31,7 +32,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Upload, AlertTriangle } from 'lucide-react';
 import JobPreviewTable from './JobPreviewTable';
 
-export default function JobImportDialog({ open, onOpenChange, user }) {
+export default function JobImportDialog({ open, onOpenChange, user, onImportComplete }) {
   const queryClient = useQueryClient();
   const [step, setStep] = useState('input'); // input | preview | parsing
   const [mode, setMode] = useState('new'); // new | replace
@@ -115,9 +116,17 @@ export default function JobImportDialog({ open, onOpenChange, user }) {
         return response.data;
       }
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      const jobCount = data.jobs_created_count || 0;
+      const deletedCount = data.jobs_deleted_count || 0;
+      const msg = deletedCount > 0 
+        ? `✓ Replaced ${deletedCount} jobs with ${jobCount} new jobs`
+        : `✓ Created ${jobCount} jobs`;
+      toast.success(msg);
+      
       queryClient.invalidateQueries({ queryKey: ['customerJobs'] });
       queryClient.invalidateQueries({ queryKey: ['jobImports'] });
+      
       setStep('input');
       setMode('new');
       setImportName('');
@@ -128,6 +137,10 @@ export default function JobImportDialog({ open, onOpenChange, user }) {
       setExpandedJob(null);
       setReplaceConfirm(false);
       onOpenChange(false);
+      
+      if (onImportComplete && data.job_import_id) {
+        onImportComplete(data.job_import_id);
+      }
     },
   });
 

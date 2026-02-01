@@ -87,8 +87,9 @@ Deno.serve(async (req) => {
     return Response.json({
       status: 'success',
       job_import_id: jobImportId,
+      job_import_name: jobImport.name,
+      jobs_deleted_count: existingJobs.length,
       jobs_created_count: jobs.length,
-      old_jobs_deleted_count: existingJobs.length,
     });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
