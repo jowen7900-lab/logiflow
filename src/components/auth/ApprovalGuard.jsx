@@ -41,23 +41,9 @@ export default function ApprovalGuard({ children }) {
         }
       }
       
-      // If user has no role, redirect to role selection
-      if (!user.app_role) {
+      // If user has no role and no requested role, redirect to role selection
+      if (!user.app_role && !user.requested_app_role) {
         navigate(createPageUrl('RoleSelection'));
-        return;
-      }
-
-      // If user has role but approval_status is draft, redirect to onboarding
-      if (user.approval_status === 'draft') {
-        // Validate role is one of the allowed roles
-        if (!['admin', 'customer', 'driver', 'fitter'].includes(user.app_role)) {
-          navigate(createPageUrl('PendingApproval'));
-          return;
-        }
-        
-        const roleCapitalized = user.app_role.charAt(0).toUpperCase() + user.app_role.slice(1);
-        const onboardingPage = `Onboarding${roleCapitalized}`;
-        navigate(createPageUrl(onboardingPage));
         return;
       }
 

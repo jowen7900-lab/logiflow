@@ -146,7 +146,7 @@ export default function UserManagement() {
 
   const approveDriverMutation = useMutation({
     mutationFn: async (userId) => {
-      const response = await base44.functions.invoke('approveDriver', {
+      const response = await base44.functions.invoke('approveUser', {
         userId,
         action: 'approve'
       });
@@ -155,16 +155,16 @@ export default function UserManagement() {
     onSuccess: async () => {
       await queryClient.refetchQueries({ queryKey: ['allUsers'] });
       await queryClient.refetchQueries({ queryKey: ['drivers'] });
-      toast.success('Driver approved successfully');
+      toast.success('User approved successfully');
     },
     onError: (error) => {
-      toast.error(`Failed to approve driver: ${error.message}`);
+      toast.error(`Failed to approve user: ${error.message}`);
     },
   });
 
   const rejectDriverMutation = useMutation({
     mutationFn: async ({ userId, reason }) => {
-      const response = await base44.functions.invoke('approveDriver', {
+      const response = await base44.functions.invoke('approveUser', {
         userId,
         action: 'reject',
         rejectionReason: reason
@@ -174,13 +174,13 @@ export default function UserManagement() {
     onSuccess: async () => {
       await queryClient.refetchQueries({ queryKey: ['allUsers'] });
       await queryClient.refetchQueries({ queryKey: ['drivers'] });
-      toast.success('Driver rejected');
+      toast.success('User rejected');
       setRejectDialog(false);
       setRejectUser(null);
       setRejectionReason('');
     },
     onError: (error) => {
-      toast.error(`Failed to reject driver: ${error.message}`);
+      toast.error(`Failed to reject user: ${error.message}`);
     },
   });
 
@@ -289,6 +289,11 @@ export default function UserManagement() {
                           {user.customer_name || user.customer_id || '-'}
                         </TableCell>
                         <TableCell>
+                          {user.requested_app_role && (
+                            <div className="text-sm text-slate-600 mb-1">
+                              Requested: <span className="font-medium">{roleLabels[user.requested_app_role]}</span>
+                            </div>
+                          )}
                           {user.app_role === 'driver' && (
                             <div className="text-sm text-slate-600">
                               {user.vehicle_reg && <span>{user.vehicle_reg}</span>}
@@ -311,37 +316,35 @@ export default function UserManagement() {
                           {user.created_date && format(new Date(user.created_date), 'MMM d, yyyy')}
                         </TableCell>
                         <TableCell>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm">
-                                <MoreHorizontal className="w-4 h-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              {user.app_role === 'driver' && user.approval_status === 'pending_review' && (
-                                <>
-                                  <DropdownMenuItem 
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      approveDriverMutation.mutate(user.id);
-                                    }}
-                                    disabled={approveDriverMutation.isPending}
-                                  >
-                                    {approveDriverMutation.isPending ? 'Approving...' : 'Approve Driver'}
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem 
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setRejectUser(user);
-                                      setRejectDialog(true);
-                                    }}
-                                  >
-                                    Reject Driver
-                                  </DropdownMenuItem>
-                                </>
-                              )}
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                          {user.approval_status === 'pending_review' && user.requested_app_role && (
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm">
+                                  <MoreHorizontal className="w-4 h-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    approveDriverMutation.mutate(user.id);
+                                  }}
+                                  disabled={approveDriverMutation.isPending}
+                                >
+                                  {approveDriverMutation.isPending ? 'Approving...' : `Approve ${roleLabels[user.requested_app_role] || 'User'}`}
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setRejectUser(user);
+                                    setRejectDialog(true);
+                                  }}
+                                >
+                                  Reject
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          )}
                         </TableCell>
                       </TableRow>
                     );
@@ -456,7 +459,7 @@ export default function UserManagement() {
       <Dialog open={rejectDialog} onOpenChange={setRejectDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Reject Driver Application</DialogTitle>
+            <DialogTitle>Reject Application</DialogTitle>
             <DialogDescription>
               Provide a reason for rejecting {rejectUser?.full_name || rejectUser?.email}
             </DialogDescription>

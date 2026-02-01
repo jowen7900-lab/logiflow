@@ -10,12 +10,28 @@ import { cn } from '@/lib/utils';
 
 const roles = [
   {
+    value: 'customer',
+    label: 'Customer',
+    icon: Building2,
+    description: 'Book and manage deliveries',
+    color: 'bg-blue-50 border-blue-200 hover:bg-blue-100',
+    iconColor: 'text-blue-600',
+  },
+  {
+    value: 'fitter',
+    label: 'Fitter',
+    icon: Wrench,
+    description: 'Install and fit equipment',
+    color: 'bg-amber-50 border-amber-200 hover:bg-amber-100',
+    iconColor: 'text-amber-600',
+  },
+  {
     value: 'driver',
     label: 'Driver',
     icon: Truck,
     description: 'Deliver and collect items',
-    color: 'bg-blue-50 border-blue-200 hover:bg-blue-100',
-    iconColor: 'text-blue-600',
+    color: 'bg-emerald-50 border-emerald-200 hover:bg-emerald-100',
+    iconColor: 'text-emerald-600',
   },
 ];
 
@@ -89,13 +105,12 @@ export default function RoleSelection() {
   const selectRoleMutation = useMutation({
     mutationFn: async (role) => {
       await base44.auth.updateMe({ 
-        app_role: role,
-        approval_status: 'draft'
+        requested_app_role: role,
+        approval_status: 'pending_review'
       });
     },
-    onSuccess: (_, role) => {
-      const roleCapitalized = role.charAt(0).toUpperCase() + role.slice(1);
-      navigate(createPageUrl(`Onboarding${roleCapitalized}`));
+    onSuccess: () => {
+      navigate(createPageUrl('PendingApproval'));
     },
   });
 
@@ -121,7 +136,7 @@ export default function RoleSelection() {
           <p className="text-slate-600 mt-2">Choose your role to get started</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {roles.map((role) => {
             const Icon = role.icon;
             const isSelected = selectedRole === role.value;
