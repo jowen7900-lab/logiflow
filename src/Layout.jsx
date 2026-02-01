@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { debounce } from 'lodash';
 import Sidebar from '@/components/layout/Sidebar';
 import Header from '@/components/layout/Header';
 import ApprovalGuard from '@/components/auth/ApprovalGuard';
@@ -41,18 +42,24 @@ export default function Layout({ children, currentPageName }) {
   useEffect(() => {
     if (!user) return;
 
-    const unsubscribe = base44.entities.Job.subscribe((event) => {
-      // Invalidate all job-related queries to trigger refetch
+    // Debounced invalidation to batch multiple events (e.g., bulk updates)
+    const debouncedInvalidate = debounce(() => {
+      // Prefix-based invalidation to cover all parameterised keys
       queryClient.invalidateQueries({ queryKey: ['opsJobs'] });
       queryClient.invalidateQueries({ queryKey: ['customerJobs'] });
       queryClient.invalidateQueries({ queryKey: ['driverJobs'] });
       queryClient.invalidateQueries({ queryKey: ['fitterJobs'] });
       queryClient.invalidateQueries({ queryKey: ['jobDetail'] });
-      queryClient.invalidateQueries({ queryKey: ['pendingTasks'] });
-      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+    }, 300);
+
+    const unsubscribe = base44.entities.Job.subscribe((event) => {
+      debouncedInvalidate();
     });
 
-    return unsubscribe;
+    return () => {
+      debouncedInvalidate.cancel();
+      unsubscribe();
+    };
   }, [user, queryClient]);
 
   // Pages that don't require approval guard
