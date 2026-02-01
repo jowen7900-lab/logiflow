@@ -16,14 +16,19 @@ export default function PlanDetailPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
+  const { data: user } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: () => base44.auth.me(),
+  });
+
   const { data: plan, isLoading: planLoading, error: planError } = useQuery({
     queryKey: ['plan', planId],
     queryFn: async () => {
-      const plans = await base44.entities.Plan.filter({ id: planId });
+      const plans = await base44.entities.Plan.filter({ id: planId, customer_id: user.customer_id });
       if (plans.length === 0) throw new Error('Plan not found or access denied');
       return plans[0];
     },
-    enabled: !!planId,
+    enabled: !!planId && !!user?.customer_id,
   });
 
   const { data: versions = [] } = useQuery({

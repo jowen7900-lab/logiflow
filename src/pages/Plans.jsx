@@ -21,9 +21,9 @@ export default function PlansPage() {
   });
 
   const { data: plans = [], isLoading } = useQuery({
-    queryKey: ['plans', user?.id],
-    queryFn: () => base44.entities.Plan.list('-created_date', 100),
-    enabled: !!user?.id,
+    queryKey: ['plans', user?.customer_id],
+    queryFn: () => base44.entities.Plan.filter({ customer_id: user.customer_id }, '-created_date', 100),
+    enabled: !!user?.customer_id,
   });
 
   const createPlanMutation = useMutation({
