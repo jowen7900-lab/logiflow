@@ -128,7 +128,16 @@ export default function UserManagement() {
       });
     },
     onError: (error) => {
-      toast.error(`Failed to invite user: ${error.message}`);
+      console.error('Invite error:', error);
+      toast.error(`Failed to invite user: ${error.message || 'Unknown error'}`);
+      setInviteDialog(false);
+      setInviteData({ 
+        email: '', 
+        app_role: 'customer',
+        customer_id: '',
+        vehicle_reg: '',
+        vehicle_type: '',
+      });
     },
   });
 
