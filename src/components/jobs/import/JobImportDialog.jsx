@@ -101,69 +101,83 @@ export default function JobImportDialog({ open, onOpenChange, user }) {
     },
   });
 
-  // Create import
+  // Create or replace import
   const createMutation = useMutation({
     mutationFn: async () => {
-      const groupedJobs = parsedData.grouped_jobs;
-      const jobImportId = parsedData.job_import_id;
+      if (mode === 'replace') {
+        // Call replace function
+        const response = await base44.functions.invoke('replaceJobImport', {
+          jobImportId: parsedData.job_import_id,
+          parsedData: { ...parsedData, filename: file.name },
+        });
+        return response.data;
+      } else {
+        // Original create logic
+        const groupedJobs = parsedData.grouped_jobs;
+        const jobImportId = parsedData.job_import_id;
 
-      // Create all jobs
-      const jobs = [];
-      for (const [jobKey, jobData] of Object.entries(groupedJobs)) {
-        const jobNumber = `IMP-${jobImportId.slice(0, 8)}-${jobKey}`.slice(0, 50);
-        jobs.push({
-          job_number: jobNumber,
-          customer_id: user.customer_id,
-          customer_name: user.full_name || user.email,
-          job_type: jobData.job_type,
-          customer_status: 'requested',
-          ops_status: 'allocated',
-          collection_address: jobData.collection_address,
-          collection_postcode: jobData.collection_postcode,
-          collection_contact: jobData.collection_contact,
-          collection_phone: jobData.collection_phone,
-          collection_date: jobData.collection_date,
-          collection_time_slot: jobData.collection_time_slot,
-          collection_time: jobData.collection_time,
-          delivery_address: jobData.delivery_address,
-          delivery_postcode: jobData.delivery_postcode,
-          delivery_contact: jobData.delivery_contact,
-          delivery_phone: jobData.delivery_phone,
-          delivery_date: jobData.delivery_date,
-          delivery_time_slot: jobData.delivery_time_slot,
-          delivery_time: jobData.delivery_time,
-          scheduled_date: jobData.delivery_date,
-          scheduled_time_slot: jobData.delivery_time_slot,
-          scheduled_time: jobData.delivery_time,
-          special_instructions: jobData.special_instructions,
-          requires_fitter: jobData.requires_fitter,
-          fitter_id: jobData.fitter_id || null,
-          fitter_name: jobData.fitter_name || null,
-          job_import_id: jobImportId,
-          job_import_name: importName,
-          items: jobData.items,
+        // Create all jobs
+        const jobs = [];
+        for (const [jobKey, jobData] of Object.entries(groupedJobs)) {
+          const jobNumber = `IMP-${jobImportId.slice(0, 8)}-${jobKey}`.slice(0, 50);
+          jobs.push({
+            job_number: jobNumber,
+            customer_id: user.customer_id,
+            customer_name: user.full_name || user.email,
+            job_type: jobData.job_type,
+            customer_status: 'requested',
+            ops_status: 'allocated',
+            collection_address: jobData.collection_address,
+            collection_postcode: jobData.collection_postcode,
+            collection_contact: jobData.collection_contact,
+            collection_phone: jobData.collection_phone,
+            collection_date: jobData.collection_date,
+            collection_time_slot: jobData.collection_time_slot,
+            collection_time: jobData.collection_time,
+            delivery_address: jobData.delivery_address,
+            delivery_postcode: jobData.delivery_postcode,
+            delivery_contact: jobData.delivery_contact,
+            delivery_phone: jobData.delivery_phone,
+            delivery_date: jobData.delivery_date,
+            delivery_time_slot: jobData.delivery_time_slot,
+            delivery_time: jobData.delivery_time,
+            scheduled_date: jobData.delivery_date,
+            scheduled_time_slot: jobData.delivery_time_slot,
+            scheduled_time: jobData.delivery_time,
+            special_instructions: jobData.special_instructions,
+            requires_fitter: jobData.requires_fitter,
+            fitter_id: jobData.fitter_id || null,
+            fitter_name: jobData.fitter_name || null,
+            job_import_id: jobImportId,
+            job_import_name: importName,
+            items: jobData.items,
+          });
+        }
+
+        // Bulk create jobs
+        await base44.asServiceRole.entities.Job.bulkCreate(jobs);
+
+        // Update JobImport status
+        await base44.asServiceRole.entities.JobImport.update(jobImportId, {
+          status: 'created',
+          jobs_created_count: jobs.length,
+          last_upload_filename: file.name,
         });
       }
-
-      // Bulk create jobs
-      await base44.asServiceRole.entities.Job.bulkCreate(jobs);
-
-      // Update JobImport status
-      await base44.asServiceRole.entities.JobImport.update(jobImportId, {
-        status: 'created',
-        jobs_created_count: jobs.length,
-        last_upload_filename: file.name,
-      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['customerJobs'] });
+      queryClient.invalidateQueries({ queryKey: ['jobImports'] });
       // Reset
       setStep('input');
+      setMode('new');
       setImportName('');
+      setSelectedImportId('');
       setFile(null);
       setParsedData(null);
       setParseErrors([]);
       setExpandedJob(null);
+      setReplaceConfirm(false);
       onOpenChange(false);
     },
   });
