@@ -43,7 +43,10 @@ export default function PlanJobsView({ planId, latestVersion }) {
 
   const deleteJobMutation = useMutation({
     mutationFn: async (jobKey) => {
-      const linesToDelete = planLines.filter(line => line.job_key === jobKey);
+      const linesToDelete = await base44.entities.PlanLine.filter({ 
+        plan_version_id: versionId, 
+        job_key: jobKey 
+      });
       await Promise.all(linesToDelete.map(line => base44.entities.PlanLine.delete(line.id)));
     },
     onSuccess: () => {
