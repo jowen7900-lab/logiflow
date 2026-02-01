@@ -30,11 +30,30 @@ const pageTitles = {
 
 export default function Layout({ children, currentPageName }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const queryClient = useQueryClient();
   
   const { data: user, isLoading: userLoading } = useQuery({
     queryKey: ['currentUser'],
     queryFn: () => base44.auth.me(),
   });
+
+  // Real-time job updates subscription
+  useEffect(() => {
+    if (!user) return;
+
+    const unsubscribe = base44.entities.Job.subscribe((event) => {
+      // Invalidate all job-related queries to trigger refetch
+      queryClient.invalidateQueries({ queryKey: ['opsJobs'] });
+      queryClient.invalidateQueries({ queryKey: ['customerJobs'] });
+      queryClient.invalidateQueries({ queryKey: ['driverJobs'] });
+      queryClient.invalidateQueries({ queryKey: ['fitterJobs'] });
+      queryClient.invalidateQueries({ queryKey: ['jobDetail'] });
+      queryClient.invalidateQueries({ queryKey: ['pendingTasks'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+    });
+
+    return unsubscribe;
+  }, [user, queryClient]);
 
   // Pages that don't require approval guard
   const publicPages = ['RoleSelection', 'OnboardingDriver', 'OnboardingFitter', 'OnboardingCustomer', 'OnboardingOps', 'PendingApproval'];
