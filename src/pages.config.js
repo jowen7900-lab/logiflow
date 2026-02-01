@@ -118,7 +118,7 @@ export const PAGES = {
 }
 
 export const pagesConfig = {
-    mainPage: "RoleSelection",
+    mainPage: "CreateJob",
     Pages: PAGES,
     Layout: __Layout,
 };
