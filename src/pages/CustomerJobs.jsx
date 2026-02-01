@@ -77,10 +77,14 @@ export default function CustomerJobs() {
       await base44.entities.Job.delete(jobId);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['customerJobs', user?.id]);
+      queryClient.invalidateQueries({ queryKey: ['customerJobs'] });
       setDeleteDialog(null);
     },
   });
+
+  const handleImportComplete = (jobImportId) => {
+    setImportFilter(jobImportId);
+  };
 
   // Filter jobs
   const filteredJobs = jobs.filter(job => {
@@ -323,6 +327,7 @@ export default function CustomerJobs() {
         open={importDialogOpen} 
         onOpenChange={setImportDialogOpen}
         user={user}
+        onImportComplete={handleImportComplete}
       />
     </div>
   );
