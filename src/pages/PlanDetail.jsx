@@ -16,9 +16,13 @@ export default function PlanDetailPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const { data: plan, isLoading: planLoading } = useQuery({
+  const { data: plan, isLoading: planLoading, error: planError } = useQuery({
     queryKey: ['plan', planId],
-    queryFn: () => base44.entities.Plan.get(planId),
+    queryFn: async () => {
+      const plans = await base44.entities.Plan.filter({ id: planId });
+      if (plans.length === 0) throw new Error('Plan not found or access denied');
+      return plans[0];
+    },
     enabled: !!planId,
   });
 
@@ -106,7 +110,24 @@ export default function PlanDetailPage() {
     a.remove();
   };
 
-  if (planLoading || !plan) return <div>Loading...</div>;
+  if (planLoading) return <div>Loading...</div>;
+  
+  if (planError || !plan) {
+    return (
+      <Card className="border-red-200 bg-red-50">
+        <CardContent className="pt-6 flex gap-3">
+          <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
+          <div>
+            <p className="text-red-800 font-medium">Unable to load plan</p>
+            <p className="text-sm text-red-600 mt-1">{planError?.message || 'Plan not found or you do not have permission to view it.'}</p>
+            <Button variant="outline" className="mt-3" onClick={() => navigate(createPageUrl('Plans'))}>
+              Back to Plans
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   const latestVersion = versions[0];
   const latestDiff = diffs[0];
