@@ -28,7 +28,9 @@ Deno.serve(async (req) => {
     });
 
     // Send the invitation email
-    await base44.users.inviteUser(email, 'user');
+    // If app_role is 'admin', invite as admin in Base44 system, otherwise as 'user'
+    const platformRole = app_role === 'admin' ? 'admin' : 'user';
+    await base44.users.inviteUser(email, platformRole);
 
     return Response.json({ 
       success: true,
