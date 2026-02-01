@@ -16,14 +16,14 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Missing planId or planVersionId' }, { status: 400 });
     }
 
-    // Verify user owns this plan (use service role for read)
-    const plan = await base44.asServiceRole.entities.Plan.read(planId);
+    // Verify user owns this plan (use .get() instead of .read())
+    const plan = await base44.asServiceRole.entities.Plan.get(planId);
     if (!plan || plan.customer_id !== user.customer_id) {
       return Response.json({ error: 'Plan not found or access denied' }, { status: 403 });
     }
 
     // Get customer details
-    const customer = await base44.asServiceRole.entities.Customer.read(plan.customer_id);
+    const customer = await base44.asServiceRole.entities.Customer.get(plan.customer_id);
 
     // Fetch all PlanLines for this version
     const planLines = await base44.asServiceRole.entities.PlanLine.filter({ 
@@ -74,7 +74,8 @@ Deno.serve(async (req) => {
       plan_status: 'published',
     }, { status: 200 });
   } catch (error) {
-    return Response.json({ error: error.message }, { status: 500 });
+    console.error('publishPlan failed:', error);
+    return Response.json({ error: error?.message || String(error) }, { status: 500 });
   }
 });
 

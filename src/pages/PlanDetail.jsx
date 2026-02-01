@@ -141,8 +141,9 @@ export default function PlanDetailPage() {
       queryClient.invalidateQueries({ queryKey: ['fitterJobs'] });
     },
     onError: (error) => {
-      console.error('Publish error:', error);
-      toast.error(`Publish failed: ${error.message || 'Unknown error'}`);
+      const msg = error?.response?.data?.error || error?.response?.data?.message || error?.message || 'Unknown error';
+      console.error('publishPlan error response:', error?.response?.data, error);
+      toast.error(`Publish failed: ${msg}`);
     },
   });
 
