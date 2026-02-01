@@ -206,10 +206,13 @@ export default function CustomerJobs() {
                   <TableHead>Job #</TableHead>
                   <TableHead>Type</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Delivery</TableHead>
-                  <TableHead>Scheduled</TableHead>
+                  <TableHead>Collection Postcode</TableHead>
+                  <TableHead>Collection Date</TableHead>
+                  <TableHead>Collection ETA</TableHead>
+                  <TableHead>Delivery Postcode</TableHead>
+                  <TableHead>Delivery Date</TableHead>
+                  <TableHead>Delivery ETA</TableHead>
                   <TableHead>Driver</TableHead>
-                  <TableHead>ETA</TableHead>
                   <TableHead></TableHead>
                 </TableRow>
               </TableHeader>
@@ -244,33 +247,56 @@ export default function CustomerJobs() {
                       </TableCell>
                       <TableCell>
                         <div className="text-sm">
-                          <p className="truncate max-w-[150px]">{job.delivery_postcode}</p>
+                          <p className="truncate max-w-[120px]">{job.collection_postcode || '—'}</p>
                         </div>
                       </TableCell>
                       <TableCell>
                         <div className="text-sm">
-                          {job.scheduled_date && (
-                            <div className="flex items-center gap-1">
-                              <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                              {format(new Date(job.scheduled_date), 'MMM d')}
-                              {job.scheduled_time_slot && (
-                                <span className="text-slate-400 uppercase text-xs">
-                                  {job.scheduled_time_slot}
-                                </span>
-                              )}
-                            </div>
+                          {job.collection_date && !isNaN(new Date(job.collection_date).getTime()) ? (
+                            format(new Date(job.collection_date), 'MMM d, yyyy')
+                          ) : (
+                            '—'
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-xs">
+                          {job.collection_time_slot === 'timed' && job.collection_time ? (
+                            <span className="font-medium">{job.collection_time}</span>
+                          ) : job.collection_time_slot ? (
+                            <span className="uppercase text-slate-600">{job.collection_time_slot}</span>
+                          ) : (
+                            '—'
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm">
+                          <p className="truncate max-w-[120px]">{job.delivery_postcode || '—'}</p>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm">
+                          {job.delivery_date && !isNaN(new Date(job.delivery_date).getTime()) ? (
+                            format(new Date(job.delivery_date), 'MMM d, yyyy')
+                          ) : (
+                            '—'
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-xs">
+                          {job.delivery_time_slot === 'timed' && job.delivery_time ? (
+                            <span className="font-medium">{job.delivery_time}</span>
+                          ) : job.delivery_time_slot ? (
+                            <span className="uppercase text-slate-600">{job.delivery_time_slot}</span>
+                          ) : (
+                            '—'
                           )}
                         </div>
                       </TableCell>
                       <TableCell>
                         <span className="text-sm">{job.driver_name || '-'}</span>
-                      </TableCell>
-                      <TableCell>
-                        {job.eta && (
-                          <span className="text-sm text-indigo-600 font-medium">
-                            {format(new Date(job.eta), 'HH:mm')}
-                          </span>
-                        )}
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-1">
