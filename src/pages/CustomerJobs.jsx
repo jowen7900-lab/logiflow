@@ -207,10 +207,11 @@ export default function CustomerJobs() {
                   <TableHead>Type</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Collection Postcode</TableHead>
-                  <TableHead>Collection Contact</TableHead>
+                  <TableHead>Collection Date</TableHead>
+                  <TableHead>Collection ETA</TableHead>
                   <TableHead>Delivery Postcode</TableHead>
-                  <TableHead>Scheduled Date</TableHead>
-                  <TableHead>Scheduled Time</TableHead>
+                  <TableHead>Delivery Date</TableHead>
+                  <TableHead>Delivery ETA</TableHead>
                   <TableHead>Driver</TableHead>
                   <TableHead></TableHead>
                 </TableRow>
@@ -218,7 +219,7 @@ export default function CustomerJobs() {
               <TableBody>
                 {filteredJobs.length === 0 ? (
                    <TableRow>
-                     <TableCell colSpan={11} className="text-center py-8 text-slate-500">
+                     <TableCell colSpan={8} className="text-center py-8 text-slate-500">
                        No jobs found
                      </TableCell>
                    </TableRow>
@@ -250,8 +251,21 @@ export default function CustomerJobs() {
                         </div>
                       </TableCell>
                       <TableCell>
+                        <div className="text-sm">
+                          {job.scheduled_date && !isNaN(new Date(job.scheduled_date).getTime()) ? (
+                            format(new Date(job.scheduled_date), 'MMM d, yyyy')
+                          ) : (
+                            '—'
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
                         <div className="text-xs">
-                          <p className="truncate max-w-[100px]">{job.collection_contact || '—'}</p>
+                          {job.collection_eta ? (
+                            format(new Date(job.collection_eta), 'MMM d, HH:mm')
+                          ) : (
+                            '—'
+                          )}
                         </div>
                       </TableCell>
                       <TableCell>
@@ -262,7 +276,7 @@ export default function CustomerJobs() {
                       <TableCell>
                         <div className="text-sm">
                           {job.scheduled_date && !isNaN(new Date(job.scheduled_date).getTime()) ? (
-                            format(new Date(job.scheduled_date), 'MMM d')
+                            format(new Date(job.scheduled_date), 'MMM d, yyyy')
                           ) : (
                             '—'
                           )}
@@ -270,10 +284,8 @@ export default function CustomerJobs() {
                       </TableCell>
                       <TableCell>
                         <div className="text-xs">
-                          {job.scheduled_time_slot === 'timed' && job.scheduled_time ? (
-                            <span className="font-medium">{job.scheduled_time}</span>
-                          ) : job.scheduled_time_slot ? (
-                            <span className="uppercase text-slate-600">{job.scheduled_time_slot}</span>
+                          {job.delivery_eta ? (
+                            format(new Date(job.delivery_eta), 'MMM d, HH:mm')
                           ) : (
                             '—'
                           )}
