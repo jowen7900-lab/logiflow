@@ -55,7 +55,6 @@ export default function CreateJob() {
   const [selectedDeliveryAddress, setSelectedDeliveryAddress] = useState('');
   const [formData, setFormData] = useState({
     job_type: '',
-    priority: 'standard',
     collection_address: '',
     collection_postcode: '',
     collection_contact: '',
@@ -139,6 +138,8 @@ export default function CreateJob() {
         customer_id: user?.customer_id,
         customer_name: customer?.name || user?.customer_name,
         customer_status: 'confirmed',
+        fitter_id: jobData.fitter_id || null,
+        fitter_name: jobData.fitter_name || null,
         has_rule_breach: ruleWarnings.length > 0,
         has_exception: ruleWarnings.length > 0,
         exception_reason: ruleWarnings.length > 0 ? ruleWarnings.map(w => w.message).join('; ') : null,
