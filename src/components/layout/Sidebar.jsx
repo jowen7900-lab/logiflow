@@ -31,7 +31,6 @@ const roleNavigation = {
     { name: 'Fitters', icon: Wrench, page: 'FitterManagement' },
     { name: 'Customers', icon: Building2, page: 'CustomerManagement' },
     { name: 'Users', icon: Users, page: 'UserManagement' },
-    { name: 'Booking Rules', icon: Settings, page: 'BookingRules' },
   ],
   customer: [
     { name: 'Dashboard', icon: LayoutDashboard, page: 'CustomerDashboard' },
