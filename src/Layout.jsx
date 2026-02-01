@@ -22,7 +22,7 @@ const pageTitles = {
   DriverManagement: { title: 'Drivers', subtitle: 'Manage driver assignments' },
   FitterManagement: { title: 'Fitters', subtitle: 'Manage fitter assignments' },
   CustomerManagement: { title: 'Customers', subtitle: 'Manage customer accounts' },
-  UserManagement: { title: 'Users', subtitle: 'Manage all platform users' },
+  UserManagement: { title: 'User Approvals', subtitle: 'Manage all platform users' },
   BookingRules: { title: 'Booking Rules', subtitle: 'Configure booking restrictions' },
   RoleSelection: { title: 'Role Selection', subtitle: 'Choose your role' },
   PendingApproval: { title: 'Pending Approval', subtitle: 'Your application is under review' },
