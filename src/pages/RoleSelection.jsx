@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
@@ -22,14 +22,37 @@ const roles = [
 export default function RoleSelection() {
   const navigate = useNavigate();
   const [selectedRole, setSelectedRole] = useState(null);
+  const [applyingRole, setApplyingRole] = useState(false);
 
-  const { data: user } = useQuery({
+  const { data: user, refetch: refetchUser } = useQuery({
     queryKey: ['currentUser'],
     queryFn: () => base44.auth.me(),
   });
 
+  // On mount, check and apply pending invitation role
+  useEffect(() => {
+    const applyPendingRole = async () => {
+      if (user && !user.app_role && !applyingRole) {
+        setApplyingRole(true);
+        try {
+          const response = await base44.functions.invoke('applyPendingRole', {});
+          if (response.data.success) {
+            // Refetch user to get updated role
+            await refetchUser();
+          }
+        } catch (error) {
+          console.error('Failed to apply pending role:', error);
+        } finally {
+          setApplyingRole(false);
+        }
+      }
+    };
+
+    applyPendingRole();
+  }, [user?.id]);
+
   // Redirect approved users to their home page
-  React.useEffect(() => {
+  useEffect(() => {
     if (user?.app_role && user?.approval_status === 'approved') {
       const homePage = {
         'admin': 'OpsDashboard',
@@ -75,6 +98,17 @@ export default function RoleSelection() {
       navigate(createPageUrl(`Onboarding${roleCapitalized}`));
     },
   });
+
+  if (applyingRole) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+          <p className="text-slate-600">Setting up your account...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
