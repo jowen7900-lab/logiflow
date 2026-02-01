@@ -43,7 +43,13 @@ export default function DriverManagement() {
 
   const { data: drivers = [], isLoading } = useQuery({
     queryKey: ['drivers'],
-    queryFn: () => base44.entities.Driver.list('-created_date', 100),
+    queryFn: async () => {
+      const users = await base44.entities.User.filter({ 
+        app_role: 'driver', 
+        approval_status: 'approved' 
+      });
+      return users;
+    },
   });
 
   const { data: jobs = [] } = useQuery({
