@@ -15,7 +15,6 @@ export default function OnboardingDriver() {
   const [formData, setFormData] = useState({
     fullName: '',
     phone: '',
-    email: '',
     vehicleSize: '',
     homePostcode: '',
     driverId: '',
@@ -32,7 +31,6 @@ export default function OnboardingDriver() {
       setFormData({
         fullName: user.full_name || '',
         phone: user.phone || '',
-        email: user.email || '',
         vehicleSize: user.vehicle_type || '',
         homePostcode: user.homePostcode || '',
         driverId: user.driverId || '',
@@ -43,7 +41,11 @@ export default function OnboardingDriver() {
   const submitMutation = useMutation({
     mutationFn: async () => {
       await base44.auth.updateMe({
-        ...formData,
+        full_name: formData.fullName,
+        phone: formData.phone,
+        vehicle_type: formData.vehicleSize,
+        homePostcode: formData.homePostcode,
+        driverId: formData.driverId,
         approval_status: 'pending_review',
         rejection_reason: null,
         reviewed_by_user_id: null,
@@ -101,14 +103,12 @@ export default function OnboardingDriver() {
             </div>
 
             <div>
-              <Label>Email *</Label>
+              <Label>Email</Label>
               <Input
-                required
                 type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                placeholder="john@example.com"
-                className="mt-1.5"
+                value={user?.email || ''}
+                disabled
+                className="mt-1.5 bg-slate-50"
               />
             </div>
 

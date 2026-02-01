@@ -105,12 +105,22 @@ export default function RoleSelection() {
   const selectRoleMutation = useMutation({
     mutationFn: async (role) => {
       await base44.auth.updateMe({ 
-        requested_app_role: role,
-        approval_status: 'pending_review'
+        requested_app_role: role
       });
     },
-    onSuccess: () => {
-      navigate(createPageUrl('PendingApproval'));
+    onSuccess: (data, role) => {
+      // Route to appropriate onboarding form based on role
+      const onboardingPage = {
+        'driver': 'OnboardingDriver',
+        'fitter': 'OnboardingFitter',
+        'customer': 'OnboardingCustomer',
+      }[role];
+      
+      if (onboardingPage) {
+        navigate(createPageUrl(onboardingPage));
+      } else {
+        navigate(createPageUrl('PendingApproval'));
+      }
     },
   });
 

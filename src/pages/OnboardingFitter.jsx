@@ -32,12 +32,15 @@ export default function OnboardingFitter() {
 
   const submitMutation = useMutation({
     mutationFn: async (data) => {
-      await base44.auth.updateMe(data);
+      await base44.auth.updateMe({
+        ...data,
+        approval_status: 'pending_review'
+      });
     },
     onSuccess: async () => {
-      toast.success('Profile completed successfully!');
+      toast.success('Profile submitted for approval!');
       await queryClient.invalidateQueries({ queryKey: ['currentUser'] });
-      navigate(createPageUrl('FitterJobs'));
+      navigate(createPageUrl('PendingApproval'));
     },
     onError: (error) => {
       toast.error(`Failed to update profile: ${error.message}`);

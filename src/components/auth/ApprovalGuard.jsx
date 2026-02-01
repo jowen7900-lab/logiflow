@@ -62,9 +62,15 @@ export default function ApprovalGuard({ children }) {
       }
 
       // If user is not approved, redirect to pending approval page
+      // BUT allow onboarding pages even if pending_review (they need to complete the form)
       if (user.approval_status !== 'approved') {
-        navigate(createPageUrl('PendingApproval'));
-        return;
+        const onboardingPages = ['OnboardingDriver', 'OnboardingFitter', 'OnboardingCustomer'];
+        const isOnOnboardingPage = onboardingPages.some(page => currentPath.includes(page));
+        
+        if (!isOnOnboardingPage) {
+          navigate(createPageUrl('PendingApproval'));
+          return;
+        }
       }
     }
   }, [user, isLoading, navigate]);
