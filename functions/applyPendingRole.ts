@@ -52,8 +52,8 @@ Deno.serve(async (req) => {
       updateData.approval_status = 'approved';
     }
 
-    // Update the user with role and other details using updateMe
-    await base44.asServiceRole.auth.updateUser(user.id, updateData);
+    // Update the user with role and other details using the User entity
+    await base44.asServiceRole.entities.User.update(user.id, updateData);
 
     // Mark invitation as accepted
     await base44.asServiceRole.entities.PendingInvitation.update(invitation.id, {
