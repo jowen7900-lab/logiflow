@@ -19,7 +19,15 @@ export default function ApprovalGuard({ children }) {
       
       // If user is approved, redirect away from onboarding/role selection pages to their home
       if (user.approval_status === 'approved') {
-        const onboardingPages = ['RoleSelection', 'OnboardingDriver', 'OnboardingFitter', 'OnboardingCustomer', 'OnboardingAdmin', 'PendingApproval'];
+        // If fitter is approved but missing profile details, send to onboarding
+        if (user.app_role === 'fitter' && (!user.full_name || !user.phone)) {
+          if (!currentPath.includes('OnboardingFitter')) {
+            navigate(createPageUrl('OnboardingFitter'));
+            return;
+          }
+        }
+        
+        const onboardingPages = ['RoleSelection', 'OnboardingDriver', 'OnboardingCustomer', 'OnboardingAdmin', 'PendingApproval'];
         const isOnOnboardingPage = onboardingPages.some(page => currentPath.includes(page));
         
         if (isOnOnboardingPage) {
