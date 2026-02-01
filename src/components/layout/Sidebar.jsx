@@ -79,11 +79,13 @@ export default function Sidebar({ user, currentPage, pendingTasks = 0 }) {
       {/* Logo */}
       <div className="p-6 border-b border-slate-800">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center">
-            <Truck className="w-6 h-6 text-white" />
-          </div>
+          <img 
+            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69775c233dcecf962ffaee75/71653c067_logo.png" 
+            alt="BHID Demo" 
+            className="w-10 h-10 rounded-xl object-cover"
+          />
           <div>
-            <h1 className="text-lg font-bold text-white">LogiFlow</h1>
+            <h1 className="text-lg font-bold text-white">BHID Demo</h1>
             <p className="text-xs text-slate-400 capitalize">{appRole.replace('_', ' ')}</p>
           </div>
         </div>
