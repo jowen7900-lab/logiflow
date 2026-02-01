@@ -17,7 +17,6 @@ import {
   ChevronDown,
   LogOut,
   Building2,
-  FileText,
   UserCheck
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -44,7 +43,6 @@ const roleNavigation = {
     { name: 'Dashboard', icon: LayoutDashboard, page: 'CustomerDashboard' },
     { name: 'My Jobs', icon: Package, page: 'CustomerJobs' },
     { name: 'Create Job', icon: Plus, page: 'CreateJob' },
-    { name: 'Plans', icon: FileText, page: 'Plans' },
     { name: 'Address List', icon: Building2, page: 'AddressList' },
   ],
   driver: [

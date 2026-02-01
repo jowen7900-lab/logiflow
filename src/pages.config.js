@@ -73,9 +73,7 @@ import OpsDashboard from './pages/OpsDashboard';
 import OpsJobs from './pages/OpsJobs';
 import OpsTaskQueue from './pages/OpsTaskQueue';
 import PendingApproval from './pages/PendingApproval';
-import PlanDetail from './pages/PlanDetail';
 import PlanDiffReview from './pages/PlanDiffReview';
-import Plans from './pages/Plans';
 import RoleGuard from './pages/RoleGuard';
 import RoleSelection from './pages/RoleSelection';
 import UserManagement from './pages/UserManagement';
@@ -109,9 +107,7 @@ export const PAGES = {
     "OpsJobs": OpsJobs,
     "OpsTaskQueue": OpsTaskQueue,
     "PendingApproval": PendingApproval,
-    "PlanDetail": PlanDetail,
     "PlanDiffReview": PlanDiffReview,
-    "Plans": Plans,
     "RoleGuard": RoleGuard,
     "RoleSelection": RoleSelection,
     "UserManagement": UserManagement,
