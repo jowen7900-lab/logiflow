@@ -39,8 +39,10 @@ import {
   Edit2,
   Trash2,
   Loader2,
-  Download
+  Download,
+  Upload
 } from 'lucide-react';
+import JobImportDialog from '@/components/jobs/import/JobImportDialog';
 import { format } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
 import { exportToCSV, prepareJobsForExport } from '@/components/utils/exportUtils';
@@ -50,6 +52,7 @@ export default function CustomerJobs() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [deleteDialog, setDeleteDialog] = useState(null);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
 
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
@@ -132,6 +135,15 @@ export default function CustomerJobs() {
           >
             <Download className="w-4 h-4" />
             Export
+          </Button>
+
+          <Button
+            variant="outline"
+            onClick={() => setImportDialogOpen(true)}
+            className="gap-2"
+          >
+            <Upload className="w-4 h-4" />
+            Import Jobs
           </Button>
           
           <Link to={createPageUrl('CreateJob')}>
@@ -279,6 +291,13 @@ export default function CustomerJobs() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Import Dialog */}
+      <JobImportDialog 
+        open={importDialogOpen} 
+        onOpenChange={setImportDialogOpen}
+        user={user}
+      />
     </div>
   );
 }
