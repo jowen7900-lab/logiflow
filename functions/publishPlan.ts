@@ -16,8 +16,8 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Missing planId or planVersionId' }, { status: 400 });
     }
 
-    // Verify user owns this plan
-    const plan = await base44.entities.Plan.read(planId);
+    // Verify user owns this plan (use service role for read)
+    const plan = await base44.asServiceRole.entities.Plan.read(planId);
     if (!plan || plan.customer_id !== user.customer_id) {
       return Response.json({ error: 'Plan not found or access denied' }, { status: 403 });
     }
@@ -44,9 +44,10 @@ Deno.serve(async (req) => {
 
     // Create jobs for each job_key group
     for (const [jobKey, lines] of Object.entries(groupedLines)) {
-      // Check for existing job (idempotency)
+      // Check for existing job (idempotency with version awareness)
       const existingJobs = await base44.asServiceRole.entities.Job.filter({ 
         plan_id: planId,
+        plan_version_id: planVersionId,
         job_key: jobKey
       });
 
@@ -61,8 +62,8 @@ Deno.serve(async (req) => {
       jobsCreatedCount++;
     }
 
-    // Update plan status to published
-    await base44.entities.Plan.update(planId, { 
+    // Update plan status to published (use service role)
+    await base44.asServiceRole.entities.Plan.update(planId, { 
       status: 'published'
     });
 
