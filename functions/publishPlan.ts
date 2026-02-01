@@ -51,6 +51,22 @@ export default async function publishPlan(req, ctx) {
     let created = 0;
     let skipped = 0;
 
+    // 5b. Ensure Customer entity exists (Option A: create if missing)
+    let customer = null;
+    try {
+      customer = await ctx.base44.asServiceRole.entities.Customer.get(plan.customer_id);
+    } catch (err) {
+      // Customer doesn't exist; create it
+      const newCustomer = await ctx.base44.asServiceRole.entities.Customer.create({
+        name: user.full_name || user.email || `Customer-${user.id}`,
+        code: `CUST-${user.id.slice(0, 8)}`,
+      });
+      customer = newCustomer;
+      plan.customer_id = newCustomer.id;
+      // Also update user.customer_id for consistency
+      await ctx.auth.updateUser({ customer_id: newCustomer.id });
+    }
+
     // 6. Create jobs (idempotent)
     for (const [jobKey, lines] of Object.entries(grouped)) {
       const existing = await ctx.base44.asServiceRole.entities.Job.filter({
