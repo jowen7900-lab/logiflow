@@ -65,14 +65,17 @@ export default async function publishPlan(req, ctx) {
       }
 
       const first = lines[0];
+      const jobNumber = `JOB-${planId.slice(0, 8)}-${jobKey}`.slice(0, 50);
 
       await ctx.base44.asServiceRole.entities.Job.create({
+        job_number: jobNumber,
         job_key: jobKey,
         plan_id: planId,
         plan_version_id: planVersionId,
         customer_id: plan.customer_id,
         customer_name: user.full_name || user.email || '',
         customer_status: 'confirmed',
+        ops_status: 'allocated',
 
         job_type: first.job_type,
         collection_address: first.collection_address,
