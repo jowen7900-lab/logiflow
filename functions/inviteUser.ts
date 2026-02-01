@@ -16,54 +16,23 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Email and role are required' }, { status: 400 });
     }
 
-    // Invite the user
-    await base44.users.inviteUser(email, 'user');
-
-    // Wait for user creation to complete and then find the newly created user with retries
-    let invitedUser = null;
-    for (let attempt = 0; attempt < 10; attempt++) { // Increased retries
-      await new Promise(resolve => setTimeout(resolve, 2000)); // Increased initial wait and subsequent waits
-      const users = await base44.asServiceRole.entities.User.filter({ email });
-      if (users.length > 0) {
-        invitedUser = users[0];
-        break;
-      }
-    }
-    
-    if (!invitedUser) {
-      return Response.json({ 
-        success: false,
-        message: 'User invitation sent, but could not retrieve user record to update role.'
-      }, { status: 500 });
-    }
-    
-    // Prepare update data based on role
-    const updateData = {
+    // Store the pending invitation with intended role
+    await base44.asServiceRole.entities.PendingInvitation.create({
+      email,
       app_role,
-    };
+      customer_id: customer_id || null,
+      vehicle_reg: vehicle_reg || null,
+      vehicle_type: vehicle_type || null,
+      invited_by: user.id,
+      status: 'pending'
+    });
 
-    // For customer and fitter: pre-approve
-    if (app_role === 'customer' || app_role === 'fitter') {
-      updateData.approval_status = 'approved';
-      if (customer_id) {
-        updateData.customer_id = customer_id;
-      }
-    }
-
-    // For driver: set vehicle details but require manual approval
-    if (app_role === 'driver') {
-      if (vehicle_reg) updateData.vehicle_reg = vehicle_reg;
-      if (vehicle_type) updateData.vehicle_type = vehicle_type;
-      // Driver approval happens separately via approval flow
-    }
-
-    // Update the user with role and other details
-    await base44.asServiceRole.entities.User.update(invitedUser.id, updateData);
+    // Send the invitation email
+    await base44.users.inviteUser(email, 'user');
 
     return Response.json({ 
       success: true,
-      message: `User invited as ${app_role}`,
-      userId: invitedUser.id 
+      message: `Invitation sent to ${email} for ${app_role} role`
     });
   } catch (error) {
     console.error('Invite user error:', error);
