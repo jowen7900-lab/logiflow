@@ -106,23 +106,18 @@ export default function UserManagement() {
 
   const inviteUserMutation = useMutation({
     mutationFn: async (data) => {
-      // First invite the user
-      await base44.users.inviteUser(data.email, 'user');
-      
-      // For customer and fitter roles: pre-approve at invite time
-      if (data.app_role === 'customer' || data.app_role === 'fitter') {
-        const users = await base44.entities.User.filter({ email: data.email });
-        if (users.length > 0) {
-          await base44.asServiceRole.entities.User.update(users[0].id, {
-            app_role: data.app_role,
-            approval_status: 'approved',
-            customer_id: data.customer_id || null,
-          });
-        }
-      }
+      const response = await base44.functions.invoke('inviteUser', {
+        email: data.email,
+        app_role: data.app_role,
+        customer_id: data.customer_id || null,
+        vehicle_reg: data.vehicle_reg || null,
+        vehicle_type: data.vehicle_type || null,
+      });
+      return response.data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries(['allUsers']);
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: ['allUsers'] });
+      toast.success('User invited successfully');
       setInviteDialog(false);
       setInviteData({ 
         email: '', 
@@ -131,6 +126,9 @@ export default function UserManagement() {
         vehicle_reg: '',
         vehicle_type: '',
       });
+    },
+    onError: (error) => {
+      toast.error(`Failed to invite user: ${error.message}`);
     },
   });
 
