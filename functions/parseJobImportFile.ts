@@ -48,7 +48,13 @@ Deno.serve(async (req) => {
     // Parse data rows
     for (let i = 1; i < lines.length; i++) {
       try {
-        const values = lines[i].split(',').map(v => v.trim());
+        const values = lines[i].split(',').map(v => {
+          let val = v.trim();
+          if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+            val = val.slice(1, -1);
+          }
+          return val;
+        });
         const row = {};
 
         headers.forEach((header, idx) => {
