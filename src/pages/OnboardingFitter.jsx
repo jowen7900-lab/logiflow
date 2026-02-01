@@ -23,10 +23,14 @@ export default function OnboardingFitter() {
     queryFn: () => base44.auth.me(),
   });
 
-  // If user already has full_name + phone, redirect to FitterJobs
+  // If user already has full_name + phone, redirect based on approval status
   React.useEffect(() => {
     if (user?.full_name && user?.phone) {
-      navigate(createPageUrl('FitterJobs'));
+      if (user.approval_status === 'approved') {
+        navigate(createPageUrl('FitterJobs'));
+      } else if (user.approval_status === 'pending_review') {
+        navigate(createPageUrl('PendingApproval'));
+      }
     }
   }, [user, navigate]);
 

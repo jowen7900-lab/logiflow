@@ -17,6 +17,16 @@ export default function ApprovalGuard({ children }) {
     if (user && !isLoading) {
       const currentPath = window.location.pathname;
       
+      // Define allowed pages that don't need approval
+      const allowedPagesWhilePending = [
+        'RoleSelection', 
+        'OnboardingDriver', 
+        'OnboardingFitter', 
+        'OnboardingCustomer', 
+        'PendingApproval'
+      ];
+      const isOnAllowedPage = allowedPagesWhilePending.some(page => currentPath.includes(page));
+      
       // If user is approved, redirect away from onboarding/role selection pages to their home
       if (user.approval_status === 'approved') {
         // If fitter is approved but missing profile details, send to onboarding
@@ -27,10 +37,7 @@ export default function ApprovalGuard({ children }) {
           }
         }
         
-        const onboardingPages = ['RoleSelection', 'OnboardingDriver', 'OnboardingCustomer', 'OnboardingAdmin', 'PendingApproval'];
-        const isOnOnboardingPage = onboardingPages.some(page => currentPath.includes(page));
-        
-        if (isOnOnboardingPage) {
+        if (isOnAllowedPage) {
           const homePage = {
             'admin': 'OpsDashboard',
             'customer': 'CustomerDashboard',
@@ -41,33 +48,29 @@ export default function ApprovalGuard({ children }) {
           if (homePage) {
             navigate(createPageUrl(homePage));
             return;
-          } else {
-            // Invalid role - redirect to pending approval
-            navigate(createPageUrl('PendingApproval'));
-            return;
           }
         }
       }
       
       // If user has no role and no requested role, redirect to role selection
       if (!user.app_role && !user.requested_app_role) {
-        navigate(createPageUrl('RoleSelection'));
-        return;
+        if (!currentPath.includes('RoleSelection')) {
+          navigate(createPageUrl('RoleSelection'));
+          return;
+        }
       }
 
       // If user is rejected, redirect to role selection to try again
       if (user.approval_status === 'rejected') {
-        navigate(createPageUrl('RoleSelection'));
-        return;
+        if (!currentPath.includes('RoleSelection')) {
+          navigate(createPageUrl('RoleSelection'));
+          return;
+        }
       }
 
-      // If user is not approved, redirect to pending approval page
-      // BUT allow onboarding pages even if pending_review (they need to complete the form)
+      // If user is not approved, allow onboarding flow pages, redirect others to PendingApproval
       if (user.approval_status !== 'approved') {
-        const onboardingPages = ['OnboardingDriver', 'OnboardingFitter', 'OnboardingCustomer'];
-        const isOnOnboardingPage = onboardingPages.some(page => currentPath.includes(page));
-        
-        if (!isOnOnboardingPage) {
+        if (!isOnAllowedPage) {
           navigate(createPageUrl('PendingApproval'));
           return;
         }

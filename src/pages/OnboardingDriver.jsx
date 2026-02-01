@@ -38,6 +38,17 @@ export default function OnboardingDriver() {
     }
   }, [user]);
 
+  // If user already has full_name + phone, redirect based on approval status
+  React.useEffect(() => {
+    if (user?.full_name && user?.phone && user?.vehicle_type) {
+      if (user.approval_status === 'approved') {
+        navigate(createPageUrl('DriverJobs'));
+      } else if (user.approval_status === 'pending_review') {
+        navigate(createPageUrl('PendingApproval'));
+      }
+    }
+  }, [user, navigate]);
+
   const submitMutation = useMutation({
     mutationFn: async () => {
       await base44.auth.updateMe({
