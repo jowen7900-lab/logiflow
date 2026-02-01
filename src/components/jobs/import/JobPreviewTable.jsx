@@ -49,7 +49,7 @@ export default function JobPreviewTable({ jobs, expandedJob, onToggleExpand }) {
                   <TableCell>
                     <div className="text-xs">
                       <p className="truncate max-w-[120px]">{job.collection_postcode}</p>
-                      {job.collection_date && (
+                      {job.collection_date && !isNaN(new Date(job.collection_date).getTime()) && (
                         <p className="text-slate-500">
                           {format(new Date(job.collection_date), 'MMM d')} {job.collection_time_slot}
                         </p>
@@ -59,7 +59,7 @@ export default function JobPreviewTable({ jobs, expandedJob, onToggleExpand }) {
                   <TableCell>
                     <div className="text-xs">
                       <p className="truncate max-w-[120px]">{job.delivery_postcode}</p>
-                      {job.delivery_date && (
+                      {job.delivery_date && !isNaN(new Date(job.delivery_date).getTime()) && (
                         <p className="text-slate-500">
                           {format(new Date(job.delivery_date), 'MMM d')} {job.delivery_time_slot}
                         </p>
