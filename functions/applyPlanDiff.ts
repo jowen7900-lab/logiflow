@@ -133,7 +133,7 @@ function planLineToJob(planLines, customerId, planId, planVersionId, jobKey) {
     scheduled_time_slot: firstLine.delivery_time_slot || '',
     scheduled_time: firstLine.delivery_time || '',
     special_instructions: firstLine.special_instructions || '',
-    requires_fitter: firstLine.fitter_id ? true : false,
+    requires_fitter: firstLine.requires_fitter || false,
     fitter_id: firstLine.fitter_id || null,
     fitter_name: firstLine.fitter_name || null,
     items: items.length > 0 ? items : [{ description: '', quantity: 1, weight_kg: 0, dimensions: '' }],

@@ -31,7 +31,7 @@ Deno.serve(async (req) => {
 
     // Header row
     const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/\s+/g, '_'));
-    const requiredFields = ['job_key', 'job_type', 'delivery_address', 'delivery_postcode', 'delivery_date', 'delivery_time_slot'];
+    const requiredFields = ['job_key', 'job_type', 'delivery_address', 'delivery_postcode', 'delivery_date', 'delivery_time_slot', 'requires_fitter'];
     const missingFields = requiredFields.filter(f => !headers.includes(f));
     
     if (missingFields.length > 0) {
@@ -79,6 +79,9 @@ Deno.serve(async (req) => {
         if (!row['delivery_time_slot']) {
           errors.push({ row: i + 1, column: 'delivery_time_slot', error: 'Required field missing' });
         }
+        if (!row['requires_fitter']) {
+          errors.push({ row: i + 1, column: 'requires_fitter', error: 'Required field missing' });
+        }
 
         // Group by job_key for consistency validation
         if (!jobGroups[jobKey]) {
@@ -96,7 +99,7 @@ Deno.serve(async (req) => {
       'collection_phone', 'collection_date', 'collection_time_slot', 'collection_time',
       'delivery_address', 'delivery_postcode', 'delivery_contact', 'delivery_phone',
       'delivery_date', 'delivery_time_slot', 'delivery_time', 'special_instructions',
-      'fitter_id', 'fitter_name'];
+      'requires_fitter', 'fitter_id', 'fitter_name'];
 
     for (const [jobKey, group] of Object.entries(jobGroups)) {
       if (group.rows.length > 1) {
@@ -136,6 +139,9 @@ Deno.serve(async (req) => {
         });
         const lineHash = await hashString(hashInput);
 
+        const requiresFitter = (row['requires_fitter'] || '').toLowerCase();
+        const requiresFitterBool = requiresFitter === 'yes' || requiresFitter === 'true' || requiresFitter === '1';
+
         planLines.push({
           plan_version_id: planVersionId,
           external_row_id: String(rowNum),
@@ -160,6 +166,7 @@ Deno.serve(async (req) => {
           item_weight_kg: parseFloat(row['item_weight_kg']) || 0,
           item_dimensions: row['item_dimensions'] || '',
           special_instructions: row['special_instructions'] || '',
+          requires_fitter: requiresFitterBool,
           fitter_id: row['fitter_id'] || '',
           fitter_name: row['fitter_name'] || '',
           line_hash: lineHash,
