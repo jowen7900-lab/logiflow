@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Upload, FileText, AlertCircle, Download } from 'lucide-react';
+import { Upload, FileText, AlertCircle, Download, CheckCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import PlanJobsView from '@/components/plans/PlanJobsView';
@@ -118,6 +118,30 @@ export default function PlanDetailPage() {
     a.remove();
   };
 
+  const publishPlanMutation = useMutation({
+    mutationFn: async () => {
+      const response = await base44.functions.invoke('publishPlan', {
+        planId: planId,
+        planVersionId: latestVersion.id,
+      });
+      return response.data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['plans', user?.customer_id] });
+      queryClient.invalidateQueries({ queryKey: ['plan', planId] });
+      queryClient.invalidateQueries({ queryKey: ['customerJobs'] });
+      queryClient.invalidateQueries({ queryKey: ['opsJobs'] });
+      queryClient.invalidateQueries({ queryKey: ['driverJobs'] });
+      queryClient.invalidateQueries({ queryKey: ['fitterJobs'] });
+    },
+  });
+
+  const handlePublishPlan = () => {
+    if (window.confirm('Publish this plan and create jobs?')) {
+      publishPlanMutation.mutate();
+    }
+  };
+
   if (planLoading) return <div>Loading...</div>;
   
   if (planError || !plan) {
@@ -145,11 +169,30 @@ export default function PlanDetailPage() {
       <div className="flex justify-between items-start">
         <div>
           <h2 className="text-2xl font-bold">{plan.name}</h2>
-          <p className="text-slate-500 mt-1">Status: {plan.status.replace(/_/g, ' ')}</p>
+          <div className="flex items-center gap-2 mt-1">
+            <p className="text-slate-500">Status: {plan.status.replace(/_/g, ' ')}</p>
+            {plan.status === 'published' && (
+              <span className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-700">
+                <CheckCircle className="w-3 h-3" /> Published
+              </span>
+            )}
+          </div>
         </div>
-        <Button onClick={() => setUploadOpen(!uploadOpen)} className="gap-2">
-          <Upload className="w-4 h-4" /> Upload Version
-        </Button>
+        <div className="flex gap-2">
+          {plan.status === 'draft' && latestVersion?.parse_status === 'parsed' && (
+            <Button 
+              onClick={handlePublishPlan} 
+              disabled={publishPlanMutation.isPending}
+              className="gap-2"
+            >
+              <CheckCircle className="w-4 h-4" /> 
+              {publishPlanMutation.isPending ? 'Publishing...' : 'Publish Plan'}
+            </Button>
+          )}
+          <Button onClick={() => setUploadOpen(!uploadOpen)} className="gap-2">
+            <Upload className="w-4 h-4" /> Upload Version
+          </Button>
+        </div>
       </div>
 
       {uploadOpen && (
