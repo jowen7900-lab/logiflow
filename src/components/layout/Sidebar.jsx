@@ -46,7 +46,6 @@ const roleNavigation = {
     { name: 'Create Job', icon: Plus, page: 'CreateJob' },
     { name: 'Plans', icon: FileText, page: 'Plans' },
     { name: 'Address List', icon: Building2, page: 'AddressList' },
-    { name: 'Messages', icon: MessageSquare, page: 'Messages' },
   ],
   driver: [
     { name: 'My Jobs', icon: Package, page: 'DriverJobs' },
