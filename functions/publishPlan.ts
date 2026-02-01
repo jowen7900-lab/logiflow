@@ -71,7 +71,8 @@ Deno.serve(async (req) => {
       status: 'success',
       jobs_created_count: jobsCreatedCount,
       jobs_skipped_count: jobsSkippedCount,
-    });
+      plan_status: 'published',
+    }, { status: 200 });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }
