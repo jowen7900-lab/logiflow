@@ -72,6 +72,20 @@ Deno.serve(async (req) => {
     await base44.asServiceRole.entities.JobImport.update(jobImport.id, {
       jobs_created_count: jobs.length,
       last_upload_filename: parsedData.filename || '',
+      last_updated_by_user_id: user.id,
+    });
+
+    // Create audit event
+    await base44.asServiceRole.entities.JobImportAudit.create({
+      job_import_id: jobImport.id,
+      customer_id: user.customer_id,
+      event_type: 'created',
+      actor_user_id: user.id,
+      actor_email: user.email,
+      upload_filename: parsedData.filename || '',
+      jobs_created_count: jobs.length,
+      file_row_count: parsedData.rows_count || 0,
+      notes: `Initial import from file: ${parsedData.filename || 'unknown'}`
     });
 
     return Response.json({
