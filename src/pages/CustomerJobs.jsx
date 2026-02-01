@@ -51,12 +51,19 @@ export default function CustomerJobs() {
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [importFilter, setImportFilter] = useState('all');
   const [deleteDialog, setDeleteDialog] = useState(null);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
 
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
     queryFn: () => base44.auth.me(),
+  });
+
+  const { data: jobImports = [] } = useQuery({
+    queryKey: ['jobImports', user?.customer_id],
+    queryFn: () => base44.entities.JobImport.filter({ customer_id: user?.customer_id }, '-created_date', 100),
+    enabled: !!user?.customer_id,
   });
 
   const { data: jobs = [], isLoading } = useQuery({
@@ -91,6 +98,11 @@ export default function CustomerJobs() {
     if (statusFilter !== 'all' && job.customer_status !== statusFilter) {
       return false;
     }
+
+    // Import batch
+    if (importFilter !== 'all' && job.job_import_id !== importFilter) {
+      return false;
+    }
     
     return true;
   });
@@ -122,6 +134,20 @@ export default function CustomerJobs() {
               <SelectItem value="delivered">Delivered</SelectItem>
               <SelectItem value="closed">Closed</SelectItem>
               <SelectItem value="cancelled">Cancelled</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={importFilter} onValueChange={setImportFilter}>
+            <SelectTrigger className="w-56">
+              <SelectValue placeholder="Import Batch" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Jobs</SelectItem>
+              {jobImports.map(imp => (
+                <SelectItem key={imp.id} value={imp.id}>
+                  {imp.name} ({imp.jobs_created_count})
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
